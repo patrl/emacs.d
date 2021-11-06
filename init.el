@@ -27,10 +27,6 @@
   (setq auto-save-default nil)
   (setq create-lockfiles nil)
 
-  ;; ignores warnings during native compilation
-  ;; (borrowed from Pat Mike's config)
-  (setq warning-minimum-level :error)
-
   ;; saves customizations made via the Customize mode in a different file.
   ;; (borrowed from Pat Mike's config)
   (setq custom-file (concat user-emacs-directory "custom.el"))
@@ -44,6 +40,11 @@
 
   (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
   )
+
+;; ignores warnings during native compilation
+;; (borrowed from Pat Mike's config)
+;; FIXME this doesn't seem to be working
+(setq warning-minimum-level :error)
 
 (use-package general
   :config
@@ -79,6 +80,7 @@
   (patrl/leader-keys
     "b" '(:ignore t :wk "buffer")
     "bk" '(kill-this-buffer :wk "kill this buffer")
+    "br" '(revert-buffer :wk "reload buffer")
     )
   )
 
@@ -90,14 +92,32 @@
   :init
   ;; I need this to ensure that 'C-u' gets bound to 'evil-scroll-up'
   (setq evil-want-C-u-scroll t)
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-split-window-below t)
+  (setq evil-split-window-right t)
   :config
-  (evil-mode t))
+  (evil-mode t)
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal)
+  )
+
+(use-package evil-collection
+  :after evil
+  :init
+  ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+  ;; This is especially useful for latex editing
+  (setq evil-collection-outline-bind-tab-p t)
+  :config
+  (evil-collection-init))
 
 (use-package evil-commentary
+  :after evil
   :config
   (evil-commentary-mode))
 
 (use-package evil-surround
+  :after evil
   :config
   (global-evil-surround-mode 1))
 
@@ -143,10 +163,10 @@
 (use-package project
   :straight (:type built-in))
 
-(use-package project-tab-groups
-  :after (project tab-bar)
-  :config
-  (project-tab-groups-mode 1))
+;; (use-package project-tab-groups
+;;   :after (project tab-bar)
+;;   :config
+;;   (project-tab-groups-mode 1))
 
 (use-package dired
   :straight (:type built-in))
@@ -158,13 +178,43 @@
   (patrl/local-leader-keys
    :keymaps 'org-mode-map
    "l" '(org-insert-link :wk "insert link")
+   "s" '(consult-org-heading :wk "consult heading")
    "b" '(:keymap org-babel-map :wk "babel")
+   "t" '(org-insert-structure-template :wk "template")
+   "e" '(org-edit-special :wk "edit")
   )
   :hook ((org-mode . visual-line-mode))
   )
 
 (use-package nix-mode
   :mode "\\.nix\\'")
+
+(use-package auctex
+  :no-require t ;; if this isn't set to true, error!
+  :init
+  ;; TODO make this contingent on installing pdf-tools
+  ;; TODO synctex
+  ;; automatically enables outline mode
+  ;; this means I can use '<TAB>' to cycle visibility
+  ;; just like in org-mode
+  (add-hook 'LaTeX-mode-hook #'outline-minor-mode)
+  :general
+  (patrl/local-leader-keys
+    :keymaps 'LaTeX-mode-map
+    "i" '(:ignore t :wk "insert")
+    "ie" '(LaTeX-environment :wk "insert environment")
+    "im" '(LaTeX-macro :wk "insert macro")
+    "is" '(LaTeX-section :wk "insert section header")
+    )
+  :mode ("\\.tex\\'" . TeX-latex-mode)
+  :config
+  (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+  )
+
+(use-package pdf-tools
+  :config
+  (pdf-tools-install)
+  )
 
 (use-package vertico
   :init (vertico-mode)
@@ -223,4 +273,19 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-(use-package magit)
+(use-package bufler
+  :general
+  (patrl/leader-keys
+    "bB" '(bufler-switch-buffer :wk "bufler switch") 
+    )
+  :config
+  (bufler-mode)
+  (bufler-tabs-mode))
+
+(use-package magit
+  :general
+  (patrl/leader-keys
+    "g" '(:ignore t :wk "git")
+    "gg" '(magit-status :wk "status")
+    )
+)
