@@ -82,6 +82,11 @@
     "bk" '(kill-this-buffer :wk "kill this buffer")
     "br" '(revert-buffer :wk "reload buffer")
     )
+
+  (patrl/leader-keys
+   "n" '(:ignore t :wk "notes")
+   "nb" '(citar-insert-citation :wk "citar")
+   )
   )
 
 (use-package evil
@@ -105,9 +110,10 @@
 (use-package evil-collection
   :after evil
   :init
-  ;; '<TAB>' cycles visibility in 'outline-minor-mode'
-  ;; This is especially useful for latex editing
-  (setq evil-collection-outline-bind-tab-p t)
+  (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+  (setq evil-collection-mode-list nil) ;; I don't like surprises
+  (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
+  (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
   :config
   (evil-collection-init))
 
@@ -192,8 +198,6 @@
 (use-package auctex
   :no-require t ;; if this isn't set to true, error!
   :init
-  ;; TODO make this contingent on installing pdf-tools
-  ;; TODO synctex
   ;; automatically enables outline mode
   ;; this means I can use '<TAB>' to cycle visibility
   ;; just like in org-mode
@@ -208,13 +212,18 @@
     )
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :config
-  ;; TODO this isn't persistent
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   )
 
 (use-package pdf-tools
   :config
   (pdf-tools-install)
+  )
+
+(use-package citar
+  :custom
+  (citar-library-paths '("~/Dropbox (MIT)/library"))
+  (citar-bibliography '("~/repos/bibliography/master.bib"))
   )
 
 (use-package vertico
@@ -273,6 +282,11 @@
   ;; auto-updating embark collect buffer
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package company
+  :hook
+  prog-mode
+  )
 
 ;; (use-package bufler
 ;;   :general

@@ -131,12 +131,17 @@ Disable GUI elements.
 	    "bk" '(kill-this-buffer :wk "kill this buffer")
 	    "br" '(revert-buffer :wk "reload buffer")
 	    )
+
+	  (patrl/leader-keys
+	   "n" '(:ignore t :wk "notes")
+	   "nb" '(citar-insert-citation :wk "citar")
+	   )
 	  )
    #+end_src
 
 ** Evil
 
-   - TODO evil collection
+   - TODO add evil collection incrementally
 
    #+begin_src emacs-lisp :tangle init.el 
      (use-package evil
@@ -160,9 +165,10 @@ Disable GUI elements.
      (use-package evil-collection
        :after evil
        :init
-       ;; '<TAB>' cycles visibility in 'outline-minor-mode'
-       ;; This is especially useful for latex editing
-       (setq evil-collection-outline-bind-tab-p t)
+       (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+       (setq evil-collection-mode-list nil) ;; I don't like surprises
+       (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
+       (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
        :config
        (evil-collection-init))
 
@@ -294,8 +300,6 @@ Disable GUI elements.
      (use-package auctex
        :no-require t ;; if this isn't set to true, error!
        :init
-       ;; TODO make this contingent on installing pdf-tools
-       ;; TODO synctex
        ;; automatically enables outline mode
        ;; this means I can use '<TAB>' to cycle visibility
        ;; just like in org-mode
@@ -310,7 +314,6 @@ Disable GUI elements.
 	 )
        :mode ("\\.tex\\'" . TeX-latex-mode)
        :config
-       ;; TODO this isn't persistent
        (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
        )
    #+end_src
@@ -319,6 +322,14 @@ Disable GUI elements.
      (use-package pdf-tools
        :config
        (pdf-tools-install)
+       )
+   #+end_src
+
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package citar
+       :custom
+       (citar-library-paths '("~/Dropbox (MIT)/library"))
+       (citar-bibliography '("~/repos/bibliography/master.bib"))
        )
    #+end_src
 
@@ -392,6 +403,17 @@ Disable GUI elements.
       :hook
       (embark-collect-mode . consult-preview-at-point-mode))
   #+end_src
+
+** TODO company
+
+   - TODO I'm getting an error when I try to use this with ~evil-collection~.
+   
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package company
+       :hook
+       prog-mode
+       )
+   #+end_src 
 
 * TODO try out ~bufler~
 
