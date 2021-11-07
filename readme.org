@@ -243,10 +243,10 @@ Disable GUI elements.
     (use-package project
       :straight (:type built-in))
 
-    ;; (use-package project-tab-groups
-    ;;   :after (project tab-bar)
-    ;;   :config
-    ;;   (project-tab-groups-mode 1))
+    (use-package project-tab-groups
+      :after (project tab-bar)
+      :config
+      (project-tab-groups-mode 1))
   #+end_src
 
 ** File management
@@ -310,6 +310,7 @@ Disable GUI elements.
 	 )
        :mode ("\\.tex\\'" . TeX-latex-mode)
        :config
+       ;; TODO this isn't persistent
        (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
        )
    #+end_src
@@ -395,15 +396,15 @@ Disable GUI elements.
 * TODO try out ~bufler~
 
   #+begin_src emacs-lisp :tangle init.el
-    (use-package bufler
-      :general
-      (patrl/leader-keys
-	"bB" '(bufler-switch-buffer :wk "bufler switch") 
-	"bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
-	)
-      :config
-      (bufler-mode)
-      (bufler-tabs-mode))
+    ;; (use-package bufler
+    ;;   :general
+    ;;   (patrl/leader-keys
+    ;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
+    ;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
+    ;;     )
+    ;;   :config
+    ;;   (bufler-mode)
+    ;;   (bufler-tabs-mode))
   #+end_src
   
 * TODO git

@@ -163,10 +163,10 @@
 (use-package project
   :straight (:type built-in))
 
-;; (use-package project-tab-groups
-;;   :after (project tab-bar)
-;;   :config
-;;   (project-tab-groups-mode 1))
+(use-package project-tab-groups
+  :after (project tab-bar)
+  :config
+  (project-tab-groups-mode 1))
 
 (use-package dired
   :straight (:type built-in))
@@ -208,6 +208,7 @@
     )
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :config
+  ;; TODO this isn't persistent
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   )
 
@@ -273,14 +274,15 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-(use-package bufler
-  :general
-  (patrl/leader-keys
-    "bB" '(bufler-switch-buffer :wk "bufler switch") 
-    )
-  :config
-  (bufler-mode)
-  (bufler-tabs-mode))
+;; (use-package bufler
+;;   :general
+;;   (patrl/leader-keys
+;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
+;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
+;;     )
+;;   :config
+;;   (bufler-mode)
+;;   (bufler-tabs-mode))
 
 (use-package magit
   :general
