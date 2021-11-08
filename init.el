@@ -101,25 +101,25 @@
 
   ;; notes bindings
   (patrl/leader-keys
-   "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
-   )
+    "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
+    )
 
   ;; open bindings
   (patrl/leader-keys
-   "o" '(:ignore t :wk "open")
-   )
+    "o" '(:ignore t :wk "open")
+    )
 
   ;; search bindings
   (patrl/leader-keys
-   "s" '(:ignore t :wk "search")
-   )
+    "s" '(:ignore t :wk "search")
+    )
   )
 
 (use-package evil
   :general
   (patrl/leader-keys
-   "w" '(:keymap evil-window-map :wk "window") ;; window bindings
-   )
+    "w" '(:keymap evil-window-map :wk "window") ;; window bindings
+    )
   :init
   (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
 
@@ -187,18 +187,18 @@
   )
 
 (use-package solaire-mode
-       :config
-       (solaire-global-mode +1))
+  :config
+  (solaire-global-mode +1))
 
 (use-package tron-legacy-theme
-       :config
-       (setq tron-legacy-theme-vivid-cursor t))
+  :config
+  (setq tron-legacy-theme-vivid-cursor t))
 
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+	doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-one t)
 
   ;; Enable flashing mode-line on errors
@@ -421,7 +421,7 @@
   (company-idle-delay nil) ;; turn off auto-completion
   :general
   (:keymap 'company-mode-map
-	    "C-SPC" 'company-complete) ;; hit TAB to trigger company completion
+	   "C-SPC" 'company-complete) ;; hit TAB to trigger company completion
   :hook
   (prog-mode . company-mode)
   (LaTeX-mode . company-mode)
@@ -452,7 +452,7 @@
     "g" '(:ignore t :wk "git")
     "gg" '(magit-status :wk "status")
     )
-)
+  )
 
 (use-package eshell
   :straight (:type built-in)
