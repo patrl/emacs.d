@@ -3,3 +3,6 @@ straight/
 transient/
 custom.el
 projects
+.org-id-locations
+bookmarks
+org-roam.db
