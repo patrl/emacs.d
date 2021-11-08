@@ -1,6 +1,12 @@
 #+title: Emacs configuration
 #+author: Patrick D. Elliott
 #+email: patrick.d.elliott@gmail.com
+#+date: <2021-11-07 Sun>
+
+* Useful resources
+
+- [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
+- [[https://github.com/pniedzielski/emacs.d/][GitHub - pniedzielski/emacs.d: My Emacs Configuration, finally git-ified]] 
 
 * Early init file
 
@@ -15,27 +21,33 @@ Since we're using ~straight.el~ as our package manager, we add the following to 
 Disable GUI elements.
 
 #+begin_src emacs-lisp :tangle early-init.el
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (setq inhibit-splash-screen t)
-  (setq use-file-dialog nil)
+  (menu-bar-mode -1) ;; disables menubar
+  (tool-bar-mode -1) ;; disables toolbar
+  (scroll-bar-mode -1) ;; disables scrollbar
+  (setq inhibit-splash-screen t) ;; no thanks
+  (setq use-file-dialog nil) ;; don't use system file dialog
 
+  (setq tab-bar-new-button-show nil) ;; don't show new tab button
+  (setq tab-bar-close-button-show nil) ;; don't show tab close button
   ;;; early-init.el ends here
 #+end_src
 
 * Init file
 
-** Package management
+** Package management: ~straight.el~
    
-   Some rules/conventions:
+- [[https://github.com/raxod502/straight.el][GitHub - raxod502/straight.el: 🍀 Next-generation, purely functional package m...]]
 
-   - When packages don't require installation, use ~:straight (:type built-in)~.
+Some rules/conventions:
 
-*** Bootstrap ~straight.el~ and ~straight-use-package~
+- When packages don't require installation, use ~:straight (:type built-in)~.
+- Prefer multiple ~setq~ expressions to one.
+- Set customizable variables via ~:custom~.
+
+*** Bootstrap ~straight.el~
 
  #+begin_src emacs-lisp :tangle init.el 
-   (setq straight-use-package-by-default t)
+   (setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
 
    (defvar bootstrap-version)
    (let ((bootstrap-file
@@ -50,7 +62,7 @@ Disable GUI elements.
 	 (eval-print-last-sexp)))
      (load bootstrap-file nil 'nomessage))
 
-   (straight-use-package 'use-package)
+   (straight-use-package 'use-package) ;; install use-package via straight
 #+end_src
 
 * Emacs
@@ -58,47 +70,63 @@ Disable GUI elements.
 ** Defaults
 
    #+begin_src emacs-lisp :tangle init.el
-     (use-package emacs
-       :init
-       (setq user-full-name "Patrick D. Elliott")
-       (setq user-mail-address "patrick.d.elliott@gmail.com")
+          (use-package emacs
+            :init
+            ;; my details
+            (setq user-full-name "Patrick D. Elliott") 
+            (setq user-mail-address "patrick.d.elliott@gmail.com")
 
-       (defalias 'yes-or-no-p 'y-or-n-p)
+            (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
-       ;; stop emacs from littering
-       (setq make-backup-files nil)
-       (setq auto-save-default nil)
-       (setq create-lockfiles nil)
+            ;; stop emacs from littering
+            (setq make-backup-files nil)
+            (setq auto-save-default nil)
+            (setq create-lockfiles nil)
 
-       ;; saves customizations made via the Customize mode in a different file.
-       ;; (borrowed from Pat Mike's config)
-       (setq custom-file (concat user-emacs-directory "custom.el"))
-       (load custom-file)
+            ;; saves customizations made via the Customize mode in a different file.
+            ;; (borrowed from Pat Mike's config)
+            (setq custom-file (concat user-emacs-directory "custom.el"))
+            (load custom-file)
 
-       ;; utf-8 everywhere
-       ;; (borrowed from Pat Mike's config)
-       (set-language-environment "UTF-8")
-       (setq locale-coding-system 'utf-8)
-       (prefer-coding-system 'utf-8)
+            ;; utf-8 everywhere
+            ;; (borrowed from Pat Mike's config)
+            (set-language-environment "UTF-8")
+            (setq locale-coding-system 'utf-8)
+            (prefer-coding-system 'utf-8)
 
-       (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
-       )
+            (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
 
-     ;; ignores warnings during native compilation
-     ;; (borrowed from Pat Mike's config)
-     ;; FIXME this doesn't seem to be working
-     (setq warning-minimum-level :error)
-   #+end_src
+            ;; ignores warnings during native compilation
+            ;; (borrowed from Pat Mike's config)
+            (setq warning-minimum-level :error)
+            )
+        #+end_src
+
+ 
+***  Electric 
+
+    #+begin_src emacs-lisp :tangle init.el
+      (use-package electric
+        :straight (:type built-in)
+        :init
+        (electric-pair-mode +1) ;; automatically insert closing parens 
+        (setq electric-pair-preserve-balance nil)
+        )
+    #+end_src
+
 
 * Keybindings
 
 ** General
+
+- TODO no local leader available in insert mode.
 
       #+begin_src emacs-lisp :tangle init.el
 	(use-package general
 	  :config
 	  (general-evil-setup)
 
+	  ;; set up 'SPC' as the global leader key
 	  (general-create-definer patrl/leader-keys
 	    :states '(normal insert visual emacs)
 	    :keymaps 'override
@@ -106,6 +134,7 @@ Disable GUI elements.
 	    :global-prefix "M-SPC"
 	    )
 
+	  ;; set up ',' as the local leader key
 	  (general-create-definer patrl/local-leader-keys
 	    :states '(normal visual)
 	    :keymaps 'override
@@ -116,44 +145,60 @@ Disable GUI elements.
 	  (patrl/leader-keys
 	    "SPC" '(execute-extended-command :wk "execute command")
 	    "." '(find-file :wk "find file")
-	    "TAB" '(:keymap tab-prefix-map :wk "tab")
-	    "h" '(:keymap help-map :wk "help")
-	    "p" '(:keymap project-prefix-map :wk "project")
+	    "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
+	    "h" '(:keymap help-map :wk "help") ;; remap help bindings
 	    )
 
+	  ;; file bindings
 	  (patrl/leader-keys
 	    "f" '(:ignore t :wk "file")
-	    "ff" '(find-file :wk "find file")
+	    "ff" '(find-file :wk "find file") ;; gets overridden by consult
+	    "fd" '(find-file :wk "dired")
 	    )
 
+	  ;; buffer bindings
 	  (patrl/leader-keys
 	    "b" '(:ignore t :wk "buffer")
+	    "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
 	    "bk" '(kill-this-buffer :wk "kill this buffer")
 	    "br" '(revert-buffer :wk "reload buffer")
 	    )
 
 	  (patrl/leader-keys
-	   "n" '(:ignore t :wk "notes")
-	   "nb" '(citar-insert-citation :wk "citar")
+	    "u" '(universal-argument :wk "universal prefix")
+	    )
+
+	  ;; notes bindings
+	  (patrl/leader-keys
+	   "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
+	   )
+
+	  ;; open bindings
+	  (patrl/leader-keys
+	   "o" '(:ignore t :wk "open")
+	   )
+
+	  ;; search bindings
+	  (patrl/leader-keys
+	   "s" '(:ignore t :wk "search")
 	   )
 	  )
    #+end_src
 
 ** Evil
 
-   - TODO add evil collection incrementally
-
    #+begin_src emacs-lisp :tangle init.el 
      (use-package evil
        :general
        (patrl/leader-keys
-	"w" '(:keymap evil-window-map :wk "window")
+	"w" '(:keymap evil-window-map :wk "window") ;; window bindings
 	)
        :init
-       ;; I need this to ensure that 'C-u' gets bound to 'evil-scroll-up'
-       (setq evil-want-C-u-scroll t)
+       (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
+
        (setq evil-want-integration t)
        (setq evil-want-keybinding nil)
+
        (setq evil-split-window-below t)
        (setq evil-split-window-right t)
        :config
@@ -166,24 +211,39 @@ Disable GUI elements.
        :after evil
        :init
        (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
-       (setq evil-collection-mode-list nil) ;; I don't like surprises
-       (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
-       (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
+       ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
+       ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
+       ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
        :config
        (evil-collection-init))
 
+     ;; port of Tim Pope's commentary package
      (use-package evil-commentary
        :after evil
        :config
        (evil-commentary-mode))
 
+     ;; port of Tim Pope's surround package
      (use-package evil-surround
        :after evil
        :config
        (global-evil-surround-mode 1))
+
+     ;; show visual hints for evil motions
+     (use-package evil-goggles
+       :config
+       (evil-goggles-mode)
+
+       ;; optionally use diff-mode's faces; as a result, deleted text
+       ;; will be highlighed with `diff-removed` face which is typically
+       ;; some red color (as defined by the color theme)
+       ;; other faces such as `diff-added` will be used for other actions
+       (evil-goggles-use-diff-faces))
    #+end_src 
 
 ** Which key
+   
+Display key bindings.
 
    #+begin_src emacs-lisp :tangle init.el
      (use-package which-key
@@ -192,11 +252,23 @@ Disable GUI elements.
        :config
        (which-key-setup-minibuffer))
    #+end_src
-   
-
+      
 * Appearance
 
+ 
+**  Olivetti
+
+Add some margins (useful for writing prose).
+
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package olivetti
+       :init
+       (setq olivetti-body-width .67))
+   #+end_src
+
 ** Mode line
+
+Minimal mode line.   
 
    #+begin_src emacs-lisp :tangle init.el
      (use-package mood-line
@@ -206,36 +278,55 @@ Disable GUI elements.
 ** Fonts
 
   #+begin_src emacs-lisp :tangle init.el
-    (set-face-attribute 'default nil :font "Operator Mono Book" :height 120)
+	(use-package emacs
+	  :init
+	  (set-face-attribute 'default nil :font "Cascadia Code-12")
+	  (add-to-list 'default-frame-alist '(font . "Cascadia Code-12"))
+	  )
   #+end_src
+
+N.b. that this interacts with ~org-superstars-mode~.
 
 ** Themes
 
-   #+begin_src emacs-lisp :tangle init.el
-     (use-package solaire-mode
+Visually distinguish between 'real' buffers and everything else.
+
+#+begin_src emacs-lisp :tangle init.el
+(use-package solaire-mode
        :config
        (solaire-global-mode +1))
+#+end_src
 
-     (use-package tron-legacy-theme
+Some nice themes:
+
+#+begin_src emacs-lisp :tangle init.el
+(use-package tron-legacy-theme
        :config
        (setq tron-legacy-theme-vivid-cursor t))
+#+end_src
 
+   #+begin_src emacs-lisp :tangle init.el
      (use-package doom-themes
        :config
        ;; Global settings (defaults)
        (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	     doom-themes-enable-italic t) ; if nil, italics is universally disabled
+             doom-themes-enable-italic t) ; if nil, italics is universally disabled
        (load-theme 'doom-one t)
 
        ;; Enable flashing mode-line on errors
        (doom-themes-visual-bell-config)
        ;; Corrects (and improves) org-mode's native fontification.
-       (doom-themes-org-config))
-
-     (use-package hl-todo
-       :init
-       (global-hl-todo-mode))
+       (doom-themes-org-config)
+       )
    #+end_src
+   
+Visually highlight todo.   
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package hl-todo
+    :init
+    (global-hl-todo-mode))
+#+end_src
    
 * Organization
    
@@ -246,9 +337,15 @@ Disable GUI elements.
       :init (tab-bar-mode)
       :straight (:type built-in))
 
+    ;; let's see how long I can go without projectile
     (use-package project
+      :general
+      (patrl/leader-keys
+        "p" '(:keymap project-prefix-map :wk "project")
+        )
       :straight (:type built-in))
 
+    ;; automatically organize projects
     (use-package project-tab-groups
       :after (project tab-bar)
       :config
@@ -257,36 +354,102 @@ Disable GUI elements.
 
 ** File management
 
-   #+begin_src emacs-lisp :tangle init.el
+- TODO try ranger
+
+#+begin_src emacs-lisp :tangle init.el
      (use-package dired
        :straight (:type built-in))
-   #+end_src
+#+end_src
   
 * Languages
 
 ** Org mode
 
-   - TODO overwrite org-mode prefix with local leader.
-   - TODO add ~org-tempo~ module for template expansion.
+Resources:
+- [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
+- TODO overwrite org-mode prefix with local leader.
    
    #+begin_src emacs-lisp :tangle init.el
      ;; FIXME using the latest version of org results in an error
      (use-package org
        :straight (:type built-in)
+       :init
+       (setq org-src-fontify-natively t) ;; fontify code in src blocks
+       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+       :custom
+       (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
        :general
        (patrl/local-leader-keys
-	:keymaps 'org-mode-map
-	"l" '(org-insert-link :wk "insert link")
-	"s" '(consult-org-heading :wk "consult heading")
-	"b" '(:keymap org-babel-map :wk "babel")
-	"t" '(org-insert-structure-template :wk "template")
-	"e" '(org-edit-special :wk "edit")
+         :keymaps 'org-mode-map
+         "l" '(:ignore t :wk "link")
+         "ll" '(org-insert-link t :wk "link")
+         "s" '(consult-org-heading :wk "consult heading")
+         "b" '(:keymap org-babel-map :wk "babel")
+         "t" '(org-insert-structure-template :wk "template")
+         "e" '(org-edit-special :wk "edit")
+         "i" '(:ignore t :wk "insert")
+         "ih" '(org-insert-heading :wk "insert heading")
+         "is" '(org-insert-subheading :wk "insert heading")
+         )
+       :hook
+       (org-mode . visual-line-mode)
+       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+       ;; :config
+       ;; (add-to-list 'org-modules 'org-tempo t) ;; enables auto-expansion for templates
        )
-       :hook ((org-mode . visual-line-mode))
+   #+end_src
+   
+Install org-cliplink.   
+
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package org-cliplink
+       :after org
+       :general
+       (patrl/local-leader-keys
+         :keymaps 'org-mode-map 
+         "lc" '(org-cliplink :wk "cliplink")
+         )
+       )
+   #+end_src
+   
+N.b. this currently doesn't play nicely with most fonts.
+   
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package org-superstar
+       :after org
+       :hook
+       (org-mode . (lambda () (org-superstar-mode 1))))
+   #+end_src
+
+*** Org roam
+
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package org-roam
+       :general
+       (patrl/leader-keys
+         "nr" '(:ignore t :wk "roam")
+         "nrf" '(org-roam-node-find :wk "find")
+         "nrd" '(:ignore t :wk "dailies")
+         "nrdt" '(org-roam-dailies-goto-today :wk "today")
+         "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
+         "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
+         )
+       :init
+       (setq org-roam-v2-ack t) ;; disables v2 warning
+       :config
+       (setq org-roam-directory (file-truename "~/notes"))
+       (org-roam-db-autosync-enable)
        )
    #+end_src
 
 ** TODO haskell
+
+   - Setup LSP
+
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package haskell-mode)
+   #+end_src
+   
 ** TODO nix
 
 #+begin_src emacs-lisp :tangle init.el 
@@ -297,25 +460,44 @@ Disable GUI elements.
 ** TODO latex
 
    #+begin_src emacs-lisp :tangle init.el
-     (use-package auctex
-       :no-require t ;; if this isn't set to true, error!
-       :init
-       ;; automatically enables outline mode
-       ;; this means I can use '<TAB>' to cycle visibility
-       ;; just like in org-mode
-       (add-hook 'LaTeX-mode-hook #'outline-minor-mode)
-       :general
-       (patrl/local-leader-keys
-	 :keymaps 'LaTeX-mode-map
-	 "i" '(:ignore t :wk "insert")
-	 "ie" '(LaTeX-environment :wk "insert environment")
-	 "im" '(LaTeX-macro :wk "insert macro")
-	 "is" '(LaTeX-section :wk "insert section header")
-	 )
-       :mode ("\\.tex\\'" . TeX-latex-mode)
+     (use-package auctex-latexmk
+       :after latex
        :config
-       (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+       (auctex-latexmk-setup)
+       (setq auctex-latexmk-inherit-TeX-PDF-mode t)
        )
+   #+end_src
+   
+   #+begin_src emacs-lisp :tangle init.el
+	  (use-package latex
+	    :straight auctex ;; if this isn't set to true, error!
+	    :init
+	    ;; automatically enables outline mode
+	    ;; this means I can use '<TAB>' to cycle visibility
+	    ;; just like in org-mode
+	    (add-hook 'LaTeX-mode-hook #'outline-minor-mode)
+	    (add-hook 'LaTeX-mode-hook #'prettify-symbols-mode)
+	    (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex)
+	    (add-hook 'LaTeX-mode-hook #'TeX-source-correlate-mode) ;; necessary for synctex
+	    (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+	    :general
+	    (patrl/local-leader-keys
+	      :keymaps 'LaTeX-mode-map
+	      "i" '(:ignore t :wk "insert")
+	      "ie" '(LaTeX-environment :wk "insert environment")
+	      "im" '(LaTeX-macro :wk "insert macro")
+	      "is" '(LaTeX-section :wk "insert section header")
+	      "p" '(:ignore t :wk "preview")
+	      "ps" '(preview-section :wk "preview section")
+	      )
+	    :mode ("\\.tex\\'" . TeX-latex-mode)
+	    :config
+	    (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+	    )
+   #+end_src
+
+   #+begin_src emacs-lisp :tangle init.el 
+     (use-package cdlatex)
    #+end_src
 
    #+begin_src emacs-lisp :tangle init.el
@@ -325,13 +507,34 @@ Disable GUI elements.
        )
    #+end_src
 
+N.b. this currently doesn't work in org-mode.
+
    #+begin_src emacs-lisp :tangle init.el
      (use-package citar
+       :general
+       (patrl/leader-keys
+	 "nb" '(citar-insert-citation :wk "citar")
+	 )
        :custom
        (citar-library-paths '("~/Dropbox (MIT)/library"))
        (citar-bibliography '("~/repos/bibliography/master.bib"))
        )
    #+end_src
+
+** TODO markdown  
+
+    #+begin_src emacs-lisp :tangle init.el
+      (use-package markdown-mode
+	:hook ((markdown-mode . visual-line-mode))
+	:commands (markdown-mode gfm-mode)
+	:mode (("README\\.md\\'" . gfm-mode)
+	       ("\\.md\\'" . markdown-mode)
+	       ("\\.markdown\\'" . markdown-mode))
+	:init (setq markdown-command "multimarkdown"))
+    #+end_src
+   
+*** TODO set markdown command to pandoc, setup pandoc mode
+
 
 * Completion
 
@@ -376,11 +579,18 @@ Disable GUI elements.
       :general
       (patrl/leader-keys
 	"bb" '(consult-buffer :wk "consult buffer")
-	"fs" '(consult-line :wk "consult line")
 	"ht" '(consult-theme :wk "consult theme")
+	"sr" '(consult-ripgrep :wk "consult rg")
+	"sg" '(consult-grep :wk "consult grep")
+	"sG" '(consult-git-grep :wk "consult git grep")
+	"sf" '(consult-find :wk "consult find")
+	"sF" '(consult-locate :wk "consult locate")
+	"sl" '(consult-line :wk "consult line")
 	)
       )
   #+end_src
+
+  
 
 ** TODO Embark
 
@@ -406,14 +616,29 @@ Disable GUI elements.
 
 ** TODO company
 
-   - TODO I'm getting an error when I try to use this with ~evil-collection~.
-   
    #+begin_src emacs-lisp :tangle init.el
      (use-package company
+       :custom
+       (company-idle-delay nil) ;; turn off auto-completion
+       :general
+       (:keymap 'company-mode-map
+		 "C-SPC" 'company-complete) ;; hit TAB to trigger company completion
        :hook
-       prog-mode
+       (prog-mode . company-mode)
+       (LaTeX-mode . company-mode)
        )
    #+end_src 
+
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package company-bibtex
+       :init
+       (setq company-bibtex-bibliography
+	     '("/home/patrl/repos/bibliography/master.bib"))
+       :after company
+       :config
+       (add-to-list 'company-backends 'company-bibtex)
+       )
+   #+end_src
 
 * TODO try out ~bufler~
 
@@ -440,6 +665,108 @@ Disable GUI elements.
 	)
     )
   #+end_src
+
+  
+* Eshell
+
+  #+begin_src emacs-lisp :tangle init.el 
+    (use-package eshell
+      :straight (:type built-in)
+      :general
+      (patrl/leader-keys
+	"oe" '(eshell :wk "eshell")
+	)
+      )
+  #+end_src
+
+ 
+* Checkers
+
+** Flymake
+
+   #+begin_src emacs-lisp :tangle init.el
+     (use-package flymake
+       :straight (:type built-in)
+
+       :hook
+       (emacs-lisp-mode . flymake-mode)
+       (LaTeX-mode . flymake-mode)
+       :custom
+       (flymake-no-changes-timeout nil)
+       :general
+       (general-nmap "] !" 'flymake-goto-next-error)
+       (general-nmap "[ !" 'flymake-goto-prev-error)
+       )
+   #+end_src 
+   
+* Tools   
+
+** TODO LSP
+
+Note I still need to set keybindings
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package lsp-mode
+    :hook
+    (haskell-mode . lsp)
+    (haskell-literate-mode . lsp)
+    (lsp-mode . lsp-enable-which-key-integration)
+    :commands
+    lsp
+  )
+
+  (use-package lsp-ui
+    :commands lsp-ui-mode
+    )
+#+end_src
+
+** TODO direnv
+
+Essential, since I'm on NixOS.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package direnv
+    :config
+    (direnv-mode))
+#+end_src
+
+* Staging grounds
+
+** Deadgrep
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package deadgrep
+    :general
+    (patrl/leader-keys
+      "sd" '(deadgrep :wk "deadgrep")
+      )
+    )
+#+end_src
+
+** TODO bufler
+** TODO helpful
+** TODO ranger
+** TODO auto-activating-snippets
+
+#+begin_src emacs-lisp :tangle init.el
+  ;;   (use-package aas
+  ;;     :hook (LaTeX-mode . aas-activate-for-major-mode)
+  ;;     :hook (org-mode . aas-activate-for-major-mode)
+  ;;     :config
+  ;;     (aas-set-snippets 'latex-mode
+  ;;       ;; set condition!
+  ;;       :cond #'texmathp ; expand only while in math
+  ;;       ";l" "λ"
+  ;;       ";a" "α"
+  ;;       ";b" "β"
+  ;;       "\\rr" "→"
+  ;;       "\\lr" "←"
+  ;;       "\\all" "∀"
+  ;;       "\\ex" "∃"
+  ;;     ;; disable snippets by redefining them with a nil expansion
+  ;;   )
+  ;; )
+#+end_src
 
 ;; Local Variables: 
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t) 

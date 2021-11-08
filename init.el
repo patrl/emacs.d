@@ -1,4 +1,4 @@
-(setq straight-use-package-by-default t)
+(setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -13,14 +13,15 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(straight-use-package 'use-package)
+(straight-use-package 'use-package) ;; install use-package via straight
 
 (use-package emacs
   :init
-  (setq user-full-name "Patrick D. Elliott")
+  ;; my details
+  (setq user-full-name "Patrick D. Elliott") 
   (setq user-mail-address "patrick.d.elliott@gmail.com")
 
-  (defalias 'yes-or-no-p 'y-or-n-p)
+  (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
   ;; stop emacs from littering
   (setq make-backup-files nil)
@@ -39,17 +40,24 @@
   (prefer-coding-system 'utf-8)
 
   (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
+
+  ;; ignores warnings during native compilation
+  ;; (borrowed from Pat Mike's config)
+  (setq warning-minimum-level :error)
   )
 
-;; ignores warnings during native compilation
-;; (borrowed from Pat Mike's config)
-;; FIXME this doesn't seem to be working
-(setq warning-minimum-level :error)
+(use-package electric
+  :straight (:type built-in)
+  :init
+  (electric-pair-mode +1) ;; automatically insert closing parens 
+  (setq electric-pair-preserve-balance nil)
+  )
 
 (use-package general
   :config
   (general-evil-setup)
 
+  ;; set up 'SPC' as the global leader key
   (general-create-definer patrl/leader-keys
     :states '(normal insert visual emacs)
     :keymaps 'override
@@ -57,6 +65,7 @@
     :global-prefix "M-SPC"
     )
 
+  ;; set up ',' as the local leader key
   (general-create-definer patrl/local-leader-keys
     :states '(normal visual)
     :keymaps 'override
@@ -67,38 +76,56 @@
   (patrl/leader-keys
     "SPC" '(execute-extended-command :wk "execute command")
     "." '(find-file :wk "find file")
-    "TAB" '(:keymap tab-prefix-map :wk "tab")
-    "h" '(:keymap help-map :wk "help")
-    "p" '(:keymap project-prefix-map :wk "project")
+    "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
+    "h" '(:keymap help-map :wk "help") ;; remap help bindings
     )
 
+  ;; file bindings
   (patrl/leader-keys
     "f" '(:ignore t :wk "file")
-    "ff" '(find-file :wk "find file")
+    "ff" '(find-file :wk "find file") ;; gets overridden by consult
+    "fd" '(find-file :wk "dired")
     )
 
+  ;; buffer bindings
   (patrl/leader-keys
     "b" '(:ignore t :wk "buffer")
+    "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
     "bk" '(kill-this-buffer :wk "kill this buffer")
     "br" '(revert-buffer :wk "reload buffer")
     )
 
   (patrl/leader-keys
-   "n" '(:ignore t :wk "notes")
-   "nb" '(citar-insert-citation :wk "citar")
+    "u" '(universal-argument :wk "universal prefix")
+    )
+
+  ;; notes bindings
+  (patrl/leader-keys
+   "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
+   )
+
+  ;; open bindings
+  (patrl/leader-keys
+   "o" '(:ignore t :wk "open")
+   )
+
+  ;; search bindings
+  (patrl/leader-keys
+   "s" '(:ignore t :wk "search")
    )
   )
 
 (use-package evil
   :general
   (patrl/leader-keys
-   "w" '(:keymap evil-window-map :wk "window")
+   "w" '(:keymap evil-window-map :wk "window") ;; window bindings
    )
   :init
-  ;; I need this to ensure that 'C-u' gets bound to 'evil-scroll-up'
-  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
+
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
+
   (setq evil-split-window-below t)
   (setq evil-split-window-right t)
   :config
@@ -111,21 +138,34 @@
   :after evil
   :init
   (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
-  (setq evil-collection-mode-list nil) ;; I don't like surprises
-  (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
-  (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
+  ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
+  ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
+  ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
   :config
   (evil-collection-init))
 
+;; port of Tim Pope's commentary package
 (use-package evil-commentary
   :after evil
   :config
   (evil-commentary-mode))
 
+;; port of Tim Pope's surround package
 (use-package evil-surround
   :after evil
   :config
   (global-evil-surround-mode 1))
+
+;; show visual hints for evil motions
+(use-package evil-goggles
+  :config
+  (evil-goggles-mode)
+
+  ;; optionally use diff-mode's faces; as a result, deleted text
+  ;; will be highlighed with `diff-removed` face which is typically
+  ;; some red color (as defined by the color theme)
+  ;; other faces such as `diff-added` will be used for other actions
+  (evil-goggles-use-diff-faces))
 
 (use-package which-key
   :after evil
@@ -133,30 +173,39 @@
   :config
   (which-key-setup-minibuffer))
 
+(use-package olivetti
+  :init
+  (setq olivetti-body-width .67))
+
 (use-package mood-line
   :config (mood-line-mode))
 
-(set-face-attribute 'default nil :font "Operator Mono Book" :height 120)
+(use-package emacs
+  :init
+  (set-face-attribute 'default nil :font "Cascadia Code-12")
+  (add-to-list 'default-frame-alist '(font . "Cascadia Code-12"))
+  )
 
 (use-package solaire-mode
-  :config
-  (solaire-global-mode +1))
+       :config
+       (solaire-global-mode +1))
 
 (use-package tron-legacy-theme
-  :config
-  (setq tron-legacy-theme-vivid-cursor t))
+       :config
+       (setq tron-legacy-theme-vivid-cursor t))
 
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	doom-themes-enable-italic t) ; if nil, italics is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-one t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
   ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+  (doom-themes-org-config)
+  )
 
 (use-package hl-todo
   :init
@@ -166,9 +215,15 @@
   :init (tab-bar-mode)
   :straight (:type built-in))
 
+;; let's see how long I can go without projectile
 (use-package project
+  :general
+  (patrl/leader-keys
+    "p" '(:keymap project-prefix-map :wk "project")
+    )
   :straight (:type built-in))
 
+;; automatically organize projects
 (use-package project-tab-groups
   :after (project tab-bar)
   :config
@@ -180,28 +235,85 @@
 ;; FIXME using the latest version of org results in an error
 (use-package org
   :straight (:type built-in)
+  :init
+  (setq org-src-fontify-natively t) ;; fontify code in src blocks
+  (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+  :custom
+  (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
   :general
   (patrl/local-leader-keys
-   :keymaps 'org-mode-map
-   "l" '(org-insert-link :wk "insert link")
-   "s" '(consult-org-heading :wk "consult heading")
-   "b" '(:keymap org-babel-map :wk "babel")
-   "t" '(org-insert-structure-template :wk "template")
-   "e" '(org-edit-special :wk "edit")
+    :keymaps 'org-mode-map
+    "l" '(:ignore t :wk "link")
+    "ll" '(org-insert-link t :wk "link")
+    "s" '(consult-org-heading :wk "consult heading")
+    "b" '(:keymap org-babel-map :wk "babel")
+    "t" '(org-insert-structure-template :wk "template")
+    "e" '(org-edit-special :wk "edit")
+    "i" '(:ignore t :wk "insert")
+    "ih" '(org-insert-heading :wk "insert heading")
+    "is" '(org-insert-subheading :wk "insert heading")
+    )
+  :hook
+  (org-mode . visual-line-mode)
+  (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+  ;; :config
+  ;; (add-to-list 'org-modules 'org-tempo t) ;; enables auto-expansion for templates
   )
-  :hook ((org-mode . visual-line-mode))
+
+(use-package org-cliplink
+  :after org
+  :general
+  (patrl/local-leader-keys
+    :keymaps 'org-mode-map 
+    "lc" '(org-cliplink :wk "cliplink")
+    )
   )
+
+(use-package org-superstar
+  :after org
+  :hook
+  (org-mode . (lambda () (org-superstar-mode 1))))
+
+(use-package org-roam
+  :general
+  (patrl/leader-keys
+    "nr" '(:ignore t :wk "roam")
+    "nrf" '(org-roam-node-find :wk "find")
+    "nrd" '(:ignore t :wk "dailies")
+    "nrdt" '(org-roam-dailies-goto-today :wk "today")
+    "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
+    "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
+    )
+  :init
+  (setq org-roam-v2-ack t) ;; disables v2 warning
+  :config
+  (setq org-roam-directory (file-truename "~/notes"))
+  (org-roam-db-autosync-enable)
+  )
+
+(use-package haskell-mode)
 
 (use-package nix-mode
   :mode "\\.nix\\'")
 
-(use-package auctex
-  :no-require t ;; if this isn't set to true, error!
+(use-package auctex-latexmk
+  :after latex
+  :config
+  (auctex-latexmk-setup)
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+  )
+
+(use-package latex
+  :straight auctex ;; if this isn't set to true, error!
   :init
   ;; automatically enables outline mode
   ;; this means I can use '<TAB>' to cycle visibility
   ;; just like in org-mode
   (add-hook 'LaTeX-mode-hook #'outline-minor-mode)
+  (add-hook 'LaTeX-mode-hook #'prettify-symbols-mode)
+  (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex)
+  (add-hook 'LaTeX-mode-hook #'TeX-source-correlate-mode) ;; necessary for synctex
+  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
   :general
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
@@ -209,11 +321,15 @@
     "ie" '(LaTeX-environment :wk "insert environment")
     "im" '(LaTeX-macro :wk "insert macro")
     "is" '(LaTeX-section :wk "insert section header")
+    "p" '(:ignore t :wk "preview")
+    "ps" '(preview-section :wk "preview section")
     )
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :config
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   )
+
+(use-package cdlatex)
 
 (use-package pdf-tools
   :config
@@ -221,10 +337,22 @@
   )
 
 (use-package citar
+  :general
+  (patrl/leader-keys
+    "nb" '(citar-insert-citation :wk "citar")
+    )
   :custom
   (citar-library-paths '("~/Dropbox (MIT)/library"))
   (citar-bibliography '("~/repos/bibliography/master.bib"))
   )
+
+(use-package markdown-mode
+  :hook ((markdown-mode . visual-line-mode))
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+	 ("\\.md\\'" . markdown-mode)
+	 ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
 
 (use-package vertico
   :init (vertico-mode)
@@ -260,8 +388,13 @@
   :general
   (patrl/leader-keys
     "bb" '(consult-buffer :wk "consult buffer")
-    "fs" '(consult-line :wk "consult line")
     "ht" '(consult-theme :wk "consult theme")
+    "sr" '(consult-ripgrep :wk "consult rg")
+    "sg" '(consult-grep :wk "consult grep")
+    "sG" '(consult-git-grep :wk "consult git grep")
+    "sf" '(consult-find :wk "consult find")
+    "sF" '(consult-locate :wk "consult locate")
+    "sl" '(consult-line :wk "consult line")
     )
   )
 
@@ -284,8 +417,23 @@
   (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package company
+  :custom
+  (company-idle-delay nil) ;; turn off auto-completion
+  :general
+  (:keymap 'company-mode-map
+	    "C-SPC" 'company-complete) ;; hit TAB to trigger company completion
   :hook
-  prog-mode
+  (prog-mode . company-mode)
+  (LaTeX-mode . company-mode)
+  )
+
+(use-package company-bibtex
+  :init
+  (setq company-bibtex-bibliography
+	'("/home/patrl/repos/bibliography/master.bib"))
+  :after company
+  :config
+  (add-to-list 'company-backends 'company-bibtex)
   )
 
 ;; (use-package bufler
@@ -305,3 +453,66 @@
     "gg" '(magit-status :wk "status")
     )
 )
+
+(use-package eshell
+  :straight (:type built-in)
+  :general
+  (patrl/leader-keys
+    "oe" '(eshell :wk "eshell")
+    )
+  )
+
+(use-package flymake
+  :straight (:type built-in)
+
+  :hook
+  (emacs-lisp-mode . flymake-mode)
+  (LaTeX-mode . flymake-mode)
+  :custom
+  (flymake-no-changes-timeout nil)
+  :general
+  (general-nmap "] !" 'flymake-goto-next-error)
+  (general-nmap "[ !" 'flymake-goto-prev-error)
+  )
+
+(use-package lsp-mode
+  :hook
+  (haskell-mode . lsp)
+  (haskell-literate-mode . lsp)
+  (lsp-mode . lsp-enable-which-key-integration)
+  :commands
+  lsp
+)
+
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  )
+
+(use-package direnv
+  :config
+  (direnv-mode))
+
+(use-package deadgrep
+  :general
+  (patrl/leader-keys
+    "sd" '(deadgrep :wk "deadgrep")
+    )
+  )
+
+;;   (use-package aas
+;;     :hook (LaTeX-mode . aas-activate-for-major-mode)
+;;     :hook (org-mode . aas-activate-for-major-mode)
+;;     :config
+;;     (aas-set-snippets 'latex-mode
+;;       ;; set condition!
+;;       :cond #'texmathp ; expand only while in math
+;;       ";l" "λ"
+;;       ";a" "α"
+;;       ";b" "β"
+;;       "\\rr" "→"
+;;       "\\lr" "←"
+;;       "\\all" "∀"
+;;       "\\ex" "∃"
+;;     ;; disable snippets by redefining them with a nil expansion
+;;   )
+;; )
