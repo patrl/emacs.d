@@ -8,3 +8,4 @@ projects
 .org-id-locations
 bookmarks
 org-roam.db
+.lsp-session-*
