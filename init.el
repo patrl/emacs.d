@@ -115,6 +115,8 @@
   ;; notes bindings
   (patrl/leader-keys
     "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
+    "na" '(org-todo-list :wk "agenda todos") ;; agenda
+    ;; TODO hack on agenda bindings
     )
 
   ;; code bindings
@@ -339,7 +341,7 @@
 (use-package haskell-mode)
 
 (use-package racket-mode
-  :hook (racket-mode . racket-xp-mode)
+  :hook (racket-mode . racket-xp-mode) ;; n.b. this requires Dr. Racket to be installed as a backend
   :general
   (patrl/leader-keys
     :keymaps 'racket-mode-map
@@ -352,22 +354,25 @@
 
 (use-package auctex-latexmk
   :after latex
+  :init
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
   :config
   (auctex-latexmk-setup)
-  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
   )
 
 (use-package latex
   :straight auctex ;; if this isn't set to true, error!
   :init
-  ;; automatically enables outline mode
-  ;; this means I can use '<TAB>' to cycle visibility
-  ;; just like in org-mode
-  (add-hook 'LaTeX-mode-hook #'outline-minor-mode)
-  (add-hook 'LaTeX-mode-hook #'prettify-symbols-mode)
-  (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex)
+  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer) ;; this currently doesn't work with preview continuously
+  (add-hook 'LaTeX-mode-hook #'outline-minor-mode) ;; automatically enables outline mode
+  (add-hook 'LaTeX-mode-hook #'prettify-symbols-mode) ;; prettify math
+  (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex) ;; cdlatex
   (add-hook 'LaTeX-mode-hook #'TeX-source-correlate-mode) ;; necessary for synctex
-  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+  (setq TeX-source-correlate-start-server nil) ;; don't start server
+  (setq TeX-parse-self t) ; parse on load
+  (setq TeX-auto-save t)  ; parse on save
+  (setq TeX-save-query nil)  ; don't ask, just save
+  (setq TeX-command-default "LatexMk") ;; latexmk by default
   :general
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
@@ -555,15 +560,24 @@
 
 (use-package lsp-mode
   :hook
-  (haskell-mode . lsp)
-  (haskell-literate-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration)
   :commands
   lsp
 )
 
 (use-package lsp-ui
+  :after lsp-mode
   :commands lsp-ui-mode
+  )
+
+(use-package lsp-haskell
+  :after lsp-mode
+  :init
+  (add-hook 'haskell-mode-hook #'lsp)
+  (add-hook 'haskell-literate-mode-hook #'lsp)
+  :config
+  (setq lsp-haskell-server-path "haskell-language-server") ;; for some reason this doesn't get found automatically
+  ;; (setq lsp-haskell-formatting-provider "brittany")
   )
 
 (use-package direnv
