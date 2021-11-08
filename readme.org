@@ -83,22 +83,33 @@ Some rules/conventions:
     (setq auto-save-default nil)
     (setq create-lockfiles nil)
 
-    ;; saves customizations made via the Customize mode in a different file.
-    ;; (borrowed from Pat Mike's config)
-    (setq custom-file (concat user-emacs-directory "custom.el"))
-    (load custom-file)
-
     ;; utf-8 everywhere
-    ;; (borrowed from Pat Mike's config)
-    (set-language-environment "UTF-8")
-    (setq locale-coding-system 'utf-8)
+    (set-charset-priority 'unicode)
+    (setq locale-coding-system 'utf-8
+	  coding-system-for-read 'utf-8
+	  coding-system-for-write 'utf-8)
+    (set-terminal-coding-system 'utf-8)
+    (set-keyboard-coding-system 'utf-8)
+    (set-selection-coding-system 'utf-8)
     (prefer-coding-system 'utf-8)
+    (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+
+    ;; escape everywhere
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+    ;; Don't persist a custom file
+    (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
+    (setq custom-safe-themes t)            ; mark all themes as safe, since we can't persist now
+    (setq enable-local-variables :all)     ; fix =defvar= warnings
 
     (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
 
-    ;; ignores warnings during native compilation
-    ;; (borrowed from Pat Mike's config)
-    (setq warning-minimum-level :error)
+    ;; less noise when compiling elisp
+    (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+    (setq native-comp-async-report-warnings-errors nil)
+    (setq load-prefer-newer t)
+
+    (show-paren-mode t)
     )
 #+end_src
 
