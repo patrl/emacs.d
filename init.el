@@ -98,7 +98,6 @@
   (patrl/leader-keys
     "f" '(:ignore t :wk "file")
     "ff" '(find-file :wk "find file") ;; gets overridden by consult
-    "fd" '(find-file :wk "dired")
     )
 
   ;; buffer bindings
@@ -116,6 +115,11 @@
   ;; notes bindings
   (patrl/leader-keys
     "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
+    )
+
+  ;; code bindings
+  (patrl/leader-keys
+    "c" '(:ignore t :wk "code") ;; see flymake
     )
 
   ;; open bindings
@@ -187,6 +191,15 @@
   :config
   (which-key-setup-minibuffer))
 
+(use-package all-the-icons
+  :if (display-graphic-p))
+
+
+(use-package all-the-icons-dired
+  :hook
+  (dired-mode . all-the-icons-dired-mode)
+  )
+
 (use-package olivetti
   :init
   (setq olivetti-body-width .67))
@@ -244,7 +257,24 @@
   (project-tab-groups-mode 1))
 
 (use-package dired
+  :general
+  (patrl/leader-keys
+    "fd" '(dired :wk "dired")
+    "fj" '(dired-jump :wk "dired jump"))
+  ;; ranger like navigation
+  (:keymaps 'dired-mode-map
+            :states 'normal
+            "h" 'dired-up-directory
+            "q" 'kill-current-buffer
+            "l" 'dired-find-file
+            )
+  :hook
+  (dired-mode . dired-hide-details-mode) ;; no thanks
   :straight (:type built-in))
+
+;; toggle subtree visibility with 'TAB'
+;; makes dired a much more pleasant file manager
+(use-package dired-subtree)
 
 ;; FIXME using the latest version of org results in an error
 (use-package org
@@ -269,6 +299,7 @@
     )
   :hook
   (org-mode . visual-line-mode)
+  (org-mode . org-indent-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
   ;; :config
   ;; (add-to-list 'org-modules 'org-tempo t) ;; enables auto-expansion for templates
@@ -435,10 +466,17 @@
   (company-idle-delay nil) ;; turn off auto-completion
   :general
   (:keymap 'company-mode-map
-	   "C-SPC" 'company-complete) ;; hit TAB to trigger company completion
+	   "C-SPC" 'company-complete) ;; keybinding to trigger company completion
   :hook
   (prog-mode . company-mode)
   (LaTeX-mode . company-mode)
+  :config
+  ;; the following stops company from using the orderless completion style
+  ;; makes company much more useful
+  (define-advice company-capf
+      (:around (orig-fun &rest args) set-completion-styles)
+    (let ((completion-styles '(basic partial-completion)))
+      (apply orig-fun args)))
   )
 
 (use-package company-bibtex
@@ -478,7 +516,11 @@
 
 (use-package flymake
   :straight (:type built-in)
-
+  :general
+  (patrl/leader-keys
+    :keymaps 'flymake-mode-map
+    "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
+    )
   :hook
   (emacs-lisp-mode . flymake-mode)
   (LaTeX-mode . flymake-mode)
@@ -488,6 +530,19 @@
   (general-nmap "] !" 'flymake-goto-next-error)
   (general-nmap "[ !" 'flymake-goto-prev-error)
   )
+
+(use-package flymake-aspell
+  :hook
+  (text-mode-hook . flymake-aspell-setup)
+  (prog-mode-hook . flymake-aspell-setup))
+
+(use-package ispell
+  :straight (:type built-in)
+  :init
+  (setq ispell-dictionary "en_US")
+  (setq ispell-program-name "aspell")
+  (setq ispell-silently-savep t)
+)
 
 (use-package lsp-mode
   :hook
