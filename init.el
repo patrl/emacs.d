@@ -76,15 +76,15 @@
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "SPC"
-    :global-prefix "M-SPC"
+    :global-prefix "M-SPC" ;; access leader in insert mode
     )
 
   ;; set up ',' as the local leader key
   (general-create-definer patrl/local-leader-keys
-    :states '(normal visual)
+    :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix ","
-    :global-prefix "SPC m"
+    :global-prefix "M-SPC m" ;; access local leader in insert mode
     )
 
   (patrl/leader-keys
@@ -338,6 +338,15 @@
 
 (use-package haskell-mode)
 
+(use-package racket-mode
+  :hook (racket-mode . racket-xp-mode)
+  :general
+  (patrl/leader-keys
+    :keymaps 'racket-mode-map
+    "cr" 'racket-run-and-switch-to-repl  
+    )
+  )
+
 (use-package nix-mode
   :mode "\\.nix\\'")
 
@@ -397,7 +406,7 @@
   :mode (("README\\.md\\'" . gfm-mode)
 	 ("\\.md\\'" . markdown-mode)
 	 ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown"))
+  :init (setq markdown-command "pandoc"))
 
 (use-package vertico
   :init (vertico-mode)
@@ -585,3 +594,7 @@
 ;;     ;; disable snippets by redefining them with a nil expansion
 ;;   )
 ;; )
+
+(use-package tree-sitter)
+
+(use-package tree-sitter-langs)

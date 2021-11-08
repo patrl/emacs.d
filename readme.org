@@ -1,12 +1,13 @@
 #+title: Emacs configuration
 #+author: Patrick D. Elliott
 #+email: patrick.d.elliott@gmail.com
-#+date: <2021-11-07 Sun>
+#+date: <2021-11-08 Mon>
 
 * Useful resources
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
 - [[https://github.com/pniedzielski/emacs.d/][GitHub - pniedzielski/emacs.d: My Emacs Configuration, finally git-ified]] 
+- [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]] 
 
 * Early init file
 
@@ -134,8 +135,6 @@ Some rules/conventions:
 
 ** General
 
-- TODO no local leader available in insert mode.
-
   #+begin_src emacs-lisp :tangle init.el
     (use-package general
       :config
@@ -143,64 +142,64 @@ Some rules/conventions:
 
       ;; set up 'SPC' as the global leader key
       (general-create-definer patrl/leader-keys
-	:states '(normal insert visual emacs)
-	:keymaps 'override
-	:prefix "SPC"
-	:global-prefix "M-SPC"
-	)
+        :states '(normal insert visual emacs)
+        :keymaps 'override
+        :prefix "SPC"
+        :global-prefix "M-SPC" ;; access leader in insert mode
+        )
 
       ;; set up ',' as the local leader key
       (general-create-definer patrl/local-leader-keys
-	:states '(normal visual)
-	:keymaps 'override
-	:prefix ","
-	:global-prefix "SPC m"
-	)
+        :states '(normal insert visual emacs)
+        :keymaps 'override
+        :prefix ","
+        :global-prefix "M-SPC m" ;; access local leader in insert mode
+        )
 
       (patrl/leader-keys
-	"SPC" '(execute-extended-command :wk "execute command")
-	"." '(find-file :wk "find file")
-	"TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
-	"h" '(:keymap help-map :wk "help") ;; remap help bindings
-	)
+        "SPC" '(execute-extended-command :wk "execute command")
+        "." '(find-file :wk "find file")
+        "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
+        "h" '(:keymap help-map :wk "help") ;; remap help bindings
+        )
 
       ;; file bindings
       (patrl/leader-keys
-	"f" '(:ignore t :wk "file")
-	"ff" '(find-file :wk "find file") ;; gets overridden by consult
-	)
+        "f" '(:ignore t :wk "file")
+        "ff" '(find-file :wk "find file") ;; gets overridden by consult
+        )
 
       ;; buffer bindings
       (patrl/leader-keys
-	"b" '(:ignore t :wk "buffer")
-	"bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
-	"bk" '(kill-this-buffer :wk "kill this buffer")
-	"br" '(revert-buffer :wk "reload buffer")
-	)
+        "b" '(:ignore t :wk "buffer")
+        "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
+        "bk" '(kill-this-buffer :wk "kill this buffer")
+        "br" '(revert-buffer :wk "reload buffer")
+        )
 
       (patrl/leader-keys
-	"u" '(universal-argument :wk "universal prefix")
-	)
+        "u" '(universal-argument :wk "universal prefix")
+        )
 
       ;; notes bindings
       (patrl/leader-keys
-	"n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
-	)
+        "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
+        )
 
       ;; code bindings
       (patrl/leader-keys
-	"c" '(:ignore t :wk "code") ;; see flymake
-	)
+        "c" '(:ignore t :wk "code") ;; see flymake
+        )
 
       ;; open bindings
       (patrl/leader-keys
-	"o" '(:ignore t :wk "open")
-	)
+        "o" '(:ignore t :wk "open")
+        )
 
       ;; search bindings
       (patrl/leader-keys
-	"s" '(:ignore t :wk "search")
-	)
+        "s" '(:ignore t :wk "search")
+        )
       )
   #+end_src
 
@@ -498,8 +497,21 @@ N.b. this currently doesn't play nicely with most fonts.
   #+begin_src emacs-lisp :tangle init.el
     (use-package haskell-mode)
   #+end_src
+
+** racket
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package racket-mode
+    :hook (racket-mode . racket-xp-mode)
+    :general
+    (patrl/leader-keys
+      :keymaps 'racket-mode-map
+      "cr" 'racket-run-and-switch-to-repl  
+      )
+    )
+#+end_src
    
-** TODO nix
+** nix
 
 #+begin_src emacs-lisp :tangle init.el 
   (use-package nix-mode
@@ -570,7 +582,7 @@ N.b. this currently doesn't work in org-mode.
     )
 #+end_src
 
-** TODO markdown  
+** markdown  
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package markdown-mode
@@ -579,10 +591,10 @@ N.b. this currently doesn't work in org-mode.
     :mode (("README\\.md\\'" . gfm-mode)
 	   ("\\.md\\'" . markdown-mode)
 	   ("\\.markdown\\'" . markdown-mode))
-    :init (setq markdown-command "multimarkdown"))
+    :init (setq markdown-command "pandoc"))
 #+end_src
    
-*** TODO set markdown command to pandoc, setup pandoc mode
+*** TODO pandoc mode
 
 * Completion
 
@@ -849,6 +861,14 @@ Essential, since I'm on NixOS.
   ;;     ;; disable snippets by redefining them with a nil expansion
   ;;   )
   ;; )
+#+end_src
+
+** Tree-sitter
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package tree-sitter)
+
+  (use-package tree-sitter-langs)
 #+end_src
 
 ;; Local Variables: 
