@@ -34,6 +34,11 @@ Disable GUI elements.
 
 * Init file
 
+#+begin_src emacs-lisp :tangle init.el
+;;; init.el --- Personal configuration file -*- lexical-binding: t; no-byte-compile: t; -*-
+;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
+#+end_src
+
 ** Package management: ~straight.el~
    
 - [[https://github.com/raxod502/straight.el][GitHub - raxod502/straight.el: 🍀 Next-generation, purely functional package m...]]

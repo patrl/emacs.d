@@ -1,3 +1,6 @@
+;;; init.el --- Personal configuration file -*- lexical-binding: t; no-byte-compile: t; -*-
+;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
+
 (setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
 
 (defvar bootstrap-version)
