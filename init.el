@@ -410,8 +410,6 @@
   (auctex-latexmk-setup)
   )
 
-;; (use-package cdlatex)
-
 (use-package pdf-tools
   :config
   (pdf-tools-install)
@@ -527,32 +525,6 @@
   (add-to-list 'company-backends 'company-bibtex)
   )
 
-;; (use-package bufler
-;;   :general
-;;   (patrl/leader-keys
-;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
-;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
-;;     )
-;;   :config
-;;   (bufler-mode)
-;;   (bufler-tabs-mode))
-
-(use-package magit
-  :general
-  (patrl/leader-keys
-    "g" '(:ignore t :wk "git")
-    "gg" '(magit-status :wk "status")
-    )
-  )
-
-(use-package eshell
-  :straight (:type built-in)
-  :general
-  (patrl/leader-keys
-    "oe" '(eshell :wk "eshell")
-    )
-  )
-
 (use-package flymake
   :straight (:type built-in)
   :general
@@ -582,6 +554,22 @@
   (setq ispell-program-name "aspell")
   (setq ispell-silently-savep t)
 )
+
+(use-package magit
+  :general
+  (patrl/leader-keys
+    "g" '(:ignore t :wk "git")
+    "gg" '(magit-status :wk "status")
+    )
+  )
+
+(use-package eshell
+  :straight (:type built-in)
+  :general
+  (patrl/leader-keys
+    "oe" '(eshell :wk "eshell")
+    )
+  )
 
 (use-package lsp-mode
   :hook
@@ -615,6 +603,16 @@
     "sd" '(deadgrep :wk "deadgrep")
     )
   )
+
+;; (use-package bufler
+;;   :general
+;;   (patrl/leader-keys
+;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
+;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
+;;     )
+;;   :config
+;;   (bufler-mode)
+;;   (bufler-tabs-mode))
 
 (use-package yasnippet
   :config
@@ -666,3 +664,5 @@
 (use-package tree-sitter)
 
 (use-package tree-sitter-langs)
+
+;; (use-package cdlatex)

@@ -587,10 +587,6 @@ A teetering stack of plates.
     )
 #+end_src
 
-#+begin_src emacs-lisp :tangle init.el 
-  ;; (use-package cdlatex)
-#+end_src
-
 #+begin_src emacs-lisp :tangle init.el
   (use-package pdf-tools
     :config
@@ -616,9 +612,8 @@ A teetering stack of plates.
 #+end_src
 
 *** Issues
-**** DONE fix citar in org-mode
-**** TODO something is preventing ~prettify-symbols-mode~ from working correctly in any mode, ~org-toggle-pretty-entities~ works fine however.
 **** TODO "LatexMk" is duplicated in ~TeX-command~.
+**** TODO pdf buffer isn't reverted in preview continuously mode.
 
 ** markdown  
 
@@ -712,9 +707,7 @@ A teetering stack of plates.
     (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
-** TODO company
-
-Company is currently using the /orderless/ completion style. I definitely don't want this.
+** company
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package company
@@ -749,45 +742,7 @@ Company is currently using the /orderless/ completion style. I definitely don't 
     (add-to-list 'company-backends 'company-bibtex)
     )
 #+end_src
-
-* TODO try out ~bufler~
-
-#+begin_src emacs-lisp :tangle init.el
-  ;; (use-package bufler
-  ;;   :general
-  ;;   (patrl/leader-keys
-  ;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
-  ;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
-  ;;     )
-  ;;   :config
-  ;;   (bufler-mode)
-  ;;   (bufler-tabs-mode))
-#+end_src
-  
-* TODO git
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package magit
-    :general
-    (patrl/leader-keys
-      "g" '(:ignore t :wk "git")
-      "gg" '(magit-status :wk "status")
-      )
-    )
-#+end_src
-
-* Eshell
-
-#+begin_src emacs-lisp :tangle init.el 
-  (use-package eshell
-    :straight (:type built-in)
-    :general
-    (patrl/leader-keys
-      "oe" '(eshell :wk "eshell")
-      )
-    )
-#+end_src
-
+ 
 * Checkers
 
 - Use ~flymake~ over ~flycheck~.
@@ -834,6 +789,30 @@ Company is currently using the /orderless/ completion style. I definitely don't 
 
 * Tools   
 
+** TODO git
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package magit
+    :general
+    (patrl/leader-keys
+      "g" '(:ignore t :wk "git")
+      "gg" '(magit-status :wk "status")
+      )
+    )
+#+end_src
+
+** Eshell
+
+#+begin_src emacs-lisp :tangle init.el 
+  (use-package eshell
+    :straight (:type built-in)
+    :general
+    (patrl/leader-keys
+      "oe" '(eshell :wk "eshell")
+      )
+    )
+#+end_src
+
 ** TODO LSP
 
 Note I still need to set keybindings
@@ -873,7 +852,7 @@ Essential, since I'm on NixOS.
 #+end_src
 
 * Staging grounds
-
+ 
 ** Deadgrep
 
 #+begin_src emacs-lisp :tangle init.el
@@ -886,6 +865,19 @@ Essential, since I'm on NixOS.
 #+end_src
 
 ** TODO bufler
+
+#+begin_src emacs-lisp :tangle init.el
+  ;; (use-package bufler
+  ;;   :general
+  ;;   (patrl/leader-keys
+  ;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
+  ;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
+  ;;     )
+  ;;   :config
+  ;;   (bufler-mode)
+  ;;   (bufler-tabs-mode))
+#+end_src
+
 ** TODO helpful
 ** TODO ranger
 ** TODO snippets
@@ -949,6 +941,16 @@ Essential, since I'm on NixOS.
   (use-package tree-sitter)
 
   (use-package tree-sitter-langs)
+#+end_src
+
+* Graveyard
+
+Packages i've tried out which, for whatever reason, haven't suited me.
+
+** cdlatex
+
+#+begin_src emacs-lisp :tangle init.el 
+  ;; (use-package cdlatex)
 #+end_src
 
 ;; Local Variables: 
