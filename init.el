@@ -26,6 +26,8 @@
 
   (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
+  (setq indent-tabs-mode nil) ;; tabs are evil
+
   ;; stop emacs from littering
   (setq make-backup-files nil)
   (setq auto-save-default nil)
@@ -34,8 +36,8 @@
   ;; utf-8 everywhere
   (set-charset-priority 'unicode)
   (setq locale-coding-system 'utf-8
-	coding-system-for-read 'utf-8
-	coding-system-for-write 'utf-8)
+        coding-system-for-read 'utf-8
+        coding-system-for-write 'utf-8)
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (set-selection-coding-system 'utf-8)
@@ -87,6 +89,14 @@
     :global-prefix "M-SPC m" ;; access local leader in insert mode
     )
 
+  ;; unbind some useless bindings
+  (general-unbind
+    "C-x C-r" ;; unbind find file read only
+    "C-x C-z" ;; unbind suspend frame
+    "C-x C-d" ;; unbind list directory
+    "<mouse-2>" ;; pasting with mouse wheel click
+    )
+
   (patrl/leader-keys
     "SPC" '(execute-extended-command :wk "execute command")
     "." '(find-file :wk "find file")
@@ -127,6 +137,7 @@
   ;; open bindings
   (patrl/leader-keys
     "o" '(:ignore t :wk "open")
+    "os" '(speedbar t :wk "speedbar")
     )
 
   ;; search bindings
@@ -280,7 +291,6 @@
 
 ;; FIXME using the latest version of org results in an error
 (use-package org
-  :straight (:type built-in)
   :init
   (setq org-src-fontify-natively t) ;; fontify code in src blocks
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -298,13 +308,18 @@
     "i" '(:ignore t :wk "insert")
     "ih" '(org-insert-heading :wk "insert heading")
     "is" '(org-insert-subheading :wk "insert heading")
+    :keymaps 'org-agenda-mode-map
+    "j" '(org-agenda-next-line)
+    "h" '(org-agenda-previous-line)
     )
   :hook
   (org-mode . visual-line-mode)
   (org-mode . org-indent-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-  ;; :config
-  ;; (add-to-list 'org-modules 'org-tempo t) ;; enables auto-expansion for templates
+  :config
+  ;; hack until straight.el builds org-mode properly
+  (defun org-git-version () "9.5")
+  (defun org-release () "9.5")
   )
 
 (use-package org-cliplink
@@ -352,27 +367,21 @@
 (use-package nix-mode
   :mode "\\.nix\\'")
 
-(use-package auctex-latexmk
-  :after latex
+(use-package auctex
+  :no-require t
+  :mode ("\\.tex\\'" . LaTeX-mode)
   :init
-  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-  :config
-  (auctex-latexmk-setup)
-  )
+  (setq TeX-parse-self t ; parse on load
+      TeX-auto-save t  ; parse on save
+      TeX-source-correlate-mode t
+      TeX-source-correlate-method 'synctex
+      TeX-source-correlate-start-server nil
+      TeX-electric-sub-and-superscript t
+      TeX-save-query nil) 
+      )
 
-(use-package latex
-  :straight auctex ;; if this isn't set to true, error!
-  :init
-  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer) ;; this currently doesn't work with preview continuously
-  (add-hook 'LaTeX-mode-hook #'outline-minor-mode) ;; automatically enables outline mode
-  (add-hook 'LaTeX-mode-hook #'prettify-symbols-mode) ;; prettify math
-  (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex) ;; cdlatex
-  (add-hook 'LaTeX-mode-hook #'TeX-source-correlate-mode) ;; necessary for synctex
-  (setq TeX-source-correlate-start-server nil) ;; don't start server
-  (setq TeX-parse-self t) ; parse on load
-  (setq TeX-auto-save t)  ; parse on save
-  (setq TeX-save-query nil)  ; don't ask, just save
-  (setq TeX-command-default "LatexMk") ;; latexmk by default
+(use-package tex
+  :straight auctex
   :general
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
@@ -382,18 +391,34 @@
     "is" '(LaTeX-section :wk "insert section header")
     "p" '(:ignore t :wk "preview")
     "ps" '(preview-section :wk "preview section")
+    "f" '(TeX-font :wk "font")
     )
-  :mode ("\\.tex\\'" . TeX-latex-mode)
   :config
+  (add-hook 'TeX-mode-hook #'visual-line-mode)
+  (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
+  (add-hook 'TeX-after-compilation-finished-functions
+              #'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+  (add-hook 'TeX-mode-hook #'outline-minor-mode)
   )
 
-(use-package cdlatex)
+(use-package auctex-latexmk
+  :after latex 
+  :init
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+  :config
+  (auctex-latexmk-setup)
+  )
+
+;; (use-package cdlatex)
 
 (use-package pdf-tools
   :config
   (pdf-tools-install)
   )
+
+(use-package evil-tex
+  :hook (LaTeX-mode . evil-tex-mode))
 
 (use-package citar
   :general
@@ -535,9 +560,9 @@
     :keymaps 'flymake-mode-map
     "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
     )
-  :hook
-  (emacs-lisp-mode . flymake-mode)
-  (LaTeX-mode . flymake-mode)
+  ;; :hook
+  ;; (emacs-lisp-mode . flymake-mode)
+  ;; (LaTeX-mode . flymake-mode)
   :custom
   (flymake-no-changes-timeout nil)
   :general
@@ -591,23 +616,52 @@
     )
   )
 
-;;   (use-package aas
-;;     :hook (LaTeX-mode . aas-activate-for-major-mode)
-;;     :hook (org-mode . aas-activate-for-major-mode)
-;;     :config
-;;     (aas-set-snippets 'latex-mode
-;;       ;; set condition!
-;;       :cond #'texmathp ; expand only while in math
-;;       ";l" "λ"
-;;       ";a" "α"
-;;       ";b" "β"
-;;       "\\rr" "→"
-;;       "\\lr" "←"
-;;       "\\all" "∀"
-;;       "\\ex" "∃"
-;;     ;; disable snippets by redefining them with a nil expansion
-;;   )
-;; )
+(use-package yasnippet
+  :config
+  (yas-reload-all)
+  (add-hook 'LaTeX-mode-hook #'yas-minor-mode)
+)
+
+(use-package aas
+  :hook (LaTeX-mode . aas-activate-for-major-mode)
+  :hook (org-mode . aas-activate-for-major-mode)
+  )
+
+(use-package laas
+  :hook (LaTeX-mode . laas-mode)
+  :config
+  (aas-set-snippets 'laas-mode
+    "mk" (lambda () (interactive)
+            (yas-expand-snippet "\\\\($0\\\\)"))
+    "dm" (lambda () (interactive)
+            (yas-expand-snippet "\\[\n$0\n\\]"))
+    "ii" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{itemize}\n\\item $0\n\\end{itemize}"))
+    "iee" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{enumerate}\n\\item $0\n\\end{enumerate}"))
+    "exex" (lambda () (interactive)
+            (yas-expand-snippet "\\ex\n$0\n\\xe"))
+    "forfor" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+    :cond #'texmathp ; expand only while in math 
+    "Olon" "O(n \\log n)"
+    ;; bind to functions!
+    "sum" (lambda () (interactive)
+            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+    "Span" (lambda () (interactive)
+             (yas-expand-snippet "\\Span($1)$0"))
+    "lam" (lambda () (interactive)
+            (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+    "set" (lambda () (interactive)
+              (yas-expand-snippet "\\set{ $1 | $2} $0"))
+    "ml" (lambda () (interactive)
+              (yas-expand-snippet "\\text{$1} $0"))
+    "ev" (lambda () (interactive)
+                (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+    ;; add accent snippets
+    :cond #'laas-object-on-left-condition
+    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
+    ))
 
 (use-package tree-sitter)
 

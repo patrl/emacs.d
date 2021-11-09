@@ -7,7 +7,7 @@
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
 - [[https://github.com/pniedzielski/emacs.d/][GitHub - pniedzielski/emacs.d: My Emacs Configuration, finally git-ified]] 
-- [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]] 
+- [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]]   
 
 * Early init file
 
@@ -84,6 +84,8 @@ Some rules/conventions:
 
     (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
+    (setq indent-tabs-mode nil) ;; tabs are evil
+
     ;; stop emacs from littering
     (setq make-backup-files nil)
     (setq auto-save-default nil)
@@ -92,8 +94,8 @@ Some rules/conventions:
     ;; utf-8 everywhere
     (set-charset-priority 'unicode)
     (setq locale-coding-system 'utf-8
-	  coding-system-for-read 'utf-8
-	  coding-system-for-write 'utf-8)
+          coding-system-for-read 'utf-8
+          coding-system-for-write 'utf-8)
     (set-terminal-coding-system 'utf-8)
     (set-keyboard-coding-system 'utf-8)
     (set-selection-coding-system 'utf-8)
@@ -156,6 +158,14 @@ Some rules/conventions:
         :global-prefix "M-SPC m" ;; access local leader in insert mode
         )
 
+      ;; unbind some useless bindings
+      (general-unbind
+        "C-x C-r" ;; unbind find file read only
+        "C-x C-z" ;; unbind suspend frame
+        "C-x C-d" ;; unbind list directory
+        "<mouse-2>" ;; pasting with mouse wheel click
+        )
+
       (patrl/leader-keys
         "SPC" '(execute-extended-command :wk "execute command")
         "." '(find-file :wk "find file")
@@ -196,6 +206,7 @@ Some rules/conventions:
       ;; open bindings
       (patrl/leader-keys
         "o" '(:ignore t :wk "open")
+        "os" '(speedbar t :wk "speedbar")
         )
 
       ;; search bindings
@@ -421,7 +432,6 @@ Resources:
   #+begin_src emacs-lisp :tangle init.el
     ;; FIXME using the latest version of org results in an error
     (use-package org
-      :straight (:type built-in)
       :init
       (setq org-src-fontify-natively t) ;; fontify code in src blocks
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -429,23 +439,28 @@ Resources:
       (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
       :general
       (patrl/local-leader-keys
-	:keymaps 'org-mode-map
-	"l" '(:ignore t :wk "link")
-	"ll" '(org-insert-link t :wk "link")
-	"s" '(consult-org-heading :wk "consult heading")
-	"b" '(:keymap org-babel-map :wk "babel")
-	"t" '(org-insert-structure-template :wk "template")
-	"e" '(org-edit-special :wk "edit")
-	"i" '(:ignore t :wk "insert")
-	"ih" '(org-insert-heading :wk "insert heading")
-	"is" '(org-insert-subheading :wk "insert heading")
-	)
+        :keymaps 'org-mode-map
+        "l" '(:ignore t :wk "link")
+        "ll" '(org-insert-link t :wk "link")
+        "s" '(consult-org-heading :wk "consult heading")
+        "b" '(:keymap org-babel-map :wk "babel")
+        "t" '(org-insert-structure-template :wk "template")
+        "e" '(org-edit-special :wk "edit")
+        "i" '(:ignore t :wk "insert")
+        "ih" '(org-insert-heading :wk "insert heading")
+        "is" '(org-insert-subheading :wk "insert heading")
+        :keymaps 'org-agenda-mode-map
+        "j" '(org-agenda-next-line)
+        "h" '(org-agenda-previous-line)
+        )
       :hook
       (org-mode . visual-line-mode)
       (org-mode . org-indent-mode)
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-      ;; :config
-      ;; (add-to-list 'org-modules 'org-tempo t) ;; enables auto-expansion for templates
+      :config
+      ;; hack until straight.el builds org-mode properly
+      (defun org-git-version () "9.5")
+      (defun org-release () "9.5")
       )
   #+end_src
    
@@ -520,32 +535,26 @@ N.b. this currently doesn't play nicely with most fonts.
     :mode "\\.nix\\'")
 #+end_src
    
-** TODO latex
+** latex
+
+A teetering stack of plates.
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package auctex-latexmk
-    :after latex
+  (use-package auctex
+    :no-require t
+    :mode ("\\.tex\\'" . LaTeX-mode)
     :init
-    (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-    :config
-    (auctex-latexmk-setup)
-    )
-#+end_src
-   
-#+begin_src emacs-lisp :tangle init.el
-  (use-package latex
-    :straight auctex ;; if this isn't set to true, error!
-    :init
-    (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer) ;; this currently doesn't work with preview continuously
-    (add-hook 'LaTeX-mode-hook #'outline-minor-mode) ;; automatically enables outline mode
-    (add-hook 'LaTeX-mode-hook #'prettify-symbols-mode) ;; prettify math
-    (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex) ;; cdlatex
-    (add-hook 'LaTeX-mode-hook #'TeX-source-correlate-mode) ;; necessary for synctex
-    (setq TeX-source-correlate-start-server nil) ;; don't start server
-    (setq TeX-parse-self t) ; parse on load
-    (setq TeX-auto-save t)  ; parse on save
-    (setq TeX-save-query nil)  ; don't ask, just save
-    (setq TeX-command-default "LatexMk") ;; latexmk by default
+    (setq TeX-parse-self t ; parse on load
+        TeX-auto-save t  ; parse on save
+        TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex
+        TeX-source-correlate-start-server nil
+        TeX-electric-sub-and-superscript t
+        TeX-save-query nil) 
+        )
+
+  (use-package tex
+    :straight auctex
     :general
     (patrl/local-leader-keys
       :keymaps 'LaTeX-mode-map
@@ -555,15 +564,31 @@ N.b. this currently doesn't play nicely with most fonts.
       "is" '(LaTeX-section :wk "insert section header")
       "p" '(:ignore t :wk "preview")
       "ps" '(preview-section :wk "preview section")
+      "f" '(TeX-font :wk "font")
       )
-    :mode ("\\.tex\\'" . TeX-latex-mode)
     :config
+    (add-hook 'TeX-mode-hook #'visual-line-mode)
+    (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
+    (add-hook 'TeX-after-compilation-finished-functions
+                #'TeX-revert-document-buffer)
     (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+    (add-hook 'TeX-mode-hook #'outline-minor-mode)
+    )
+
+#+end_src
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package auctex-latexmk
+    :after latex 
+    :init
+    (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+    :config
+    (auctex-latexmk-setup)
     )
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el 
-  (use-package cdlatex)
+  ;; (use-package cdlatex)
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
@@ -573,7 +598,10 @@ N.b. this currently doesn't play nicely with most fonts.
     )
 #+end_src
 
-N.b. this currently doesn't work in org-mode.
+#+begin_src emacs-lisp :tangle init.el
+  (use-package evil-tex
+    :hook (LaTeX-mode . evil-tex-mode))
+#+end_src
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citar
@@ -586,6 +614,11 @@ N.b. this currently doesn't work in org-mode.
     (citar-bibliography '("~/repos/bibliography/master.bib"))
     )
 #+end_src
+
+*** Issues
+**** DONE fix citar in org-mode
+**** TODO something is preventing ~prettify-symbols-mode~ from working correctly in any mode, ~org-toggle-pretty-entities~ works fine however.
+**** TODO "LatexMk" is duplicated in ~TeX-command~.
 
 ** markdown  
 
@@ -769,9 +802,9 @@ Company is currently using the /orderless/ completion style. I definitely don't 
       :keymaps 'flymake-mode-map
       "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
       )
-    :hook
-    (emacs-lisp-mode . flymake-mode)
-    (LaTeX-mode . flymake-mode)
+    ;; :hook
+    ;; (emacs-lisp-mode . flymake-mode)
+    ;; (LaTeX-mode . flymake-mode)
     :custom
     (flymake-no-changes-timeout nil)
     :general
@@ -855,26 +888,59 @@ Essential, since I'm on NixOS.
 ** TODO bufler
 ** TODO helpful
 ** TODO ranger
-** TODO auto-activating-snippets
+** TODO snippets
+
+#+begin_src emacs-lisp :tangle init.el 
+  (use-package yasnippet
+    :config
+    (yas-reload-all)
+    (add-hook 'LaTeX-mode-hook #'yas-minor-mode)
+  )
+#+end_src
 
 #+begin_src emacs-lisp :tangle init.el
-  ;;   (use-package aas
-  ;;     :hook (LaTeX-mode . aas-activate-for-major-mode)
-  ;;     :hook (org-mode . aas-activate-for-major-mode)
-  ;;     :config
-  ;;     (aas-set-snippets 'latex-mode
-  ;;       ;; set condition!
-  ;;       :cond #'texmathp ; expand only while in math
-  ;;       ";l" "λ"
-  ;;       ";a" "α"
-  ;;       ";b" "β"
-  ;;       "\\rr" "→"
-  ;;       "\\lr" "←"
-  ;;       "\\all" "∀"
-  ;;       "\\ex" "∃"
-  ;;     ;; disable snippets by redefining them with a nil expansion
-  ;;   )
-  ;; )
+  (use-package aas
+    :hook (LaTeX-mode . aas-activate-for-major-mode)
+    :hook (org-mode . aas-activate-for-major-mode)
+    )
+#+end_src
+
+#+begin_src emacs-lisp :tangle init.el
+    (use-package laas
+      :hook (LaTeX-mode . laas-mode)
+      :config
+      (aas-set-snippets 'laas-mode
+        "mk" (lambda () (interactive)
+                (yas-expand-snippet "\\\\($0\\\\)"))
+        "dm" (lambda () (interactive)
+                (yas-expand-snippet "\\[\n$0\n\\]"))
+        "ii" (lambda () (interactive)
+                (yas-expand-snippet "\\begin{itemize}\n\\item $0\n\\end{itemize}"))
+        "iee" (lambda () (interactive)
+                (yas-expand-snippet "\\begin{enumerate}\n\\item $0\n\\end{enumerate}"))
+        "exex" (lambda () (interactive)
+                (yas-expand-snippet "\\ex\n$0\n\\xe"))
+        "forfor" (lambda () (interactive)
+                (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+        :cond #'texmathp ; expand only while in math 
+        "Olon" "O(n \\log n)"
+        ;; bind to functions!
+        "sum" (lambda () (interactive)
+                (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+        "Span" (lambda () (interactive)
+                 (yas-expand-snippet "\\Span($1)$0"))
+        "lam" (lambda () (interactive)
+                (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+        "set" (lambda () (interactive)
+                  (yas-expand-snippet "\\set{ $1 | $2} $0"))
+        "ml" (lambda () (interactive)
+                  (yas-expand-snippet "\\text{$1} $0"))
+        "ev" (lambda () (interactive)
+                    (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+        ;; add accent snippets
+        :cond #'laas-object-on-left-condition
+        "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
+        ))
 #+end_src
 
 ** Tree-sitter
