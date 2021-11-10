@@ -20,21 +20,18 @@
 
 (use-package emacs
   :init
-  ;; my details
-  (setq user-full-name "Patrick D. Elliott") 
+  (setq user-full-name "Patrick D. Elliott") ;; my details
   (setq user-mail-address "patrick.d.elliott@gmail.com")
 
   (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
   (setq indent-tabs-mode nil) ;; tabs are evil
 
-  ;; stop emacs from littering
-  (setq make-backup-files nil)
+  (setq make-backup-files nil) ;; no littering
   (setq auto-save-default nil)
   (setq create-lockfiles nil)
 
-  ;; utf-8 everywhere
-  (set-charset-priority 'unicode)
+  (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
   (setq locale-coding-system 'utf-8
         coding-system-for-read 'utf-8
         coding-system-for-write 'utf-8)
@@ -44,8 +41,7 @@
   (prefer-coding-system 'utf-8)
   (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 
-  ;; escape everywhere
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; escape quits everything
 
   ;; Don't persist a custom file
   (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
@@ -60,6 +56,9 @@
   (setq load-prefer-newer t)
 
   (show-paren-mode t)
+
+  ;; Hide commands in M-x which don't work in the current mode
+  (setq read-extended-command-predicate #'command-completion-default-include-p)
   )
 
 (use-package electric
@@ -95,6 +94,8 @@
     "C-x C-z" ;; unbind suspend frame
     "C-x C-d" ;; unbind list directory
     "<mouse-2>" ;; pasting with mouse wheel click
+    :states '(insert)
+    "C-k" ;; this was interfering with corfu completion
     )
 
   (patrl/leader-keys
@@ -222,8 +223,10 @@
 
 (use-package emacs
   :init
-  (set-face-attribute 'default nil :font "Cascadia Code-12")
-  (add-to-list 'default-frame-alist '(font . "Cascadia Code-12"))
+  (set-face-font 'default "Operator Mono Medium-12")
+  (set-face-font 'variable-pitch "iA Writer Duospace")
+  (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+  (add-to-list 'default-frame-alist '(font . "Operator Mono Medium-12"))
   )
 
 (use-package solaire-mode
@@ -291,6 +294,8 @@
 
 ;; FIXME using the latest version of org results in an error
 (use-package org
+  ;; :hook
+  ;; (org-mode . variable-pitch-mode)
   :init
   (setq org-src-fontify-natively t) ;; fontify code in src blocks
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -386,11 +391,11 @@
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
     "i" '(:ignore t :wk "insert")
-    "ie" '(LaTeX-environment :wk "insert environment")
     "im" '(LaTeX-macro :wk "insert macro")
     "is" '(LaTeX-section :wk "insert section header")
     "p" '(:ignore t :wk "preview")
     "ps" '(preview-section :wk "preview section")
+    "pp" '(preview-at-point :wk "preview section")
     "f" '(TeX-font :wk "font")
     )
   :config
@@ -435,6 +440,10 @@
 	 ("\\.md\\'" . markdown-mode)
 	 ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "pandoc"))
+
+(use-package pandoc-mode
+  :after markdown-mode
+  :hook (markdown-mode . pandoc-mode))
 
 (use-package vertico
   :init (vertico-mode)
@@ -498,32 +507,32 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-(use-package company
-  :custom
-  (company-idle-delay nil) ;; turn off auto-completion
-  :general
-  (:keymap 'company-mode-map
-	   "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-  :hook
-  (prog-mode . company-mode)
-  (LaTeX-mode . company-mode)
-  :config
-  ;; the following stops company from using the orderless completion style
-  ;; makes company much more useful
-  (define-advice company-capf
-      (:around (orig-fun &rest args) set-completion-styles)
-    (let ((completion-styles '(basic partial-completion)))
-      (apply orig-fun args)))
-  )
+;; (use-package company
+;;   :custom
+;;   (company-idle-delay nil) ;; turn off auto-completion
+;;   :general
+;;   (:keymap 'company-mode-map
+;; 	   "C-SPC" 'company-complete) ;; keybinding to trigger company completion
+;;   :hook
+;;   (prog-mode . company-mode)
+;;   (LaTeX-mode . company-mode)
+;;   :config
+;;   ;; the following stops company from using the orderless completion style
+;;   ;; makes company much more useful
+;;   (define-advice company-capf
+;;       (:around (orig-fun &rest args) set-completion-styles)
+;;     (let ((completion-styles '(basic partial-completion)))
+;;       (apply orig-fun args)))
+;;   )
 
-(use-package company-bibtex
-  :init
-  (setq company-bibtex-bibliography
-	'("/home/patrl/repos/bibliography/master.bib"))
-  :after company
-  :config
-  (add-to-list 'company-backends 'company-bibtex)
-  )
+;; (use-package company-bibtex
+;;   :init
+;;   (setq company-bibtex-bibliography
+;; 	'("/home/patrl/repos/bibliography/master.bib"))
+;;   :after company
+;;   :config
+;;   (add-to-list 'company-backends 'company-bibtex)
+;;   )
 
 (use-package flymake
   :straight (:type built-in)
@@ -572,6 +581,8 @@
   )
 
 (use-package lsp-mode
+  :custom
+  (lsp-completion-provider :none) ;; probably want to delete this if I reenable company
   :hook
   (lsp-mode . lsp-enable-which-key-integration)
   :commands
@@ -596,6 +607,21 @@
 (use-package direnv
   :config
   (direnv-mode))
+
+(use-package corfu
+  :custom
+  (corfu-cycle t) ;; allows cycling through candidates
+  (corfu-auto nil) ;; disables auto-completion
+  (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
+  :bind
+  :general
+  (:keymaps 'corfu-map
+            "C-j" 'corfu-next
+            "C-k" 'corfu-previous
+            )
+  :init
+  (corfu-global-mode)
+  )
 
 (use-package deadgrep
   :general
@@ -629,9 +655,10 @@
   :hook (LaTeX-mode . laas-mode)
   :config
   (aas-set-snippets 'laas-mode
-    "mk" (lambda () (interactive)
+    ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+    "mx" (lambda () (interactive)
             (yas-expand-snippet "\\\\($0\\\\)"))
-    "dm" (lambda () (interactive)
+    "mq" (lambda () (interactive)
             (yas-expand-snippet "\\[\n$0\n\\]"))
     "ii" (lambda () (interactive)
             (yas-expand-snippet "\\begin{itemize}\n\\item $0\n\\end{itemize}"))

@@ -8,6 +8,7 @@
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
 - [[https://github.com/pniedzielski/emacs.d/][GitHub - pniedzielski/emacs.d: My Emacs Configuration, finally git-ified]] 
 - [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]]   
+- [[https://github.com/abo-abo/oremacs][GitHub - abo-abo/oremacs: My Emacs config]]
 
 * Early init file
 
@@ -19,12 +20,13 @@ Since we're using ~straight.el~ as our package manager, we add the following to 
   (setq package-enable-at-startup nil)
 #+end_src
 
-Disable GUI elements.
+Disable GUI elements before we have a chance to peek.
 
 #+begin_src emacs-lisp :tangle early-init.el
   (menu-bar-mode -1) ;; disables menubar
   (tool-bar-mode -1) ;; disables toolbar
   (scroll-bar-mode -1) ;; disables scrollbar
+
   (setq inhibit-splash-screen t) ;; no thanks
   (setq use-file-dialog nil) ;; don't use system file dialog
 
@@ -48,7 +50,7 @@ Some rules/conventions:
 
 - When packages don't require installation, use ~:straight (:type built-in)~.
 - Prefer multiple ~setq~ expressions to one.
-- Set customizable variables via ~:custom~.
+- Prefer ~:init~ to ~:custom~.
 
 *** Bootstrap ~straight.el~
 
@@ -76,49 +78,48 @@ Some rules/conventions:
 ** Defaults
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package emacs
-    :init
-    ;; my details
-    (setq user-full-name "Patrick D. Elliott") 
-    (setq user-mail-address "patrick.d.elliott@gmail.com")
+    (use-package emacs
+      :init
+      (setq user-full-name "Patrick D. Elliott") ;; my details
+      (setq user-mail-address "patrick.d.elliott@gmail.com")
 
-    (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
+      (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
-    (setq indent-tabs-mode nil) ;; tabs are evil
+      (setq indent-tabs-mode nil) ;; tabs are evil
 
-    ;; stop emacs from littering
-    (setq make-backup-files nil)
-    (setq auto-save-default nil)
-    (setq create-lockfiles nil)
+      (setq make-backup-files nil) ;; no littering
+      (setq auto-save-default nil)
+      (setq create-lockfiles nil)
 
-    ;; utf-8 everywhere
-    (set-charset-priority 'unicode)
-    (setq locale-coding-system 'utf-8
-          coding-system-for-read 'utf-8
-          coding-system-for-write 'utf-8)
-    (set-terminal-coding-system 'utf-8)
-    (set-keyboard-coding-system 'utf-8)
-    (set-selection-coding-system 'utf-8)
-    (prefer-coding-system 'utf-8)
-    (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+      (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
+      (setq locale-coding-system 'utf-8
+            coding-system-for-read 'utf-8
+            coding-system-for-write 'utf-8)
+      (set-terminal-coding-system 'utf-8)
+      (set-keyboard-coding-system 'utf-8)
+      (set-selection-coding-system 'utf-8)
+      (prefer-coding-system 'utf-8)
+      (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 
-    ;; escape everywhere
-    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+      (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; escape quits everything
 
-    ;; Don't persist a custom file
-    (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
-    (setq custom-safe-themes t)            ; mark all themes as safe, since we can't persist now
-    (setq enable-local-variables :all)     ; fix =defvar= warnings
+      ;; Don't persist a custom file
+      (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
+      (setq custom-safe-themes t)            ; mark all themes as safe, since we can't persist now
+      (setq enable-local-variables :all)     ; fix =defvar= warnings
 
-    (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
+      (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
 
-    ;; less noise when compiling elisp
-    (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
-    (setq native-comp-async-report-warnings-errors nil)
-    (setq load-prefer-newer t)
+      ;; less noise when compiling elisp
+      (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+      (setq native-comp-async-report-warnings-errors nil)
+      (setq load-prefer-newer t)
 
-    (show-paren-mode t)
-    )
+      (show-paren-mode t)
+  
+      ;; Hide commands in M-x which don't work in the current mode
+      (setq read-extended-command-predicate #'command-completion-default-include-p)
+      )
 #+end_src
 
  
@@ -135,7 +136,9 @@ Some rules/conventions:
 
 * Keybindings
 
-** General
+** TODO General
+
+Maybe bind ~C-g~ to exit normal mode?
 
   #+begin_src emacs-lisp :tangle init.el
     (use-package general
@@ -164,6 +167,8 @@ Some rules/conventions:
         "C-x C-z" ;; unbind suspend frame
         "C-x C-d" ;; unbind list directory
         "<mouse-2>" ;; pasting with mouse wheel click
+        :states '(insert)
+        "C-k" ;; this was interfering with corfu completion
         )
 
       (patrl/leader-keys
@@ -320,15 +325,20 @@ Minimal mode line.
   
 ** Fonts
 
+
 #+begin_src emacs-lisp :tangle init.el
   (use-package emacs
     :init
-    (set-face-attribute 'default nil :font "Cascadia Code-12")
-    (add-to-list 'default-frame-alist '(font . "Cascadia Code-12"))
+    (set-face-font 'default "Operator Mono Medium-12")
+    (set-face-font 'variable-pitch "iA Writer Duospace")
+    (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+    (add-to-list 'default-frame-alist '(font . "Operator Mono Medium-12"))
     )
 #+end_src
 
 N.b. that this interacts with ~org-superstars-mode~.
+
+*** Get variable pitch mode working properly with org-mode and emacs daemon. 
 
 ** Themes
 
@@ -432,6 +442,8 @@ Resources:
   #+begin_src emacs-lisp :tangle init.el
     ;; FIXME using the latest version of org results in an error
     (use-package org
+      ;; :hook
+      ;; (org-mode . variable-pitch-mode)
       :init
       (setq org-src-fontify-natively t) ;; fontify code in src blocks
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -559,11 +571,11 @@ A teetering stack of plates.
     (patrl/local-leader-keys
       :keymaps 'LaTeX-mode-map
       "i" '(:ignore t :wk "insert")
-      "ie" '(LaTeX-environment :wk "insert environment")
       "im" '(LaTeX-macro :wk "insert macro")
       "is" '(LaTeX-section :wk "insert section header")
       "p" '(:ignore t :wk "preview")
       "ps" '(preview-section :wk "preview section")
+      "pp" '(preview-at-point :wk "preview section")
       "f" '(TeX-font :wk "font")
       )
     :config
@@ -628,6 +640,12 @@ A teetering stack of plates.
 #+end_src
    
 *** TODO pandoc mode
+
+#+begin_src emacs-lisp :tangle init.el 
+  (use-package pandoc-mode
+    :after markdown-mode
+    :hook (markdown-mode . pandoc-mode))
+#+end_src
 
 * Completion
 
@@ -707,40 +725,40 @@ A teetering stack of plates.
     (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
-** company
+** TODO company
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package company
-    :custom
-    (company-idle-delay nil) ;; turn off auto-completion
-    :general
-    (:keymap 'company-mode-map
-	     "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-    :hook
-    (prog-mode . company-mode)
-    (LaTeX-mode . company-mode)
-    :config
-    ;; the following stops company from using the orderless completion style
-    ;; makes company much more useful
-    (define-advice company-capf
-	(:around (orig-fun &rest args) set-completion-styles)
-      (let ((completion-styles '(basic partial-completion)))
-	(apply orig-fun args)))
-    )
+  ;; (use-package company
+  ;;   :custom
+  ;;   (company-idle-delay nil) ;; turn off auto-completion
+  ;;   :general
+  ;;   (:keymap 'company-mode-map
+  ;; 	   "C-SPC" 'company-complete) ;; keybinding to trigger company completion
+  ;;   :hook
+  ;;   (prog-mode . company-mode)
+  ;;   (LaTeX-mode . company-mode)
+  ;;   :config
+  ;;   ;; the following stops company from using the orderless completion style
+  ;;   ;; makes company much more useful
+  ;;   (define-advice company-capf
+  ;;       (:around (orig-fun &rest args) set-completion-styles)
+  ;;     (let ((completion-styles '(basic partial-completion)))
+  ;;       (apply orig-fun args)))
+  ;;   )
 #+end_src 
 
 #+begin_src emacs-lisp
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package company-bibtex
-    :init
-    (setq company-bibtex-bibliography
-	  '("/home/patrl/repos/bibliography/master.bib"))
-    :after company
-    :config
-    (add-to-list 'company-backends 'company-bibtex)
-    )
+  ;; (use-package company-bibtex
+  ;;   :init
+  ;;   (setq company-bibtex-bibliography
+  ;; 	'("/home/patrl/repos/bibliography/master.bib"))
+  ;;   :after company
+  ;;   :config
+  ;;   (add-to-list 'company-backends 'company-bibtex)
+  ;;   )
 #+end_src
  
 * Checkers
@@ -819,6 +837,8 @@ Note I still need to set keybindings
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package lsp-mode
+    :custom
+    (lsp-completion-provider :none) ;; probably want to delete this if I reenable company
     :hook
     (lsp-mode . lsp-enable-which-key-integration)
     :commands
@@ -852,6 +872,31 @@ Essential, since I'm on NixOS.
 #+end_src
 
 * Staging grounds
+
+** TODO Replace ~company~ with ~corfu~
+
+Not sure if this is such a good idea...
+
+A minimal ui for ~completion-in-region~.
+
+#+begin_src emacs-lisp :tangle init.el 
+  (use-package corfu
+    :custom
+    (corfu-cycle t) ;; allows cycling through candidates
+    (corfu-auto nil) ;; disables auto-completion
+    (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
+    :bind
+    :general
+    (:keymaps 'corfu-map
+              "C-j" 'corfu-next
+              "C-k" 'corfu-previous
+              )
+    :init
+    (corfu-global-mode)
+    )
+#+end_src
+
+*** TODO this isn't working so well with lsp-mode
  
 ** Deadgrep
 
@@ -898,41 +943,42 @@ Essential, since I'm on NixOS.
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package laas
-      :hook (LaTeX-mode . laas-mode)
-      :config
-      (aas-set-snippets 'laas-mode
-        "mk" (lambda () (interactive)
-                (yas-expand-snippet "\\\\($0\\\\)"))
-        "dm" (lambda () (interactive)
-                (yas-expand-snippet "\\[\n$0\n\\]"))
-        "ii" (lambda () (interactive)
-                (yas-expand-snippet "\\begin{itemize}\n\\item $0\n\\end{itemize}"))
-        "iee" (lambda () (interactive)
-                (yas-expand-snippet "\\begin{enumerate}\n\\item $0\n\\end{enumerate}"))
-        "exex" (lambda () (interactive)
-                (yas-expand-snippet "\\ex\n$0\n\\xe"))
-        "forfor" (lambda () (interactive)
-                (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
-        :cond #'texmathp ; expand only while in math 
-        "Olon" "O(n \\log n)"
-        ;; bind to functions!
-        "sum" (lambda () (interactive)
-                (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-        "Span" (lambda () (interactive)
-                 (yas-expand-snippet "\\Span($1)$0"))
-        "lam" (lambda () (interactive)
-                (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
-        "set" (lambda () (interactive)
-                  (yas-expand-snippet "\\set{ $1 | $2} $0"))
-        "ml" (lambda () (interactive)
-                  (yas-expand-snippet "\\text{$1} $0"))
-        "ev" (lambda () (interactive)
-                    (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
-        ;; add accent snippets
-        :cond #'laas-object-on-left-condition
-        "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
-        ))
+  (use-package laas
+    :hook (LaTeX-mode . laas-mode)
+    :config
+    (aas-set-snippets 'laas-mode
+      ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+      "mx" (lambda () (interactive)
+              (yas-expand-snippet "\\\\($0\\\\)"))
+      "mq" (lambda () (interactive)
+              (yas-expand-snippet "\\[\n$0\n\\]"))
+      "ii" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{itemize}\n\\item $0\n\\end{itemize}"))
+      "iee" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{enumerate}\n\\item $0\n\\end{enumerate}"))
+      "exex" (lambda () (interactive)
+              (yas-expand-snippet "\\ex\n$0\n\\xe"))
+      "forfor" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+      :cond #'texmathp ; expand only while in math 
+      "Olon" "O(n \\log n)"
+      ;; bind to functions!
+      "sum" (lambda () (interactive)
+              (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+      "Span" (lambda () (interactive)
+               (yas-expand-snippet "\\Span($1)$0"))
+      "lam" (lambda () (interactive)
+              (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+      "set" (lambda () (interactive)
+                (yas-expand-snippet "\\set{ $1 | $2} $0"))
+      "ml" (lambda () (interactive)
+                (yas-expand-snippet "\\text{$1} $0"))
+      "ev" (lambda () (interactive)
+                  (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+      ;; add accent snippets
+      :cond #'laas-object-on-left-condition
+      "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
+      ))
 #+end_src
 
 ** Tree-sitter
@@ -942,6 +988,8 @@ Essential, since I'm on NixOS.
 
   (use-package tree-sitter-langs)
 #+end_src
+
+** TODO jupyter
 
 * Graveyard
 
