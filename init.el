@@ -507,23 +507,23 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-;; (use-package company
-;;   :custom
-;;   (company-idle-delay nil) ;; turn off auto-completion
-;;   :general
-;;   (:keymap 'company-mode-map
-;; 	   "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-;;   :hook
-;;   (prog-mode . company-mode)
-;;   (LaTeX-mode . company-mode)
-;;   :config
-;;   ;; the following stops company from using the orderless completion style
-;;   ;; makes company much more useful
-;;   (define-advice company-capf
-;;       (:around (orig-fun &rest args) set-completion-styles)
-;;     (let ((completion-styles '(basic partial-completion)))
-;;       (apply orig-fun args)))
-;;   )
+(use-package company
+  :custom
+  (company-idle-delay nil) ;; turn off auto-completion
+  :general
+  (:keymap 'company-mode-map
+           "C-SPC" 'company-complete) ;; keybinding to trigger company completion
+  :hook
+  (prog-mode . company-mode)
+  (LaTeX-mode . company-mode)
+  :config
+  ;; the following stops company from using the orderless completion style
+  ;; makes company much more useful
+  (define-advice company-capf
+      (:around (orig-fun &rest args) set-completion-styles)
+    (let ((completion-styles '(basic partial-completion)))
+      (apply orig-fun args)))
+  )
 
 ;; (use-package company-bibtex
 ;;   :init
@@ -608,20 +608,20 @@
   :config
   (direnv-mode))
 
-(use-package corfu
-  :custom
-  (corfu-cycle t) ;; allows cycling through candidates
-  (corfu-auto nil) ;; disables auto-completion
-  (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
-  :bind
-  :general
-  (:keymaps 'corfu-map
-            "C-j" 'corfu-next
-            "C-k" 'corfu-previous
-            )
-  :init
-  (corfu-global-mode)
-  )
+;; (use-package corfu
+;;   :custom
+;;   (corfu-cycle t) ;; allows cycling through candidates
+;;   (corfu-auto nil) ;; disables auto-completion
+;;   (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
+;;   :bind
+;;   :general
+;;   (:keymaps 'corfu-map
+;;             "C-j" 'corfu-next
+;;             "C-k" 'corfu-previous
+;;             )
+;;   :init
+;;   (corfu-global-mode)
+;;   )
 
 (use-package deadgrep
   :general
