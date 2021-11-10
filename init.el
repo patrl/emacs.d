@@ -88,14 +88,17 @@
     :global-prefix "M-SPC m" ;; access local leader in insert mode
     )
 
+  (general-define-key
+   :states 'insert
+   "C-g" 'evil-normal-state ;; don't stretch for ESC
+   )
+
   ;; unbind some useless bindings
   (general-unbind
     "C-x C-r" ;; unbind find file read only
     "C-x C-z" ;; unbind suspend frame
     "C-x C-d" ;; unbind list directory
     "<mouse-2>" ;; pasting with mouse wheel click
-    :states '(insert)
-    "C-k" ;; this was interfering with corfu completion
     )
 
   (patrl/leader-keys
@@ -223,10 +226,17 @@
 
 (use-package emacs
   :init
-  (set-face-font 'default "Operator Mono Medium-12")
-  (set-face-font 'variable-pitch "iA Writer Duospace")
+  ;; (set-face-font 'default "Operator Mono Medium-12")
+  (set-face-attribute 'default nil
+                      :font "Operator Mono Medium-12")
+  (set-face-attribute 'fixed-pitch nil
+                      :font "Operator Mono Medium-12")
+  ;; (set-face-attribute 'variable-pitch nil
+                    ;; :font "iA Writer Duospace")
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-  (add-to-list 'default-frame-alist '(font . "Operator Mono Medium-12"))
+  ;; (add-to-list 'default-frame-alist '(font . "Operator Mono Medium-12"))
+  (set-face-attribute 'variable-pitch nil
+                      :font "iA Writer Duospace")
   )
 
 (use-package solaire-mode
@@ -294,8 +304,8 @@
 
 ;; FIXME using the latest version of org results in an error
 (use-package org
-  ;; :hook
-  ;; (org-mode . variable-pitch-mode)
+  :hook
+  (org-mode . variable-pitch-mode)
   :init
   (setq org-src-fontify-natively t) ;; fontify code in src blocks
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -507,23 +517,23 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-(use-package company
-  :custom
-  (company-idle-delay nil) ;; turn off auto-completion
-  :general
-  (:keymap 'company-mode-map
-           "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-  :hook
-  (prog-mode . company-mode)
-  (LaTeX-mode . company-mode)
-  :config
-  ;; the following stops company from using the orderless completion style
-  ;; makes company much more useful
-  (define-advice company-capf
-      (:around (orig-fun &rest args) set-completion-styles)
-    (let ((completion-styles '(basic partial-completion)))
-      (apply orig-fun args)))
-  )
+;; (use-package company
+;;   :custom
+;;   (company-idle-delay nil) ;; turn off auto-completion
+;;   :general
+;;   (:keymap 'company-mode-map
+;;            "C-SPC" 'company-complete) ;; keybinding to trigger company completion
+;;   :hook
+;;   (prog-mode . company-mode)
+;;   (LaTeX-mode . company-mode)
+;;   :config
+;;   ;; the following stops company from using the orderless completion style
+;;   ;; makes company much more useful
+;;   (define-advice company-capf
+;;       (:around (orig-fun &rest args) set-completion-styles)
+;;     (let ((completion-styles '(basic partial-completion)))
+;;       (apply orig-fun args)))
+;;   )
 
 ;; (use-package company-bibtex
 ;;   :init
@@ -608,20 +618,30 @@
   :config
   (direnv-mode))
 
-;; (use-package corfu
-;;   :custom
-;;   (corfu-cycle t) ;; allows cycling through candidates
-;;   (corfu-auto nil) ;; disables auto-completion
-;;   (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
-;;   :bind
-;;   :general
-;;   (:keymaps 'corfu-map
-;;             "C-j" 'corfu-next
-;;             "C-k" 'corfu-previous
-;;             )
-;;   :init
-;;   (corfu-global-mode)
-;;   )
+(use-package corfu
+  :custom
+  (corfu-cycle t) ;; allows cycling through candidates
+  (corfu-auto nil) ;; disables auto-completion
+  (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
+  :bind
+  :general
+  (:keymaps 'corfu-map
+            "C-j" 'corfu-next
+            "C-k" 'corfu-previous
+            )
+  :init
+  (corfu-global-mode)
+  )
+
+(general-unbind
+  :states '(insert)
+  "C-k" ;; this was interfering with corfu completion
+  )
+
+(use-package emacs
+  :init
+  (setq tab-always-indent 'complete)
+  )
 
 (use-package deadgrep
   :general
