@@ -226,18 +226,13 @@
 
 (use-package emacs
   :init
-  ;; (set-face-font 'default "Operator Mono Medium-12")
-  (set-face-attribute 'default nil
-                      :font "Operator Mono Medium-12")
-  (set-face-attribute 'fixed-pitch nil
-                      :font "Operator Mono Medium-12")
-  ;; (set-face-attribute 'variable-pitch nil
-                    ;; :font "iA Writer Duospace")
-  (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-  ;; (add-to-list 'default-frame-alist '(font . "Operator Mono Medium-12"))
+  (set-face-font 'default "Operator Mono-12")
+;; FIXME not working in daemon
   (set-face-attribute 'variable-pitch nil
-                      :font "iA Writer Duospace")
-  )
+                    :font "iA Writer Duospace")
+  (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+  (add-to-list 'default-frame-alist '(font . "Operator Mono-12"))
+    )
 
 (use-package solaire-mode
   :config
@@ -304,8 +299,8 @@
 
 ;; FIXME using the latest version of org results in an error
 (use-package org
-  :hook
-  (org-mode . variable-pitch-mode)
+  ;; :hook
+  ;; FIXME (org-mode . variable-pitch-mode)
   :init
   (setq org-src-fontify-natively t) ;; fontify code in src blocks
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -373,7 +368,7 @@
 (use-package racket-mode
   :hook (racket-mode . racket-xp-mode) ;; n.b. this requires Dr. Racket to be installed as a backend
   :general
-  (patrl/leader-keys
+  (patrl/local-leader-keys
     :keymaps 'racket-mode-map
     "cr" 'racket-run-and-switch-to-repl  
     )
@@ -400,14 +395,15 @@
   :general
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
-    "i" '(:ignore t :wk "insert")
-    "im" '(LaTeX-macro :wk "insert macro")
-    "is" '(LaTeX-section :wk "insert section header")
-    "p" '(:ignore t :wk "preview")
-    "ps" '(preview-section :wk "preview section")
-    "pp" '(preview-at-point :wk "preview section")
+    ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
+    "m" '(LaTeX-macro :wk "insert macro")
+    "s" '(LaTeX-section :wk "insert section header")
+    "e" '(LaTeX-environment :wk "insert environment")
+    "p" '(preview-at-point :wk "preview at point")
     "f" '(TeX-font :wk "font")
     )
+  :init
+  (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
   :config
   (add-hook 'TeX-mode-hook #'visual-line-mode)
   (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
