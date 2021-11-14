@@ -9,10 +9,11 @@
 - [[https://github.com/pniedzielski/emacs.d/][GitHub - pniedzielski/emacs.d: My Emacs Configuration, finally git-ified]] 
 - [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]]   
 - [[https://github.com/abo-abo/oremacs][GitHub - abo-abo/oremacs: My Emacs config]]
+- [[https://github.com/jwiegley/dot-emacs][GitHub - jwiegley/dot-emacs: My .emacs.el file and other personal Emacs goodies]]
 
 * Early init file
 
-Since we're using ~straight.el~ as our package manager, we add the following to ~early-init.el~ to prevent ~package.el~ from loading packages, prior to our init file loading.
+Since we're using ~straight.el~  "as" our package manager, we add the following to ~early-init.el~ to prevent ~package.el~ from loading packages, prior to our init file loading.
 
 #+begin_src emacs-lisp :tangle early-init.el
   ;;; early-init.el --- Early Init File -*- lexical-binding: t; no-byte-compile: t -*-
@@ -34,6 +35,8 @@ Disable GUI elements before we have a chance to peek.
   (setq tab-bar-close-button-show nil) ;; don't show tab close button
   ;;; early-init.el ends here
 #+end_src
+
+hello
 
 * Init file
 
@@ -178,13 +181,19 @@ Maybe bind ~C-g~ to exit normal mode?
         "SPC" '(execute-extended-command :wk "execute command")
         "." '(find-file :wk "find file")
         "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
-        "h" '(:keymap help-map :wk "help") ;; remap help bindings
+        ;; "h" '(:keymap help-map :wk "help") ;; remap help bindings
         )
+
+      ;; help binding
+      (patrl/leader-keys
+        "h" '(:ignore t :wk "help")
+                    )
 
       ;; file bindings
       (patrl/leader-keys
         "f" '(:ignore t :wk "file")
         "ff" '(find-file :wk "find file") ;; gets overridden by consult
+        "fs" '(save-buffer :wk "save file")
         )
 
       ;; buffer bindings
@@ -240,6 +249,8 @@ Maybe bind ~C-g~ to exit normal mode?
 
     (setq evil-split-window-below t)
     (setq evil-split-window-right t)
+
+    (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
     :config
     (evil-mode t)
     (evil-set-initial-state 'messages-buffer-mode 'normal)
@@ -250,6 +261,7 @@ Maybe bind ~C-g~ to exit normal mode?
     :after evil
     :init
     (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+
     ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
     ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
     ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
@@ -265,6 +277,9 @@ Maybe bind ~C-g~ to exit normal mode?
   ;; port of Tim Pope's surround package
   (use-package evil-surround
     :after evil
+    :hook (
+           (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+           )
     :config
     (global-evil-surround-mode 1))
 
@@ -314,7 +329,7 @@ Add some margins (useful for writing prose).
 #+begin_src emacs-lisp :tangle init.el
   (use-package olivetti
     :init
-    (setq olivetti-body-width .67))
+    (setq olivetti-body-width 80))
 #+end_src
 
 ** Mode line
@@ -330,15 +345,17 @@ Minimal mode line.
 
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package emacs
-    :init
-    (set-face-font 'default "Operator Mono-12")
-  ;; FIXME not working in daemon
-    (set-face-attribute 'variable-pitch nil
-                      :font "iA Writer Duospace")
+  (defun patrl/setup-font-faces ()
+    (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'regular))
+    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'regular))
+    (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'regular))
     (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-    (add-to-list 'default-frame-alist '(font . "Operator Mono-12"))
-      )
+    )
+
+  ;; run this hook after we have initialized the first time
+  (add-hook 'after-init-hook 'patrl/setup-font-faces)
+  ;; re-run this hook if we create a new frame from daemonized Emacs
+  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-faces)
 #+end_src
 
 N.b. that this interacts with ~org-superstars-mode~.
@@ -442,13 +459,12 @@ Visually highlight todo.
 
 Resources:
 - [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
+- [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
 - TODO overwrite org-mode prefix with local leader.
    
   #+begin_src emacs-lisp :tangle init.el
     ;; FIXME using the latest version of org results in an error
     (use-package org
-      ;; :hook
-      ;; FIXME (org-mode . variable-pitch-mode)
       :init
       (setq org-src-fontify-natively t) ;; fontify code in src blocks
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -460,17 +476,23 @@ Resources:
         "l" '(:ignore t :wk "link")
         "ll" '(org-insert-link t :wk "link")
         "s" '(consult-org-heading :wk "consult heading")
+        "d" '(org-cut-special :wk "org cut special")
+        "y" '(org-copy-special :wk "org copy special")
+        "p" '(org-paste-special :wk "org paste special")
         "b" '(:keymap org-babel-map :wk "babel")
         "t" '(org-insert-structure-template :wk "template")
         "e" '(org-edit-special :wk "edit")
         "i" '(:ignore t :wk "insert")
         "ih" '(org-insert-heading :wk "insert heading")
         "is" '(org-insert-subheading :wk "insert heading")
-        :keymaps 'org-agenda-mode-map
-        "j" '(org-agenda-next-line)
-        "h" '(org-agenda-previous-line)
         )
+      (:keymaps 'org-agenda-mode-map
+                "j" '(org-agenda-next-line)
+                "h" '(org-agenda-previous-line))
+
       :hook
+      (org-mode . olivetti-mode)
+      (org-mode . variable-pitch-mode)
       (org-mode . visual-line-mode)
       (org-mode . org-indent-mode)
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
@@ -551,12 +573,27 @@ N.b. this currently doesn't play nicely with most fonts.
   (use-package nix-mode
     :mode "\\.nix\\'")
 #+end_src
-   
+
 ** latex
+
+Useful resources:
+
+- [[https://github.com/daviwil/emacs-from-scratch/wiki/LaTeX-config-(AucteX)-in-Emacs-from-scratch][LaTeX config (AucteX) in Emacs from scratch · daviwil/emacs-from-scratch Wiki...]]
 
 Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
 
-- Insert citations using ~citar~, bound to ~n b~.
+Bindings:
+
+- ~n b~: insert citation via citar (normal mode).
+- ~, p~: preview at point. 
+- ~, c~: compile.
+  
+Auto-activating snippets:
+
+- ~mx~: insert in-line equation.
+- ~mq~: insert equation.
+- ~ii~: insert itemize environment.
+- ~forfor~: insert forest environment.
 
 
 #+begin_src emacs-lisp :tangle init.el
@@ -570,6 +607,7 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
         TeX-source-correlate-method 'synctex
         TeX-source-correlate-start-server nil
         TeX-electric-sub-and-superscript t
+        TeX-engine 'luatex ;; use lualatex by default
         TeX-save-query nil) 
         )
 
@@ -584,6 +622,7 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
       "e" '(LaTeX-environment :wk "insert environment")
       "p" '(preview-at-point :wk "preview at point")
       "f" '(TeX-font :wk "font")
+      "c" '(TeX-command-run-all :wk "compile")
       )
     :init
     (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
@@ -594,18 +633,18 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
                 #'TeX-revert-document-buffer)
     (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
     (add-hook 'TeX-mode-hook #'outline-minor-mode)
+    (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
     )
-
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package auctex-latexmk
-    :after latex 
-    :init
-    (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-    :config
-    (auctex-latexmk-setup)
-    )
+  ;; (use-package auctex-latexmk
+  ;;   :after latex 
+  ;;   :init
+  ;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+  ;;   :config
+  ;;   (auctex-latexmk-setup)
+  ;;   )
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
@@ -614,6 +653,10 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
     (pdf-tools-install)
     )
 #+end_src
+
+~evil-tex~ is a crucial component in my workflow. ~evil-surround~ integration makes things a breeze. Some examples:
+
+- Italicize word from point in normal mode: ~ysw;i~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package evil-tex
@@ -632,9 +675,55 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
     )
 #+end_src
 
+**** TODO add "citep" and "citealt" to the supported list of latex citation commands.
+
+*** Snippets
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package laas
+    :hook (LaTeX-mode . laas-mode)
+    :config
+    (aas-set-snippets 'laas-mode
+      ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+      "mx" (lambda () (interactive)
+              (yas-expand-snippet "\\\\($0\\\\)"))
+      "mq" (lambda () (interactive)
+              (yas-expand-snippet "\\[\n$0\n\\]"))
+      "ii" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
+      "iee" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
+      "exex" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
+      "forfor" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+      :cond #'texmathp ; expand only while in math 
+      "Olon" "O(n \\log n)"
+      ";:" "\\coloneq"
+      ";;N" "\\mathbb{N}"
+      ;; bind to functions!
+      "sum" (lambda () (interactive)
+              (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+      "Span" (lambda () (interactive)
+               (yas-expand-snippet "\\Span($1)$0"))
+      "lam" (lambda () (interactive)
+              (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+      "set" (lambda () (interactive)
+                (yas-expand-snippet "\\set{ $1 | $2} $0"))
+      "txt" (lambda () (interactive)
+                (yas-expand-snippet "\\text{$1} $0"))
+      "ev" (lambda () (interactive)
+                  (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+      ;; add accent snippets
+      :cond #'laas-object-on-left-condition
+      "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
+      ))
+#+end_src
+
 *** Issues
 **** TODO "LatexMk" is duplicated in ~TeX-command~.
 **** TODO pdf buffer isn't reverted in preview continuously mode.
+**** TODO ~flymake-mode~ somehow isn't working properly with auctex.
 
 ** markdown  
 
@@ -783,10 +872,11 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
     (patrl/leader-keys
       :keymaps 'flymake-mode-map
       "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
+      "cc" '(flymake-mode :wk "toggle flymake") ;; depends on consult
       )
-    ;; :hook
-    ;; (emacs-lisp-mode . flymake-mode)
-    ;; (LaTeX-mode . flymake-mode)
+    :hook
+    (TeX-mode . flymake-mode) ;; this is now working
+    (emacs-lisp-mode . flymake-mode)
     :custom
     (flymake-no-changes-timeout nil)
     :general
@@ -797,11 +887,11 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
    
 ** Spell check  
 
+- These hooks don't appear o be doing anything.
+
 #+begin_src emacs-lisp :tangle init.el
   (use-package flymake-aspell
-    :hook
-    (text-mode-hook . flymake-aspell-setup)
-    (prog-mode-hook . flymake-aspell-setup))
+    :after flymake)
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
@@ -882,6 +972,29 @@ Essential, since I'm on NixOS.
 
 * Staging grounds
 
+** Mail
+
+#+begin_src emacs-lisp :tangle init.el
+    (use-package mu4e
+    :straight (:type built-in)
+      ;; the following bit of nonsense is necessary to get straight to install mu4e on NixOS
+  )
+#+end_src
+
+** lispy
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package lispy
+    :hook (elisp-mode . lispy-mode))
+
+  (use-package lispyville
+    :init
+    (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
+    :config
+    ;; play around with these
+    (lispyville-set-key-theme '(operators c-w additional)))
+#+end_src
+
 ** TODO Replace ~company~ with ~corfu~
 
 Not sure if this is such a good idea...
@@ -942,7 +1055,6 @@ A minimal ui for ~completion-in-region~.
   ;;   (bufler-tabs-mode))
 #+end_src
 
-** TODO helpful
 ** TODO ranger
 ** TODO snippets
 
@@ -961,45 +1073,6 @@ A minimal ui for ~completion-in-region~.
     )
 #+end_src
 
-#+begin_src emacs-lisp :tangle init.el
-  (use-package laas
-    :hook (LaTeX-mode . laas-mode)
-    :config
-    (aas-set-snippets 'laas-mode
-      ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
-      "mx" (lambda () (interactive)
-              (yas-expand-snippet "\\\\($0\\\\)"))
-      "mq" (lambda () (interactive)
-              (yas-expand-snippet "\\[\n$0\n\\]"))
-      "ii" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{itemize}\n\\item $0\n\\end{itemize}"))
-      "iee" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{enumerate}\n\\item $0\n\\end{enumerate}"))
-      "exex" (lambda () (interactive)
-              (yas-expand-snippet "\\ex\n$0\n\\xe"))
-      "forfor" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
-      :cond #'texmathp ; expand only while in math 
-      "Olon" "O(n \\log n)"
-      ;; bind to functions!
-      "sum" (lambda () (interactive)
-              (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-      "Span" (lambda () (interactive)
-               (yas-expand-snippet "\\Span($1)$0"))
-      "lam" (lambda () (interactive)
-              (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
-      "set" (lambda () (interactive)
-                (yas-expand-snippet "\\set{ $1 | $2} $0"))
-      "ml" (lambda () (interactive)
-                (yas-expand-snippet "\\text{$1} $0"))
-      "ev" (lambda () (interactive)
-                  (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
-      ;; add accent snippets
-      :cond #'laas-object-on-left-condition
-      "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
-      ))
-#+end_src
-
 ** Tree-sitter
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1009,6 +1082,19 @@ A minimal ui for ~completion-in-region~.
 #+end_src
 
 ** TODO jupyter
+
+** Helpful
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package helpful
+    :general
+    (patrl/leader-keys
+      "hf" '(helpful-callable :wk "helpful callable")
+      "hh" '(helpful-at-point :wk "helpful at point")
+      "hF" '(helpful-function :wk "helpful function")
+      "hv" '(helpful-variable :wk "helpful variable")
+      "hk" '(helpful-key :wk "helpful key")))
+#+end_src
 
 * Graveyard
 

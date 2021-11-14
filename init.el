@@ -105,13 +105,19 @@
     "SPC" '(execute-extended-command :wk "execute command")
     "." '(find-file :wk "find file")
     "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
-    "h" '(:keymap help-map :wk "help") ;; remap help bindings
+    ;; "h" '(:keymap help-map :wk "help") ;; remap help bindings
     )
+
+  ;; help binding
+  (patrl/leader-keys
+    "h" '(:ignore t :wk "help")
+                )
 
   ;; file bindings
   (patrl/leader-keys
     "f" '(:ignore t :wk "file")
     "ff" '(find-file :wk "find file") ;; gets overridden by consult
+    "fs" '(save-buffer :wk "save file")
     )
 
   ;; buffer bindings
@@ -163,6 +169,8 @@
 
   (setq evil-split-window-below t)
   (setq evil-split-window-right t)
+
+  (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
   :config
   (evil-mode t)
   (evil-set-initial-state 'messages-buffer-mode 'normal)
@@ -173,6 +181,7 @@
   :after evil
   :init
   (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+
   ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
   ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
   ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
@@ -188,6 +197,9 @@
 ;; port of Tim Pope's surround package
 (use-package evil-surround
   :after evil
+  :hook (
+         (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+         )
   :config
   (global-evil-surround-mode 1))
 
@@ -219,20 +231,22 @@
 
 (use-package olivetti
   :init
-  (setq olivetti-body-width .67))
+  (setq olivetti-body-width 80))
 
 (use-package mood-line
   :config (mood-line-mode))
 
-(use-package emacs
-  :init
-  (set-face-font 'default "Operator Mono-12")
-;; FIXME not working in daemon
-  (set-face-attribute 'variable-pitch nil
-                    :font "iA Writer Duospace")
+(defun patrl/setup-font-faces ()
+  (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'regular))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'regular))
+  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'regular))
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-  (add-to-list 'default-frame-alist '(font . "Operator Mono-12"))
-    )
+  )
+
+;; run this hook after we have initialized the first time
+(add-hook 'after-init-hook 'patrl/setup-font-faces)
+;; re-run this hook if we create a new frame from daemonized Emacs
+(add-hook 'server-after-make-frame-hook 'patrl/setup-font-faces)
 
 (use-package solaire-mode
   :config
@@ -299,8 +313,6 @@
 
 ;; FIXME using the latest version of org results in an error
 (use-package org
-  ;; :hook
-  ;; FIXME (org-mode . variable-pitch-mode)
   :init
   (setq org-src-fontify-natively t) ;; fontify code in src blocks
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -312,17 +324,23 @@
     "l" '(:ignore t :wk "link")
     "ll" '(org-insert-link t :wk "link")
     "s" '(consult-org-heading :wk "consult heading")
+    "d" '(org-cut-special :wk "org cut special")
+    "y" '(org-copy-special :wk "org copy special")
+    "p" '(org-paste-special :wk "org paste special")
     "b" '(:keymap org-babel-map :wk "babel")
     "t" '(org-insert-structure-template :wk "template")
     "e" '(org-edit-special :wk "edit")
     "i" '(:ignore t :wk "insert")
     "ih" '(org-insert-heading :wk "insert heading")
     "is" '(org-insert-subheading :wk "insert heading")
-    :keymaps 'org-agenda-mode-map
-    "j" '(org-agenda-next-line)
-    "h" '(org-agenda-previous-line)
     )
+  (:keymaps 'org-agenda-mode-map
+            "j" '(org-agenda-next-line)
+            "h" '(org-agenda-previous-line))
+
   :hook
+  (org-mode . olivetti-mode)
+  (org-mode . variable-pitch-mode)
   (org-mode . visual-line-mode)
   (org-mode . org-indent-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
@@ -387,6 +405,7 @@
       TeX-source-correlate-method 'synctex
       TeX-source-correlate-start-server nil
       TeX-electric-sub-and-superscript t
+      TeX-engine 'luatex ;; use lualatex by default
       TeX-save-query nil) 
       )
 
@@ -401,6 +420,7 @@
     "e" '(LaTeX-environment :wk "insert environment")
     "p" '(preview-at-point :wk "preview at point")
     "f" '(TeX-font :wk "font")
+    "c" '(TeX-command-run-all :wk "compile")
     )
   :init
   (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
@@ -411,15 +431,16 @@
               #'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   (add-hook 'TeX-mode-hook #'outline-minor-mode)
+  (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
   )
 
-(use-package auctex-latexmk
-  :after latex 
-  :init
-  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-  :config
-  (auctex-latexmk-setup)
-  )
+;; (use-package auctex-latexmk
+;;   :after latex 
+;;   :init
+;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+;;   :config
+;;   (auctex-latexmk-setup)
+;;   )
 
 (use-package pdf-tools
   :config
@@ -438,6 +459,45 @@
   (citar-library-paths '("~/Dropbox (MIT)/library"))
   (citar-bibliography '("~/repos/bibliography/master.bib"))
   )
+
+(use-package laas
+  :hook (LaTeX-mode . laas-mode)
+  :config
+  (aas-set-snippets 'laas-mode
+    ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+    "mx" (lambda () (interactive)
+            (yas-expand-snippet "\\\\($0\\\\)"))
+    "mq" (lambda () (interactive)
+            (yas-expand-snippet "\\[\n$0\n\\]"))
+    "ii" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
+    "iee" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
+    "exex" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
+    "forfor" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+    :cond #'texmathp ; expand only while in math 
+    "Olon" "O(n \\log n)"
+    ";:" "\\coloneq"
+    ";;N" "\\mathbb{N}"
+    ;; bind to functions!
+    "sum" (lambda () (interactive)
+            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+    "Span" (lambda () (interactive)
+             (yas-expand-snippet "\\Span($1)$0"))
+    "lam" (lambda () (interactive)
+            (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+    "set" (lambda () (interactive)
+              (yas-expand-snippet "\\set{ $1 | $2} $0"))
+    "txt" (lambda () (interactive)
+              (yas-expand-snippet "\\text{$1} $0"))
+    "ev" (lambda () (interactive)
+                (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+    ;; add accent snippets
+    :cond #'laas-object-on-left-condition
+    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
+    ))
 
 (use-package markdown-mode
   :hook ((markdown-mode . visual-line-mode))
@@ -546,10 +606,11 @@
   (patrl/leader-keys
     :keymaps 'flymake-mode-map
     "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
+    "cc" '(flymake-mode :wk "toggle flymake") ;; depends on consult
     )
-  ;; :hook
-  ;; (emacs-lisp-mode . flymake-mode)
-  ;; (LaTeX-mode . flymake-mode)
+  :hook
+  (TeX-mode . flymake-mode) ;; this is now working
+  (emacs-lisp-mode . flymake-mode)
   :custom
   (flymake-no-changes-timeout nil)
   :general
@@ -558,9 +619,7 @@
   )
 
 (use-package flymake-aspell
-  :hook
-  (text-mode-hook . flymake-aspell-setup)
-  (prog-mode-hook . flymake-aspell-setup))
+  :after flymake)
 
 (use-package ispell
   :straight (:type built-in)
@@ -613,6 +672,21 @@
 (use-package direnv
   :config
   (direnv-mode))
+
+(use-package mu4e
+  :straight (:type built-in)
+    ;; the following bit of nonsense is necessary to get straight to install mu4e on NixOS
+)
+
+(use-package lispy
+  :hook (elisp-mode . lispy-mode))
+
+(use-package lispyville
+  :init
+  (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
+  :config
+  ;; play around with these
+  (lispyville-set-key-theme '(operators c-w additional)))
 
 (use-package corfu
   :custom
@@ -667,45 +741,17 @@
   :hook (org-mode . aas-activate-for-major-mode)
   )
 
-(use-package laas
-  :hook (LaTeX-mode . laas-mode)
-  :config
-  (aas-set-snippets 'laas-mode
-    ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
-    "mx" (lambda () (interactive)
-            (yas-expand-snippet "\\\\($0\\\\)"))
-    "mq" (lambda () (interactive)
-            (yas-expand-snippet "\\[\n$0\n\\]"))
-    "ii" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{itemize}\n\\item $0\n\\end{itemize}"))
-    "iee" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{enumerate}\n\\item $0\n\\end{enumerate}"))
-    "exex" (lambda () (interactive)
-            (yas-expand-snippet "\\ex\n$0\n\\xe"))
-    "forfor" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
-    :cond #'texmathp ; expand only while in math 
-    "Olon" "O(n \\log n)"
-    ;; bind to functions!
-    "sum" (lambda () (interactive)
-            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-    "Span" (lambda () (interactive)
-             (yas-expand-snippet "\\Span($1)$0"))
-    "lam" (lambda () (interactive)
-            (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
-    "set" (lambda () (interactive)
-              (yas-expand-snippet "\\set{ $1 | $2} $0"))
-    "ml" (lambda () (interactive)
-              (yas-expand-snippet "\\text{$1} $0"))
-    "ev" (lambda () (interactive)
-                (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
-    ;; add accent snippets
-    :cond #'laas-object-on-left-condition
-    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
-    ))
-
 (use-package tree-sitter)
 
 (use-package tree-sitter-langs)
+
+(use-package helpful
+  :general
+  (patrl/leader-keys
+    "hf" '(helpful-callable :wk "helpful callable")
+    "hh" '(helpful-at-point :wk "helpful at point")
+    "hF" '(helpful-function :wk "helpful function")
+    "hv" '(helpful-variable :wk "helpful variable")
+    "hk" '(helpful-key :wk "helpful key")))
 
 ;; (use-package cdlatex)
