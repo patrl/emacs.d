@@ -3,6 +3,8 @@
 #+email: patrick.d.elliott@gmail.com
 #+date: <2021-11-08 Mon>
 
+Currently tailored for GNU Emacs 29.0.50.
+
 * Useful resources
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
@@ -135,6 +137,21 @@ Some rules/conventions:
     (electric-pair-mode +1) ;; automatically insert closing parens 
     (setq electric-pair-preserve-balance nil)
     )
+#+end_src
+
+
+
+** Helpful
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package helpful
+    :general
+    (patrl/leader-keys
+      "hf" '(helpful-callable :wk "helpful callable")
+      "hh" '(helpful-at-point :wk "helpful at point")
+      "hF" '(helpful-function :wk "helpful function")
+      "hv" '(helpful-variable :wk "helpful variable")
+      "hk" '(helpful-key :wk "helpful key")))
 #+end_src
 
 * Keybindings
@@ -699,6 +716,9 @@ Auto-activating snippets:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package laas
+    :after
+    yasnippet
+    aas
     :hook (LaTeX-mode . laas-mode)
     :config
     (aas-set-snippets 'laas-mode
@@ -741,8 +761,7 @@ Auto-activating snippets:
 *** Issues
 **** TODO "LatexMk" is duplicated in ~TeX-command~.
 **** TODO pdf buffer isn't reverted in preview continuously mode.
-**** TODO ~flymake-mode~ somehow isn't working properly with auctex.
-
+I think probably I just need to use zathura as the pdf viewer, which has its own smart revert functionality.
 ** markdown  
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1066,21 +1085,6 @@ Essential, since I'm on NixOS.
   (use-package tree-sitter)
 
   (use-package tree-sitter-langs)
-#+end_src
-
-** TODO jupyter
-
-** Helpful
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package helpful
-    :general
-    (patrl/leader-keys
-      "hf" '(helpful-callable :wk "helpful callable")
-      "hh" '(helpful-at-point :wk "helpful at point")
-      "hF" '(helpful-function :wk "helpful function")
-      "hv" '(helpful-variable :wk "helpful variable")
-      "hk" '(helpful-key :wk "helpful key")))
 #+end_src
 
 * Graveyard

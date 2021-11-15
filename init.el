@@ -68,6 +68,15 @@
   (setq electric-pair-preserve-balance nil)
   )
 
+(use-package helpful
+  :general
+  (patrl/leader-keys
+    "hf" '(helpful-callable :wk "helpful callable")
+    "hh" '(helpful-at-point :wk "helpful at point")
+    "hF" '(helpful-function :wk "helpful function")
+    "hv" '(helpful-variable :wk "helpful variable")
+    "hk" '(helpful-key :wk "helpful key")))
+
 (use-package general
   :config
   (general-evil-setup)
@@ -280,6 +289,8 @@
 ;; let's see how long I can go without projectile
 (use-package project
   :init
+  ;; the following allows non version controlled dirs suffixed with '.project' to be treated as projects.
+  ;; TODO test this is working properly 
   (cl-defmethod project-root ((project (head local)))
     (cdr project))
 
@@ -477,6 +488,9 @@ DIR must include a .project file to be considered a project."
   )
 
 (use-package laas
+  :after
+  yasnippet
+  aas
   :hook (LaTeX-mode . laas-mode)
   :config
   (aas-set-snippets 'laas-mode
@@ -734,15 +748,6 @@ DIR must include a .project file to be considered a project."
 (use-package tree-sitter)
 
 (use-package tree-sitter-langs)
-
-(use-package helpful
-  :general
-  (patrl/leader-keys
-    "hf" '(helpful-callable :wk "helpful callable")
-    "hh" '(helpful-at-point :wk "helpful at point")
-    "hF" '(helpful-function :wk "helpful function")
-    "hv" '(helpful-variable :wk "helpful variable")
-    "hk" '(helpful-key :wk "helpful key")))
 
 ;; (use-package cdlatex)
 
