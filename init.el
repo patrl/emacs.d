@@ -413,10 +413,10 @@ DIR must include a .project file to be considered a project."
   :general
   (patrl/local-leader-keys
     :keymaps 'racket-mode-map
-    "cr" 'racket-run-and-switch-to-repl  
-    "ce" 'racket-eval-last-sexp
-    )
-  )
+    "cr" '(racket-run-and-switch-to-repl :wk "run")
+    "cR" '(racket-xp-rename :wk "rename")  
+    "ce" '(racket-eval-last-sexp "eval last sexp")
+    ))
 
 (use-package nix-mode
   ;; There's no `nix-mode-map`, so not currently possible to set local bindings.

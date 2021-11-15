@@ -595,10 +595,10 @@ N.b. this currently doesn't play nicely with most fonts.
     :general
     (patrl/local-leader-keys
       :keymaps 'racket-mode-map
-      "cr" 'racket-run-and-switch-to-repl  
-      "ce" 'racket-eval-last-sexp
-      )
-    )
+      "cr" '(racket-run-and-switch-to-repl :wk "run")
+      "cR" '(racket-xp-rename :wk "rename")  
+      "ce" '(racket-eval-last-sexp "eval last sexp")
+      ))
 #+end_src
    
 ** nix
