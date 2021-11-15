@@ -237,9 +237,9 @@
   :config (mood-line-mode))
 
 (defun patrl/setup-font-faces ()
-  (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'regular))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'regular))
-  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'regular))
+  (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
   )
 
@@ -279,6 +279,17 @@
 
 ;; let's see how long I can go without projectile
 (use-package project
+  :init
+  (cl-defmethod project-root ((project (head local)))
+    (cdr project))
+
+  (defun patrl/project-try-local (dir)
+    "Determine if DIR is a non-Git project.
+DIR must include a .project file to be considered a project."
+    (let ((root (locate-dominating-file dir ".project")))
+      (and root (cons 'local root))))
+
+  (add-hook 'project-find-functions 'patrl/project-try-local 100) ;; adds to the end
   :general
   (patrl/leader-keys
     "p" '(:keymap project-prefix-map :wk "project")
@@ -314,6 +325,9 @@
 ;; FIXME using the latest version of org results in an error
 (use-package org
   :init
+  (setq org-todo-keywords
+        ;; it's extremely useful to distinguish between short-term goals and long-term projects
+        '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)")))
   (setq org-src-fontify-natively t) ;; fontify code in src blocks
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
   :custom
@@ -389,10 +403,12 @@
   (patrl/local-leader-keys
     :keymaps 'racket-mode-map
     "cr" 'racket-run-and-switch-to-repl  
+    "ce" 'racket-eval-last-sexp
     )
   )
 
 (use-package nix-mode
+  ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
   :mode "\\.nix\\'")
 
 (use-package auctex
@@ -573,32 +589,30 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-;; (use-package company
-;;   :custom
-;;   (company-idle-delay nil) ;; turn off auto-completion
-;;   :general
-;;   (:keymap 'company-mode-map
-;;            "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-;;   :hook
-;;   (prog-mode . company-mode)
-;;   (LaTeX-mode . company-mode)
-;;   :config
-;;   ;; the following stops company from using the orderless completion style
-;;   ;; makes company much more useful
-;;   (define-advice company-capf
-;;       (:around (orig-fun &rest args) set-completion-styles)
-;;     (let ((completion-styles '(basic partial-completion)))
-;;       (apply orig-fun args)))
-;;   )
+(use-package corfu
+  :custom
+  (corfu-cycle t) ;; allows cycling through candidates
+  (corfu-auto nil) ;; disables auto-completion
+  (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
+  :bind
+  :general
+  (:keymaps 'corfu-map
+            "C-j" 'corfu-next
+            "C-k" 'corfu-previous
+            )
+  :init
+  (corfu-global-mode)
+  )
 
-;; (use-package company-bibtex
-;;   :init
-;;   (setq company-bibtex-bibliography
-;; 	'("/home/patrl/repos/bibliography/master.bib"))
-;;   :after company
-;;   :config
-;;   (add-to-list 'company-backends 'company-bibtex)
-;;   )
+(general-unbind
+  :states '(insert)
+  "C-k" ;; this was interfering with corfu completion
+  )
+
+(use-package emacs
+  :init
+  (setq tab-always-indent 'complete)
+  )
 
 (use-package flymake
   :straight (:type built-in)
@@ -673,45 +687,21 @@
   :config
   (direnv-mode))
 
+(use-package sly)
+
 (use-package mu4e
   :straight (:type built-in)
-    ;; the following bit of nonsense is necessary to get straight to install mu4e on NixOS
 )
 
 (use-package lispy
-  :hook (elisp-mode . lispy-mode))
+  :hook (elisp-mode . lispy-mode)
+  (racket-mode . lispy-mode))
 
 (use-package lispyville
-  :init
-  (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
+  :hook (lispy-mode . lispyville-mode)
   :config
-  ;; play around with these
+  ;; TODO play around with keythemes 
   (lispyville-set-key-theme '(operators c-w additional)))
-
-(use-package corfu
-  :custom
-  (corfu-cycle t) ;; allows cycling through candidates
-  (corfu-auto nil) ;; disables auto-completion
-  (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
-  :bind
-  :general
-  (:keymaps 'corfu-map
-            "C-j" 'corfu-next
-            "C-k" 'corfu-previous
-            )
-  :init
-  (corfu-global-mode)
-  )
-
-(general-unbind
-  :states '(insert)
-  "C-k" ;; this was interfering with corfu completion
-  )
-
-(use-package emacs
-  :init
-  (setq tab-always-indent 'complete)
-  )
 
 (use-package deadgrep
   :general
@@ -755,3 +745,30 @@
     "hk" '(helpful-key :wk "helpful key")))
 
 ;; (use-package cdlatex)
+
+;; (use-package company
+;;   :custom
+;;   (company-idle-delay nil) ;; turn off auto-completion
+;;   :general
+;;   (:keymap 'company-mode-map
+;;            "C-SPC" 'company-complete) ;; keybinding to trigger company completion
+;;   :hook
+;;   (prog-mode . company-mode)
+;;   (LaTeX-mode . company-mode)
+;;   :config
+;;   ;; the following stops company from using the orderless completion style
+;;   ;; makes company much more useful
+;;   (define-advice company-capf
+;;       (:around (orig-fun &rest args) set-completion-styles)
+;;     (let ((completion-styles '(basic partial-completion)))
+;;       (apply orig-fun args)))
+;;   )
+
+;; (use-package company-bibtex
+;;   :init
+;;   (setq company-bibtex-bibliography
+;; 	'("/home/patrl/repos/bibliography/master.bib"))
+;;   :after company
+;;   :config
+;;   (add-to-list 'company-backends 'company-bibtex)
+;;   )
