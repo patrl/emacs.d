@@ -140,20 +140,6 @@ Some rules/conventions:
 #+end_src
 
 
-
-** Helpful
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package helpful
-    :general
-    (patrl/leader-keys
-      "hf" '(helpful-callable :wk "helpful callable")
-      "hh" '(helpful-at-point :wk "helpful at point")
-      "hF" '(helpful-function :wk "helpful function")
-      "hv" '(helpful-variable :wk "helpful variable")
-      "hk" '(helpful-key :wk "helpful key")))
-#+end_src
-
 * Keybindings
 
 ** TODO General
@@ -259,6 +245,8 @@ Maybe bind ~C-g~ to exit normal mode?
       "w" '(:keymap evil-window-map :wk "window") ;; window bindings
       )
     :init
+    (setq evil-search-module 'evil-search) ;; makes evil search more like vim
+
     (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
 
     (setq evil-want-integration t)
@@ -425,36 +413,37 @@ Visually highlight todo.
 ** Tabs and projects
   
 #+begin_src emacs-lisp :tangle init.el 
-    (use-package tab-bar
-      :init (tab-bar-mode)
-      :straight (:type built-in))
+  (use-package tab-bar
+    :init (tab-bar-mode)
+    :straight (:type built-in))
 
-    ;; let's see how long I can go without projectile
-    (use-package project
-      :init
-      ;; the following allows non version controlled dirs suffixed with '.project' to be treated as projects.
-      ;; TODO test this is working properly 
-      (cl-defmethod project-root ((project (head local)))
-        (cdr project))
+  ;; let's see how long I can go without projectile
+  (use-package project
+  ;;   :init
+  ;;   ;; the following allows non version controlled dirs suffixed with '.project' to be treated as projects.
+  ;;   ;; TODO test this is working properly 
+  ;;   (cl-defmethod project-root ((project (head local)))
+  ;;     (cdr project))
 
-      (defun patrl/project-try-local (dir)
-        "Determine if DIR is a non-Git project.
-    DIR must include a .project file to be considered a project."
-        (let ((root (locate-dominating-file dir ".project")))
-          (and root (cons 'local root))))
+  ;;   (defun patrl/project-try-local (dir)
+  ;;     "Determine if DIR is a non-Git project.
+  ;; DIR must include a .project file to be considered a project."
+  ;;     (let ((root (locate-dominating-file dir ".project")))
+  ;;       (and root (cons 'local root))))
 
-      (add-hook 'project-find-functions 'patrl/project-try-local 100) ;; adds to the end
-      :general
-      (patrl/leader-keys
-        "p" '(:keymap project-prefix-map :wk "project")
-        )
-      :straight (:type built-in))
+  ;;   (add-hook 'project-find-functions 'patrl/project-try-local 100) ;; 
+    ;; adds to the end
+    :general
+    (patrl/leader-keys
+      "p" '(:keymap project-prefix-map :wk "project")
+      )
+    :straight (:type built-in))
 
-    ;; automatically organize projects
-    (use-package project-tab-groups
-      :after (project tab-bar)
-      :config
-      (project-tab-groups-mode 1))
+  ;; automatically organize projects
+  (use-package project-tab-groups
+    :after (project tab-bar)
+    :config
+    (project-tab-groups-mode 1))
 #+end_src
 
 ** File management
@@ -595,9 +584,10 @@ N.b. this currently doesn't play nicely with most fonts.
     :general
     (patrl/local-leader-keys
       :keymaps 'racket-mode-map
-      "cr" '(racket-run-and-switch-to-repl :wk "run")
-      "cR" '(racket-xp-rename :wk "rename")  
-      "ce" '(racket-eval-last-sexp "eval last sexp")
+      "r" '(racket-run-and-switch-to-repl :wk "run")
+      "e" '(racket-eval-last-sexp :wk "eval last sexp")
+      :keymaps 'racket-xp-mode-map
+      "xr" '(racket-xp-rename :wk "rename")
       ))
 #+end_src
    
@@ -716,9 +706,6 @@ Auto-activating snippets:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package laas
-    :after
-    yasnippet
-    aas
     :hook (LaTeX-mode . laas-mode)
     :config
     (aas-set-snippets 'laas-mode
@@ -750,8 +737,11 @@ Auto-activating snippets:
                 (yas-expand-snippet "\\set{ $1 | $2} $0"))
       "txt" (lambda () (interactive)
                 (yas-expand-snippet "\\text{$1} $0"))
-      "ev" (lambda () (interactive)
-                  (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+      ";;o" (lambda () (interactive)
+                (yas-expand-snippet "\\oplus"))
+      ;; "ev" (lambda () (interactive)
+      ;;             (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+      ;; clash with event type sigs
       ;; add accent snippets
       :cond #'laas-object-on-left-condition
       "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
@@ -1016,12 +1006,6 @@ Essential, since I'm on NixOS.
 
 ** TODO Mail
 
-#+begin_src emacs-lisp :tangle init.el
-    (use-package mu4e
-    :straight (:type built-in)
-  )
-#+end_src
-
 ** lispy
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1085,6 +1069,19 @@ Essential, since I'm on NixOS.
   (use-package tree-sitter)
 
   (use-package tree-sitter-langs)
+#+end_src
+
+** Helpful
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package helpful
+    :general
+    (patrl/leader-keys
+      "hf" '(helpful-callable :wk "helpful callable")
+      "hh" '(helpful-at-point :wk "helpful at point")
+      "hF" '(helpful-function :wk "helpful function")
+      "hv" '(helpful-variable :wk "helpful variable")
+      "hk" '(helpful-key :wk "helpful key")))
 #+end_src
 
 * Graveyard
