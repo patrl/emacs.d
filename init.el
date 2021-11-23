@@ -231,12 +231,12 @@
     (dired-mode . all-the-icons-dired-mode)
     )
 
-  (use-package olivetti
-    :init
-    (setq olivetti-body-width 80))
+  ;; (use-package olivetti
+  ;;   :init
+  ;;   (setq olivetti-body-width 80))
 
-  (use-package mood-line
-    :config (mood-line-mode))
+  ;; (use-package mood-line
+  ;;   :config (mood-line-mode))
 
   (defun patrl/setup-font-faces ()
     (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
@@ -281,20 +281,6 @@
 
   ;; let's see how long I can go without projectile
   (use-package project
-  ;;   :init
-  ;;   ;; the following allows non version controlled dirs suffixed with '.project' to be treated as projects.
-  ;;   ;; TODO test this is working properly 
-  ;;   (cl-defmethod project-root ((project (head local)))
-  ;;     (cdr project))
-
-  ;;   (defun patrl/project-try-local (dir)
-  ;;     "Determine if DIR is a non-Git project.
-  ;; DIR must include a .project file to be considered a project."
-  ;;     (let ((root (locate-dominating-file dir ".project")))
-  ;;       (and root (cons 'local root))))
-
-  ;;   (add-hook 'project-find-functions 'patrl/project-try-local 100) ;; 
-    ;; adds to the end
     :general
     (patrl/leader-keys
       "p" '(:keymap project-prefix-map :wk "project")
@@ -623,23 +609,23 @@
     (setq tab-always-indent 'complete)
     )
 
-  (use-package flymake
-    :straight (:type built-in)
-    :general
-    (patrl/leader-keys
-      :keymaps 'flymake-mode-map
-      "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
-      "cc" '(flymake-mode :wk "toggle flymake") ;; depends on consult
-      )
-    :hook
-    (TeX-mode . flymake-mode) ;; this is now working
-    (emacs-lisp-mode . flymake-mode)
-    :custom
-    (flymake-no-changes-timeout nil)
-    :general
-    (general-nmap "] !" 'flymake-goto-next-error)
-    (general-nmap "[ !" 'flymake-goto-prev-error)
-    )
+  ;; (use-package flymake
+  ;;   :straight (:type built-in)
+  ;;   ;; :general
+  ;;   ;; (patrl/leader-keys
+  ;;   ;;   :keymaps 'flymake-mode-map
+  ;;   ;;   "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
+  ;;   ;;   "cc" '(flymake-mode :wk "toggle flymake") ;; depends on consult
+  ;;   ;;   )
+  ;;   :hook
+  ;;   (TeX-mode . flymake-mode) ;; this is now working
+  ;;   (emacs-lisp-mode . flymake-mode)
+  ;;   :custom
+  ;;   (flymake-no-changes-timeout nil)
+  ;;   ;; :general
+  ;;   ;; (general-nmap "] !" 'flymake-goto-next-error)
+  ;;   ;; (general-nmap "[ !" 'flymake-goto-prev-error)
+  ;;   )
 
   (use-package flymake-aspell
     :after flymake)
