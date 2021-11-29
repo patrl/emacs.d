@@ -135,21 +135,21 @@ Some rules/conventions:
     :straight (:type built-in)
     :init
     (electric-pair-mode +1) ;; automatically insert closing parens 
-    (setq electric-pair-preserve-balance nil)
+    (setq electric-pair-preserve-balance nil) ;; more annoying than useful
     )
 #+end_src
 
 
 * Keybindings
 
-** TODO General
+** TODO Cheatsheet
 
-Maybe bind ~C-g~ to exit normal mode?
+** General
 
   #+begin_src emacs-lisp :tangle init.el
     (use-package general
       :config
-      (general-evil-setup)
+      (general-evil-setup) ;; integrate general with evil
 
       ;; set up 'SPC' as the global leader key
       (general-create-definer patrl/leader-keys
@@ -184,22 +184,21 @@ Maybe bind ~C-g~ to exit normal mode?
         "SPC" '(execute-extended-command :wk "execute command")
         "." '(find-file :wk "find file")
         "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
-        ;; "h" '(:keymap help-map :wk "help") ;; remap help bindings
         )
 
-      ;; help binding
+      ;; help
       (patrl/leader-keys
         "h" '(:ignore t :wk "help")
                     )
 
-      ;; file bindings
+      ;; file
       (patrl/leader-keys
         "f" '(:ignore t :wk "file")
         "ff" '(find-file :wk "find file") ;; gets overridden by consult
         "fs" '(save-buffer :wk "save file")
         )
 
-      ;; buffer bindings
+      ;; buffer 
       (patrl/leader-keys
         "b" '(:ignore t :wk "buffer")
         "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
@@ -207,29 +206,29 @@ Maybe bind ~C-g~ to exit normal mode?
         "br" '(revert-buffer :wk "reload buffer")
         )
 
+      ;; universal argument
       (patrl/leader-keys
         "u" '(universal-argument :wk "universal prefix")
         )
 
-      ;; notes bindings
+      ;; notes
       (patrl/leader-keys
         "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
         "na" '(org-todo-list :wk "agenda todos") ;; agenda
-        ;; TODO hack on agenda bindings
         )
 
-      ;; code bindings
+      ;; code
       (patrl/leader-keys
         "c" '(:ignore t :wk "code") ;; see flymake
         )
 
-      ;; open bindings
+      ;; open
       (patrl/leader-keys
         "o" '(:ignore t :wk "open")
         "os" '(speedbar t :wk "speedbar")
         )
 
-      ;; search bindings
+      ;; search
       (patrl/leader-keys
         "s" '(:ignore t :wk "search")
         )
@@ -239,65 +238,69 @@ Maybe bind ~C-g~ to exit normal mode?
 ** Evil
 
 #+begin_src emacs-lisp :tangle init.el 
-  (use-package evil
-    :general
-    (patrl/leader-keys
-      "w" '(:keymap evil-window-map :wk "window") ;; window bindings
+    (use-package evil
+      :general
+      (patrl/leader-keys
+        "w" '(:keymap evil-window-map :wk "window") ;; window bindings
+        )
+      :init
+      (setq evil-search-module 'evil-search) ;; makes evil search more like vim
+
+      (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
+
+      (setq evil-want-integration t) ;; necessary for evil collection
+      (setq evil-want-keybinding nil)
+
+      (setq evil-split-window-below t)
+      (setq evil-split-window-right t)
+
+      (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
+      :config
+      (evil-mode t) ;; globally enable evil mode
+      (evil-set-initial-state 'messages-buffer-mode 'normal)
+      (evil-set-initial-state 'dashboard-mode 'normal)
       )
-    :init
-    (setq evil-search-module 'evil-search) ;; makes evil search more like vim
 
-    (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
+    (use-package evil-collection ;; evilifies a bunch of things
+      :after evil
+      :init
+      (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+      ;; If I want to incrementally enable evil-collection mode-by-mode, I can do something like the following:
+      ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
+      ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
+      ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
+      :config
+      (evil-collection-init)
+      )
 
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
+    ;; port of Tim Pope's commentary package
+    ;; 'g c c' in normal mode to comment a line.
+    (use-package evil-commentary
+      :after evil
+      :config
+      (evil-commentary-mode) ;; globally enable evil-commentary
+      )
 
-    (setq evil-split-window-below t)
-    (setq evil-split-window-right t)
+    ;; port of Tim Pope's surround package
+    (use-package evil-surround
+      :after evil
+      :hook (
+             (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+             )
+      :config
+      (global-evil-surround-mode 1) ;; globally enable evil-surround
+      )
 
-    (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
-    :config
-    (evil-mode t)
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal)
-    )
+    ;; show visual hints for evil motions
+    (use-package evil-goggles
+      :config
+      (evil-goggles-mode)
 
-  (use-package evil-collection
-    :after evil
-    :init
-    (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
-
-    ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
-    ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
-    ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
-    :config
-    (evil-collection-init))
-
-  ;; port of Tim Pope's commentary package
-  (use-package evil-commentary
-    :after evil
-    :config
-    (evil-commentary-mode))
-
-  ;; port of Tim Pope's surround package
-  (use-package evil-surround
-    :after evil
-    :hook (
-           (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-           )
-    :config
-    (global-evil-surround-mode 1))
-
-  ;; show visual hints for evil motions
-  (use-package evil-goggles
-    :config
-    (evil-goggles-mode)
-
-    ;; optionally use diff-mode's faces; as a result, deleted text
-    ;; will be highlighed with `diff-removed` face which is typically
-    ;; some red color (as defined by the color theme)
-    ;; other faces such as `diff-added` will be used for other actions
-    (evil-goggles-use-diff-faces))
+      ;; optionally use diff-mode's faces; as a result, deleted text
+      ;; will be highlighed with `diff-removed` face which is typically
+      ;; some red color (as defined by the color theme)
+      ;; other faces such as `diff-added` will be used for other actions
+      (evil-goggles-use-diff-faces))
 #+end_src 
 
 ** Which key
@@ -321,13 +324,16 @@ Display key bindings.
     :if (display-graphic-p))
 
 
+  ;; prettify dired with icons
   (use-package all-the-icons-dired
     :hook
     (dired-mode . all-the-icons-dired-mode)
     )
 #+end_src
  
-**  Olivetti
+**  FIXME Olivetti
+
+*This started throwing an error for some reason.*
 
 Add some margins (useful for writing prose).
 
@@ -342,8 +348,8 @@ Add some margins (useful for writing prose).
 Minimal mode line.   
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package mood-line
-  ;;   :config (mood-line-mode))
+  (use-package mood-line
+    :config (mood-line-mode))
 #+end_src
   
 ** Fonts
@@ -417,7 +423,7 @@ Visually highlight todo.
     :init (tab-bar-mode)
     :straight (:type built-in))
 
-  ;; let's see how long I can go without projectile
+  ;; use emacs' built-in 'project.el'
   (use-package project
     :general
     (patrl/leader-keys
@@ -434,14 +440,12 @@ Visually highlight todo.
 
 ** File management
 
-- TODO try ranger
-
 #+begin_src emacs-lisp :tangle init.el
   (use-package dired
     :general
     (patrl/leader-keys
-      "fd" '(dired :wk "dired")
-      "fj" '(dired-jump :wk "dired jump"))
+      "fd" '(dired :wk "dired") ;; open dired (in a directory)
+      "fj" '(dired-jump :wk "dired jump")) ;; open direct in the current directory
     ;; ranger like navigation
     (:keymaps 'dired-mode-map
               :states 'normal
@@ -450,7 +454,7 @@ Visually highlight todo.
               "l" 'dired-find-file
               )
     :hook
-    (dired-mode . dired-hide-details-mode) ;; no thanks
+    (dired-mode . dired-hide-details-mode) ;; make dired prettier
     :straight (:type built-in))
 
   ;; toggle subtree visibility with 'TAB'
@@ -465,16 +469,16 @@ Visually highlight todo.
 Resources:
 - [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
 - [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
-- TODO overwrite org-mode prefix with local leader.
    
   #+begin_src emacs-lisp :tangle init.el
-    ;; FIXME using the latest version of org results in an error
     (use-package org
+      ;; :straight (:type built-in)
       :init
       (setq org-todo-keywords
             ;; it's extremely useful to distinguish between short-term goals and long-term projects
             '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)")))
       (setq org-src-fontify-natively t) ;; fontify code in src blocks
+      (setq org-highlight-latex-and-related '(native))
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
       :custom
       (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
@@ -499,15 +503,11 @@ Resources:
                 "h" '(org-agenda-previous-line))
 
       :hook
-      (org-mode . olivetti-mode)
+      ;; FIXME (org-mode . olivetti-mode)
       (org-mode . variable-pitch-mode)
       (org-mode . visual-line-mode)
       (org-mode . org-indent-mode)
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-      :config
-      ;; hack until straight.el builds org-mode properly
-      (defun org-git-version () "9.5")
-      (defun org-release () "9.5")
       )
   #+end_src
    
@@ -700,18 +700,20 @@ Auto-activating snippets:
               (yas-expand-snippet "\\\\($0\\\\)"))
       "mq" (lambda () (interactive)
               (yas-expand-snippet "\\[\n$0\n\\]"))
-      "ii" (lambda () (interactive)
+      "*i" (lambda () (interactive)
               (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
-      "iee" (lambda () (interactive)
+      "*I" (lambda () (interactive)
               (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
-      "exex" (lambda () (interactive)
+      "*e" (lambda () (interactive)
               (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
-      "forfor" (lambda () (interactive)
+      "*f" (lambda () (interactive)
               (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
       :cond #'texmathp ; expand only while in math 
       "Olon" "O(n \\log n)"
       ";:" "\\coloneq"
       ";;N" "\\mathbb{N}"
+      ";T" "\\top"
+      ";B" "\\bot"
       ;; bind to functions!
       "sum" (lambda () (interactive)
               (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -873,26 +875,26 @@ A minimal ui for ~completion-in-region~.
 
 - Use ~flymake~ over ~flycheck~.
 
-** Flymake
+** FIXME Flymake
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package flymake
-  ;;   :straight (:type built-in)
-  ;;   ;; :general
-  ;;   ;; (patrl/leader-keys
-  ;;   ;;   :keymaps 'flymake-mode-map
-  ;;   ;;   "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
-  ;;   ;;   "cc" '(flymake-mode :wk "toggle flymake") ;; depends on consult
-  ;;   ;;   )
-  ;;   :hook
-  ;;   (TeX-mode . flymake-mode) ;; this is now working
-  ;;   (emacs-lisp-mode . flymake-mode)
-  ;;   :custom
-  ;;   (flymake-no-changes-timeout nil)
-  ;;   ;; :general
-  ;;   ;; (general-nmap "] !" 'flymake-goto-next-error)
-  ;;   ;; (general-nmap "[ !" 'flymake-goto-prev-error)
-  ;;   )
+  (use-package flymake
+    :straight (:type built-in)
+    :general
+    (patrl/leader-keys
+      :keymaps 'flymake-mode-map
+      "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
+      "cc" '(flymake-mode :wk "toggle flymake") ;; depends on consult
+      )
+    :hook
+    (TeX-mode . flymake-mode) ;; this is now working
+    (emacs-lisp-mode . flymake-mode)
+    :custom
+    (flymake-no-changes-timeout nil)
+    :general
+    (general-nmap "] !" 'flymake-goto-next-error)
+    (general-nmap "[ !" 'flymake-goto-prev-error)
+    )
 #+end_src
    
 ** Spell check  
