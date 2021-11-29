@@ -1,6 +1,7 @@
 history
 url/
-straight/
+straight/build*
+straight/repos/
 transient/
 eshell/
 racket-mode/
