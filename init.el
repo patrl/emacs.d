@@ -99,7 +99,7 @@
     "C-x C-z" ;; unbind suspend frame
     "C-x C-d" ;; unbind list directory
     "<mouse-2>" ;; pasting with mouse wheel click
-    )
+    ) 
 
   (patrl/leader-keys
     "SPC" '(execute-extended-command :wk "execute command")
@@ -685,6 +685,14 @@
   :config
   (direnv-mode))
 
+(use-package avy
+  :general
+  (general-def '(normal motion)
+    "s" 'evil-avy-goto-char-timer
+    "f" 'evil-avy-goto-char-in-line
+    ";" 'avy-resume) ;; depend on avy
+)
+
 (use-package sly)
 
 (use-package lispy
@@ -737,6 +745,8 @@
     "hF" '(helpful-function :wk "helpful function")
     "hv" '(helpful-variable :wk "helpful variable")
     "hk" '(helpful-key :wk "helpful key")))
+
+(use-package crdt)
 
 ;; (use-package cdlatex)
 
