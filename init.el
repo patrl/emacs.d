@@ -690,8 +690,10 @@
   (general-def '(normal motion)
     "s" 'evil-avy-goto-char-timer
     "f" 'evil-avy-goto-char-in-line
-    ";" 'avy-resume) ;; depend on avy
-)
+    "gl" 'evil-avy-goto-line ;; this rules
+    ;; TODO incorporate avy-resume (maybe ";")
+    )
+  )
 
 (use-package sly)
 
