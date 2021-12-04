@@ -38,8 +38,6 @@ Disable GUI elements before we have a chance to peek.
 ;;; early-init.el ends here
 #+end_src
 
-hello
-
 * Init file
 
 #+begin_src emacs-lisp :tangle init.el
