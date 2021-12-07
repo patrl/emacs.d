@@ -146,7 +146,7 @@
   ;; open
   (patrl/leader-keys
     "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar")
+    "os" '(speedbar t :wk "speedbar") ;; FIXME I never use this
     )
 
   ;; search
@@ -354,6 +354,12 @@
   (org-mode . visual-line-mode)
   (org-mode . org-indent-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+  :config
+  (defvar org-electric-pairs '((?\* . ?\*)\ (?/ . ?/) (?= . ?=) (?\_ . ?\_) (?~ . ?~) (?+ . ?+) (?$ . ?$))) ;; electric pairs for org-mode
+  (defun org-add-electric-pairs ()
+    (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
+    (setq-local electric-pair-text-pairs electric-pair-pairs))
+  (add-hook 'org-mode-hook 'org-add-electric-pairs)
   )
 
 (use-package org-cliplink
@@ -386,6 +392,20 @@
   (setq org-roam-directory (file-truename "~/notes"))
   (org-roam-db-autosync-enable)
   )
+
+(use-package citeproc
+  :after org)
+
+(with-eval-after-load 'ox-latex
+   (add-to-list 'org-latex-classes
+                '("scrartcl"
+                  "\\documentclass[letterpaper]{scrartcl}"
+                  ("\\section{%s}" . "\\section*{%s}")
+                  ("\\subsection{%s}" . "\\subsection*{%s}")
+                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")
+                  )))
 
 (use-package haskell-mode)
 
@@ -470,7 +490,8 @@
   )
 
 (use-package laas
-  :hook (LaTeX-mode . laas-mode)
+  :hook ((LaTeX-mode . laas-mode)
+         (org-mode . laas-mode))
   :config
   (aas-set-snippets 'laas-mode
     ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
@@ -499,8 +520,8 @@
              (yas-expand-snippet "\\Span($1)$0"))
     "lam" (lambda () (interactive)
             (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
-    "set" (lambda () (interactive)
-              (yas-expand-snippet "\\set{ $1 | $2} $0"))
+    ;; "set" (lambda () (interactive)
+    ;;           (yas-expand-snippet "\\set{ $1 | $2} $0"))
     "txt" (lambda () (interactive)
               (yas-expand-snippet "\\text{$1} $0"))
     ";;o" (lambda () (interactive)
@@ -685,11 +706,18 @@
   :config
   (direnv-mode))
 
+(use-package notmuch
+  :general
+  (patrl/leader-keys
+    "on" '(notmuch :wk "notmuch"))
+)
+
 (use-package avy
   :general
   (general-def '(normal motion)
     "s" 'evil-avy-goto-char-timer
     "f" 'evil-avy-goto-char-in-line
+    ";" 'avy-resume
     "gl" 'evil-avy-goto-line ;; this rules
     ;; TODO incorporate avy-resume (maybe ";")
     )
