@@ -235,9 +235,9 @@
   (dired-mode . all-the-icons-dired-mode)
   )
 
-;; (use-package olivetti
-;;   :init
-;;   (setq olivetti-body-width 80))
+(use-package olivetti
+  :init
+  (setq olivetti-body-width 80))
 
 (use-package mood-line
   :config (mood-line-mode))
@@ -354,12 +354,13 @@
   (org-mode . visual-line-mode)
   (org-mode . org-indent-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-  :config
-  (defvar org-electric-pairs '((?\* . ?\*)\ (?/ . ?/) (?= . ?=) (?\_ . ?\_) (?~ . ?~) (?+ . ?+) (?$ . ?$))) ;; electric pairs for org-mode
-  (defun org-add-electric-pairs ()
-    (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
-    (setq-local electric-pair-text-pairs electric-pair-pairs))
-  (add-hook 'org-mode-hook 'org-add-electric-pairs)
+  ;; :config
+  ;; FIXME this turns out to be a bad idea, since the symbols conflict
+  ;; (defvar org-electric-pairs '((?\* . ?\*)\ (?/ . ?/) (?= . ?=) (?\_ . ?\_) (?~ . ?~) (?+ . ?+) (?$ . ?$))) ;; electric pairs for org-mode
+  ;; (defun org-add-electric-pairs ()
+  ;;   (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
+  ;;   (setq-local electric-pair-text-pairs electric-pair-pairs))
+  ;; (add-hook 'org-mode-hook 'org-add-electric-pairs)
   )
 
 (use-package org-cliplink
@@ -513,6 +514,7 @@
     ";;N" "\\mathbb{N}"
     ";T" "\\top"
     ";B" "\\bot"
+    ";;x" "\\times"
     ;; bind to functions!
     "sum" (lambda () (interactive)
             (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -724,6 +726,8 @@
   )
 
 (use-package sly)
+
+()
 
 (use-package lispy
   :hook (elisp-mode . lispy-mode)

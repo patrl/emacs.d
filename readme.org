@@ -343,9 +343,9 @@ Display key bindings.
 Add some margins (useful for writing prose).
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package olivetti
-  ;;   :init
-  ;;   (setq olivetti-body-width 80))
+  (use-package olivetti
+    :init
+    (setq olivetti-body-width 80))
 #+end_src
 
 ** Mode line
@@ -513,12 +513,13 @@ Resources:
       (org-mode . visual-line-mode)
       (org-mode . org-indent-mode)
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-      :config
-      (defvar org-electric-pairs '((?\* . ?\*)\ (?/ . ?/) (?= . ?=) (?\_ . ?\_) (?~ . ?~) (?+ . ?+) (?$ . ?$))) ;; electric pairs for org-mode
-      (defun org-add-electric-pairs ()
-        (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
-        (setq-local electric-pair-text-pairs electric-pair-pairs))
-      (add-hook 'org-mode-hook 'org-add-electric-pairs)
+      ;; :config
+      ;; FIXME this turns out to be a bad idea, since the symbols conflict
+      ;; (defvar org-electric-pairs '((?\* . ?\*)\ (?/ . ?/) (?= . ?=) (?\_ . ?\_) (?~ . ?~) (?+ . ?+) (?$ . ?$))) ;; electric pairs for org-mode
+      ;; (defun org-add-electric-pairs ()
+      ;;   (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
+      ;;   (setq-local electric-pair-text-pairs electric-pair-pairs))
+      ;; (add-hook 'org-mode-hook 'org-add-electric-pairs)
       )
   #+end_src
    
@@ -745,6 +746,7 @@ Auto-activating snippets:
       ";;N" "\\mathbb{N}"
       ";T" "\\top"
       ";B" "\\bot"
+      ";;x" "\\times"
       ;; bind to functions!
       "sum" (lambda () (interactive)
               (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -1049,6 +1051,10 @@ Essential, since I'm on NixOS.
 *** FIXME compatibility with ~corfu~
 
 ** TODO Mail
+
+#+begin_src emacs-lisp :tangle init.el
+  ()
+#+end_src
 
 ** lispy
 
