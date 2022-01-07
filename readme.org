@@ -5,6 +5,8 @@
 
 Currently tailored for GNU Emacs 29.0.50.
 
+Patrick is.
+
 * Useful resources
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
@@ -243,70 +245,86 @@ Quick how-to for straight:
 ** Evil
 
 #+begin_src emacs-lisp :tangle init.el 
-    (use-package evil
-      :general
-      (patrl/leader-keys
-        "w" '(:keymap evil-window-map :wk "window") ;; window bindings
-        )
-      :init
-      (setq evil-search-module 'evil-search) ;; makes evil search more like vim
-
-      (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
-
-      (setq evil-want-integration t) ;; necessary for evil collection
-      (setq evil-want-keybinding nil)
-
-      (setq evil-split-window-below t)
-      (setq evil-split-window-right t)
-
-      (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
-      :config
-      (evil-mode t) ;; globally enable evil mode
-      (evil-set-initial-state 'messages-buffer-mode 'normal)
-      (evil-set-initial-state 'dashboard-mode 'normal)
+  (use-package evil
+    :general
+    (patrl/leader-keys
+      "w" '(:keymap evil-window-map :wk "window") ;; window bindings
       )
+    :init
+    (setq evil-search-module 'evil-search) ;; makes evil search more like vim
 
-    (use-package evil-collection ;; evilifies a bunch of things
-      :after evil
-      :init
-      (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
-      ;; If I want to incrementally enable evil-collection mode-by-mode, I can do something like the following:
-      ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
-      ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
-      ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
-      :config
-      (evil-collection-init)
-      )
+    (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
 
-    ;; port of Tim Pope's commentary package
-    ;; 'g c c' in normal mode to comment a line.
-    (use-package evil-commentary
-      :after evil
-      :config
-      (evil-commentary-mode) ;; globally enable evil-commentary
-      )
+    (setq evil-want-integration t) ;; necessary for evil collection
+    (setq evil-want-keybinding nil)
 
-    ;; port of Tim Pope's surround package
-    (use-package evil-surround
-      :after evil
-      :hook (
-             (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-             )
-      :config
-      (global-evil-surround-mode 1) ;; globally enable evil-surround
-      )
+    (setq evil-split-window-below t)
+    (setq evil-split-window-right t)
 
-    ;; show visual hints for evil motions
-    (use-package evil-goggles
-      :config
-      (evil-goggles-mode)
+    (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
+    :config
+    (evil-mode t) ;; globally enable evil mode
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal)
+    (evil-set-initial-state 'eshell-mode 'insert)
+    )
 
-      ;; optionally use diff-mode's faces; as a result, deleted text
-      ;; will be highlighed with `diff-removed` face which is typically
-      ;; some red color (as defined by the color theme)
-      ;; other faces such as `diff-added` will be used for other actions
-      (evil-goggles-use-diff-faces))
+  (use-package evil-collection ;; evilifies a bunch of things
+    :after evil
+    :init
+    (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+    ;; If I want to incrementally enable evil-collection mode-by-mode, I can do something like the following:
+    ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
+    ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
+    ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
+    :config
+    (evil-collection-init)
+    )
+
+  ;; port of Tim Pope's commentary package
+  ;; 'g c c' in normal mode to comment a line.
+  (use-package evil-commentary
+    :after evil
+    :config
+    (evil-commentary-mode) ;; globally enable evil-commentary
+    )
+
+  ;; port of Tim Pope's surround package
+  (use-package evil-surround
+    :after evil
+    :hook (
+           (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+           )
+    :config
+    (global-evil-surround-mode 1) ;; globally enable evil-surround
+    )
+
+  ;; show visual hints for evil motions
+  (use-package evil-goggles
+    :config
+    (evil-goggles-mode)
+
+    ;; optionally use diff-mode's faces; as a result, deleted text
+    ;; will be highlighed with `diff-removed` face which is typically
+    ;; some red color (as defined by the color theme)
+    ;; other faces such as `diff-added` will be used for other actions
+    (evil-goggles-use-diff-faces))
 #+end_src 
+
+** Avy
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package avy
+    :general
+    (general-def '(normal motion)
+      "s" 'evil-avy-goto-char-timer
+      "f" 'evil-avy-goto-char-in-line
+      "gl" 'evil-avy-goto-line ;; this rules
+      ;; TODO incorporate avy-resume (maybe ";")
+      )
+    )
+#+end_src
+
 
 ** Which key
    
@@ -336,9 +354,7 @@ Display key bindings.
     )
 #+end_src
  
-**  FIXME Olivetti
-
-*This started throwing an error for some reason.*
+**  Olivetti
 
 Add some margins (useful for writing prose).
 
@@ -402,7 +418,7 @@ Some nice themes:
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
 	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'doom-one t)
+    (load-theme 'doom-nord t)
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -508,10 +524,11 @@ Resources:
                 "h" '(org-agenda-previous-line))
 
       :hook
-      ;; FIXME (org-mode . olivetti-mode)
+      (org-mode . olivetti-mode)
       (org-mode . variable-pitch-mode)
       (org-mode . visual-line-mode)
       (org-mode . org-indent-mode)
+      (org-mode . org-num-mode)
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
       ;; :config
       ;; FIXME this turns out to be a bad idea, since the symbols conflict
@@ -614,6 +631,13 @@ N.b. this currently doesn't play nicely with most fonts.
   (use-package nix-mode
     ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
     :mode "\\.nix\\'")
+#+end_src
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package nix-update
+    :commands
+    nix-update-fetch
+  )
 #+end_src
 
 ** latex
@@ -747,6 +771,7 @@ Auto-activating snippets:
       ";T" "\\top"
       ";B" "\\bot"
       ";;x" "\\times"
+      ";;v" "\\veebar"
       ;; bind to functions!
       "sum" (lambda () (interactive)
               (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -773,16 +798,21 @@ Auto-activating snippets:
 **** TODO "LatexMk" is duplicated in ~TeX-command~.
 **** TODO pdf buffer isn't reverted in preview continuously mode.
 I think probably I just need to use zathura as the pdf viewer, which has its own smart revert functionality.
+
 ** markdown  
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package markdown-mode
-    :hook ((markdown-mode . visual-line-mode))
+    :hook ((markdown-mode . visual-line-mode)
+           (markdown-mode . olivetti-mode)
+           (markdown-mode . variable-pitch-mode))
     :commands (markdown-mode gfm-mode)
     :mode (("README\\.md\\'" . gfm-mode)
-	   ("\\.md\\'" . markdown-mode)
-	   ("\\.markdown\\'" . markdown-mode))
-    :init (setq markdown-command "pandoc"))
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :init
+    (setq markdown-command "pandoc")
+    (setq markdown-header-scaling t))
 #+end_src
    
 *** TODO pandoc mode
@@ -903,6 +933,7 @@ A minimal ui for ~completion-in-region~.
 #+end_src
 
 *** TODO this isn't working so well with lsp-mode
+*** TODO consider incorporating the ~cape~ package
  
 * Checkers
 
@@ -932,7 +963,7 @@ A minimal ui for ~completion-in-region~.
    
 ** Spell check  
 
-- These hooks don't appear o be doing anything.
+- These hooks don't appear to be doing anything.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package flymake-aspell
@@ -950,6 +981,13 @@ A minimal ui for ~completion-in-region~.
 #+end_src
 
 * Tools   
+
+** Web preview
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package simple-httpd
+    :commands httpd-serve-directory)
+#+end_src
 
 ** TODO git
 
@@ -1017,28 +1055,83 @@ Essential, since I'm on NixOS.
 
 * Staging grounds
 
+** Popper
+
+Classify certain buffer types as popups.
+
+#+begin_src emacs-lisp :tangle init.el
+    (use-package popper
+      :init
+      (setq popper-reference-buffers
+            '("\\*Messages\\*"
+              "Output\\*$"
+              "\\*Async Shell Command\\*"
+              help-mode
+              compilation-mode
+              "^\\*eshell.*\\*" eshell-mode))
+      (popper-mode +1)
+      (popper-echo-mode +1))
+#+end_src
+
+** Lua
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package lua-mode
+    :mode "\\.lua\\'")
+#+end_src
+
+** TODO Cape
+
+** Numbex
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package numbex
+    :straight (:type git :host github :repo "enricoflor/numbex"))
+#+end_src
+
+** TODO Elfeed
+
+Resources:
+- [[https://karthinks.com/software/lazy-elfeed/][Lazy Elfeed | Karthinks]]
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package elfeed
+    :commands elfeed)
+
+  (use-package elfeed-org
+    :init
+   (setq rmh-elfeed-org-files (list "~/Dropbox (MIT)/org/elfeed.org"))
+    :config
+    (elfeed-org))
+#+end_src
+
 ** Notmuch
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package notmuch
+    :init
+    (defvar +notmuch-delete-tags '("+trash" "-inbox" "-unread" "-new"))
+    (setq notmuch-archive-tags '("-inbox" "-new"))
+    :config
+    (add-to-list 'notmuch-saved-searches '(:name "new" :query "tag:new" :key "n"))
+    (defun +notmuch/search-delete ()
+      (interactive)
+      (notmuch-search-add-tag +notmuch-delete-tags)
+      (notmuch-tree-next-message))
+    (defun +notmuch/tree-delete ()
+      (interactive)
+      (notmuch-tree-add-tag +notmuch-delete-tags)
+      (notmuch-tree-next-message))
     :general
     (patrl/leader-keys
-      "on" '(notmuch :wk "notmuch"))
-  )
-#+end_src
-
-** Avy
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package avy
-    :general
-    (general-def '(normal motion)
-      "s" 'evil-avy-goto-char-timer
-      "f" 'evil-avy-goto-char-in-line
-      ";" 'avy-resume
-      "gl" 'evil-avy-goto-line ;; this rules
-      ;; TODO incorporate avy-resume (maybe ";")
-      )
+      "on" '(notmuch :wk "notmuch")) 
+    (:keymaps 'notmuch-search-mode-map
+              :states 'normal
+              "S" '+notmuch/search-delete
+              )
+    (:keymaps 'notmuch-tree-mode-map
+              :states 'normal
+              "S" '+notmuch/tree-delete)
     )
 #+end_src
 
@@ -1050,25 +1143,25 @@ Essential, since I'm on NixOS.
 
 *** FIXME compatibility with ~corfu~
 
-** TODO Mail
-
-#+begin_src emacs-lisp :tangle init.el
-  ()
-#+end_src
-
 ** lispy
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package lispy
-    :hook (elisp-mode . lispy-mode)
+    :hook (emacs-lisp-mode . lispy-mode)
     (racket-mode . lispy-mode))
 
   (use-package lispyville
     :hook (lispy-mode . lispyville-mode)
+    ;; the following is necessary to retain tab completion in lispy mode
+    :general
+    (:keymaps 'lispy-mode-map 
+              "TAB" 'indent-for-tab-command)
     :config
     ;; TODO play around with keythemes 
     (lispyville-set-key-theme '(operators c-w additional)))
 #+end_src
+
+*** FIXME tab completion currently doesn't work properly
 
 ** Deadgrep
 
@@ -1095,7 +1188,6 @@ Essential, since I'm on NixOS.
   ;;   (bufler-tabs-mode))
 #+end_src
 
-** TODO ranger
 ** TODO snippets
 
 #+begin_src emacs-lisp :tangle init.el 
@@ -1127,6 +1219,7 @@ Essential, since I'm on NixOS.
   (use-package helpful
     :general
     (patrl/leader-keys
+      "hc" '(helpful-command :wk "helpful command")
       "hf" '(helpful-callable :wk "helpful callable")
       "hh" '(helpful-at-point :wk "helpful at point")
       "hF" '(helpful-function :wk "helpful function")
@@ -1134,25 +1227,25 @@ Essential, since I'm on NixOS.
       "hk" '(helpful-key :wk "helpful key")))
 #+end_src
 
-** Cdrt
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package crdt)
-#+end_src
-
 * Graveyard
 
 Packages i've tried out which, for whatever reason, haven't suited me.
 
+** Cdrt
+
+#+begin_src emacs-lisp
+  ;; (use-package crdt)
+#+end_src
+
 ** cdlatex
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp 
   ;; (use-package cdlatex)
 #+end_src
 
 ** company
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   ;; (use-package company
   ;;   :custom
   ;;   (company-idle-delay nil) ;; turn off auto-completion
@@ -1175,7 +1268,7 @@ Packages i've tried out which, for whatever reason, haven't suited me.
 #+begin_src emacs-lisp
 #+end_src
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   ;; (use-package company-bibtex
   ;;   :init
   ;;   (setq company-bibtex-bibliography

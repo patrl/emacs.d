@@ -176,6 +176,7 @@
   (evil-mode t) ;; globally enable evil mode
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal)
+  (evil-set-initial-state 'eshell-mode 'insert)
   )
 
 (use-package evil-collection ;; evilifies a bunch of things
@@ -218,6 +219,16 @@
   ;; some red color (as defined by the color theme)
   ;; other faces such as `diff-added` will be used for other actions
   (evil-goggles-use-diff-faces))
+
+(use-package avy
+  :general
+  (general-def '(normal motion)
+    "s" 'evil-avy-goto-char-timer
+    "f" 'evil-avy-goto-char-in-line
+    "gl" 'evil-avy-goto-line ;; this rules
+    ;; TODO incorporate avy-resume (maybe ";")
+    )
+  )
 
 (use-package which-key
   :after evil
@@ -267,7 +278,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
 	doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
+  (load-theme 'doom-nord t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -349,10 +360,11 @@
             "h" '(org-agenda-previous-line))
 
   :hook
-  ;; FIXME (org-mode . olivetti-mode)
+  (org-mode . olivetti-mode)
   (org-mode . variable-pitch-mode)
   (org-mode . visual-line-mode)
   (org-mode . org-indent-mode)
+  (org-mode . org-num-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
   ;; :config
   ;; FIXME this turns out to be a bad idea, since the symbols conflict
@@ -424,6 +436,11 @@
 (use-package nix-mode
   ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
   :mode "\\.nix\\'")
+
+(use-package nix-update
+  :commands
+  nix-update-fetch
+)
 
 (use-package auctex
   :no-require t
@@ -515,6 +532,7 @@
     ";T" "\\top"
     ";B" "\\bot"
     ";;x" "\\times"
+    ";;v" "\\veebar"
     ;; bind to functions!
     "sum" (lambda () (interactive)
             (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -537,12 +555,16 @@
     ))
 
 (use-package markdown-mode
-  :hook ((markdown-mode . visual-line-mode))
+  :hook ((markdown-mode . visual-line-mode)
+         (markdown-mode . olivetti-mode)
+         (markdown-mode . variable-pitch-mode))
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
-	 ("\\.md\\'" . markdown-mode)
-	 ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "pandoc"))
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init
+  (setq markdown-command "pandoc")
+  (setq markdown-header-scaling t))
 
 (use-package pandoc-mode
   :after markdown-mode
@@ -708,33 +730,64 @@
   :config
   (direnv-mode))
 
+(use-package lua-mode
+  :mode "\\.lua\\'")
+
+(use-package numbex
+  :straight (:type git :host github :repo "enricoflor/numbex"))
+
+(use-package elfeed
+  :commands elfeed)
+
+(use-package elfeed-org
+  :init
+  (setq rmh-elfeed-org-files (list "~/Dropbox (MIT)/org/elfeed.org"))
+  :config
+  (elfeed-org))
+
+(use-package simple-httpd
+  :commands httpd-serve-directory)
+
 (use-package notmuch
+  :init
+  (defvar +notmuch-delete-tags '("+trash" "-inbox" "-unread" "-new"))
+  (setq notmuch-archive-tags '("-inbox" "-new"))
+  :config
+  (add-to-list 'notmuch-saved-searches '(:name "new" :query "tag:new" :key "n"))
+  (defun +notmuch/search-delete ()
+    (interactive)
+    (notmuch-search-add-tag +notmuch-delete-tags)
+    (notmuch-tree-next-message))
+  (defun +notmuch/tree-delete ()
+    (interactive)
+    (notmuch-tree-add-tag +notmuch-delete-tags)
+    (notmuch-tree-next-message))
   :general
   (patrl/leader-keys
-    "on" '(notmuch :wk "notmuch"))
-)
-
-(use-package avy
-  :general
-  (general-def '(normal motion)
-    "s" 'evil-avy-goto-char-timer
-    "f" 'evil-avy-goto-char-in-line
-    ";" 'avy-resume
-    "gl" 'evil-avy-goto-line ;; this rules
-    ;; TODO incorporate avy-resume (maybe ";")
-    )
+    "on" '(notmuch :wk "notmuch")) 
+  (:keymaps 'notmuch-search-mode-map
+            :states 'normal
+            "S" '+notmuch/search-delete
+            )
+  (:keymaps 'notmuch-tree-mode-map
+            :states 'normal
+            "S" '+notmuch/tree-delete)
   )
 
 (use-package sly)
 
-()
-
 (use-package lispy
-  :hook (elisp-mode . lispy-mode)
+  :hook (emacs-lisp-mode . lispy-mode)
   (racket-mode . lispy-mode))
 
 (use-package lispyville
   :hook (lispy-mode . lispyville-mode)
+  ;; the following is necessary to retain tab completion in lispy mode
+  :general
+  ;; (:keymaps 'evil-collection-lispy-mode-map-special
+  ;;           "TAB" 'indent-for-tab-command)
+  (:keymaps 'lispy-mode-map 
+            "TAB" 'indent-for-tab-command)
   :config
   ;; TODO play around with keythemes 
   (lispyville-set-key-theme '(operators c-w additional)))
@@ -774,39 +827,9 @@
 (use-package helpful
   :general
   (patrl/leader-keys
+    "hc" '(helpful-command :wk "helpful command")
     "hf" '(helpful-callable :wk "helpful callable")
     "hh" '(helpful-at-point :wk "helpful at point")
     "hF" '(helpful-function :wk "helpful function")
     "hv" '(helpful-variable :wk "helpful variable")
     "hk" '(helpful-key :wk "helpful key")))
-
-(use-package crdt)
-
-;; (use-package cdlatex)
-
-;; (use-package company
-;;   :custom
-;;   (company-idle-delay nil) ;; turn off auto-completion
-;;   :general
-;;   (:keymap 'company-mode-map
-;;            "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-;;   :hook
-;;   (prog-mode . company-mode)
-;;   (LaTeX-mode . company-mode)
-;;   :config
-;;   ;; the following stops company from using the orderless completion style
-;;   ;; makes company much more useful
-;;   (define-advice company-capf
-;;       (:around (orig-fun &rest args) set-completion-styles)
-;;     (let ((completion-styles '(basic partial-completion)))
-;;       (apply orig-fun args)))
-;;   )
-
-;; (use-package company-bibtex
-;;   :init
-;;   (setq company-bibtex-bibliography
-;; 	'("/home/patrl/repos/bibliography/master.bib"))
-;;   :after company
-;;   :config
-;;   (add-to-list 'company-backends 'company-bibtex)
-;;   )
