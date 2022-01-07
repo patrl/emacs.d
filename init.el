@@ -177,6 +177,7 @@
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal)
   (evil-set-initial-state 'eshell-mode 'insert)
+  (evil-set-initial-state 'magit-diff-mode 'insert)
   )
 
 (use-package evil-collection ;; evilifies a bunch of things
