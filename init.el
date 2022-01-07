@@ -686,6 +686,9 @@
   (setq ispell-silently-savep t)
 )
 
+(use-package simple-httpd
+  :commands httpd-serve-directory)
+
 (use-package magit
   :general
   (patrl/leader-keys
@@ -730,6 +733,18 @@
   :config
   (direnv-mode))
 
+(use-package popper
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode
+          "^\\*eshell.*\\*" eshell-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))
+
 (use-package lua-mode
   :mode "\\.lua\\'")
 
@@ -741,12 +756,9 @@
 
 (use-package elfeed-org
   :init
-  (setq rmh-elfeed-org-files (list "~/Dropbox (MIT)/org/elfeed.org"))
+ (setq rmh-elfeed-org-files (list "~/Dropbox (MIT)/org/elfeed.org"))
   :config
   (elfeed-org))
-
-(use-package simple-httpd
-  :commands httpd-serve-directory)
 
 (use-package notmuch
   :init
@@ -784,8 +796,6 @@
   :hook (lispy-mode . lispyville-mode)
   ;; the following is necessary to retain tab completion in lispy mode
   :general
-  ;; (:keymaps 'evil-collection-lispy-mode-map-special
-  ;;           "TAB" 'indent-for-tab-command)
   (:keymaps 'lispy-mode-map 
             "TAB" 'indent-for-tab-command)
   :config

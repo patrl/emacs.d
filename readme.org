@@ -5,8 +5,6 @@
 
 Currently tailored for GNU Emacs 29.0.50.
 
-Patrick is.
-
 * Useful resources
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
