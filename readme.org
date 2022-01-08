@@ -2,6 +2,7 @@
 #+author: Patrick D. Elliott
 #+email: patrick.d.elliott@gmail.com
 #+date: <2021-11-08 Mon>
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
 Currently tailored for GNU Emacs 29.0.50.
 
@@ -26,16 +27,16 @@ Since we're using ~straight.el~  "as" our package manager, we add the following 
 Disable GUI elements before we have a chance to peek.
 
 #+begin_src emacs-lisp :tangle early-init.el
-(menu-bar-mode -1) ;; disables menubar
-(tool-bar-mode -1) ;; disables toolbar
-(scroll-bar-mode -1) ;; disables scrollbar
+  (menu-bar-mode -1) ;; disables menubar
+  (tool-bar-mode -1) ;; disables toolbar
+  (scroll-bar-mode -1) ;; disables scrollbar
 
-(setq inhibit-splash-screen t) ;; no thanks
-(setq use-file-dialog nil) ;; don't use system file dialog
+  (setq inhibit-splash-screen t) ;; no thanks
+  (setq use-file-dialog nil) ;; don't use system file dialog
 
-(setq tab-bar-new-button-show nil) ;; don't show new tab button
-(setq tab-bar-close-button-show nil) ;; don't show tab close button
-;;; early-init.el ends here
+  (setq tab-bar-new-button-show nil) ;; don't show new tab button
+  (setq tab-bar-close-button-show nil) ;; don't show tab close button
+  ;;; early-init.el ends here
 #+end_src
 
 * Init file
@@ -452,6 +453,7 @@ Visually highlight todo.
     :straight (:type built-in))
 
   ;; automatically organize projects
+  ;; TODO consider replacing this with bufler
   (use-package project-tab-groups
     :after (project tab-bar)
     :config
@@ -599,6 +601,12 @@ N.b. this currently doesn't play nicely with most fonts.
                     ("\\subparagraph{%s}" . "\\subparagraph*{%s}")
                     )))
 
+#+end_src
+
+*** Syntax highlighting
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package htmlize)
 #+end_src
 
 ** TODO haskell
@@ -1054,22 +1062,35 @@ Essential, since I'm on NixOS.
 
 * Staging grounds
 
-** Popper
+** Popup management
 
 Classify certain buffer types as popups.
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package popper
-      :init
-      (setq popper-reference-buffers
-            '("\\*Messages\\*"
-              "Output\\*$"
-              "\\*Async Shell Command\\*"
-              help-mode
-              compilation-mode
-              "^\\*eshell.*\\*" eshell-mode))
-      (popper-mode +1)
-      (popper-echo-mode +1))
+  (use-package popper
+    :general
+    (patrl/leader-keys
+          "P" '(:ignore t :wk "popper")
+          "Pc" '(popper-cycle t :wk "cycle")
+          "Pt" '(popper-toggle-latest t :wk "toggle latest")
+          "Pb" '(popper-toggle-type t :wk "toggle type")
+          "Pk" '(popper-kill-latest-popup t :wk "kill latest")
+      )
+    :init
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "Output\\*$"
+            "\\*Async Shell Command\\*"
+            help-mode
+            compilation-mode
+            "^\\*eshell.*\\*" eshell-mode
+            "\\*direnv\\*"
+            "\\*elfeed-log\\*"
+            "\\*straight-process\\*"
+            "\\*Async-native-compile-log\\*"
+            ))
+    (popper-mode +1)
+    (popper-echo-mode +1))
 #+end_src
 
 ** Lua
@@ -1126,11 +1147,11 @@ Resources:
       "on" '(notmuch :wk "notmuch")) 
     (:keymaps 'notmuch-search-mode-map
               :states 'normal
-              "S" '+notmuch/search-delete
+              "D" '+notmuch/search-delete
               )
     (:keymaps 'notmuch-tree-mode-map
               :states 'normal
-              "S" '+notmuch/tree-delete)
+              "D" '+notmuch/tree-delete)
     )
 #+end_src
 
@@ -1278,6 +1299,8 @@ Packages i've tried out which, for whatever reason, haven't suited me.
   ;;   )
 #+end_src
  
+* File local variables                                             :noexport:
+
 ;; Local Variables: 
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t) 
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t) 

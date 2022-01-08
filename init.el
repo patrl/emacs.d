@@ -304,6 +304,7 @@
   :straight (:type built-in))
 
 ;; automatically organize projects
+;; TODO consider replacing this with bufler
 (use-package project-tab-groups
   :after (project tab-bar)
   :config
@@ -420,6 +421,8 @@
                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")
                   )))
+
+(use-package htmlize)
 
 (use-package haskell-mode)
 
@@ -735,6 +738,14 @@
   (direnv-mode))
 
 (use-package popper
+  :general
+  (patrl/leader-keys
+        "P" '(:ignore t :wk "popper")
+        "Pc" '(popper-cycle t :wk "cycle")
+        "Pt" '(popper-toggle-latest t :wk "toggle latest")
+        "Pb" '(popper-toggle-type t :wk "toggle type")
+        "Pk" '(popper-kill-latest-popup t :wk "kill latest")
+    )
   :init
   (setq popper-reference-buffers
         '("\\*Messages\\*"
@@ -742,7 +753,12 @@
           "\\*Async Shell Command\\*"
           help-mode
           compilation-mode
-          "^\\*eshell.*\\*" eshell-mode))
+          "^\\*eshell.*\\*" eshell-mode
+          "\\*direnv\\*"
+          "\\*elfeed-log\\*"
+          "\\*straight-process\\*"
+          "\\*Async-native-compile-log\\*"
+          ))
   (popper-mode +1)
   (popper-echo-mode +1))
 
@@ -780,11 +796,11 @@
     "on" '(notmuch :wk "notmuch")) 
   (:keymaps 'notmuch-search-mode-map
             :states 'normal
-            "S" '+notmuch/search-delete
+            "D" '+notmuch/search-delete
             )
   (:keymaps 'notmuch-tree-mode-map
             :states 'normal
-            "S" '+notmuch/tree-delete)
+            "D" '+notmuch/tree-delete)
   )
 
 (use-package sly)
