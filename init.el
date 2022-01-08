@@ -482,7 +482,7 @@
               #'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   (add-hook 'TeX-mode-hook #'outline-minor-mode)
-  (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
+  ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
   )
 
 ;; (use-package auctex-latexmk
