@@ -64,13 +64,14 @@
 (use-package electric
   :straight (:type built-in)
   :init
-  (electric-pair-mode +1) ;; automatically insert closing parens 
+  (electric-pair-mode +1) ;; automatically insert closing parens
   (setq electric-pair-preserve-balance nil) ;; more annoying than useful
   )
 
 (use-package general
   :config
-  (general-evil-setup) ;; integrate general with evil
+  (general-evil-setup)
+  ;; integrate general with evil
 
   ;; set up 'SPC' as the global leader key
   (general-create-definer patrl/leader-keys
@@ -95,34 +96,38 @@
 
   ;; unbind some useless bindings
   (general-unbind
-    "C-x C-r" ;; unbind find file read only
-    "C-x C-z" ;; unbind suspend frame
-    "C-x C-d" ;; unbind list directory
+    "C-x C-r"	;; unbind find file read only
+    "C-x C-z"	;; unbind suspend frame
+    "C-x C-d"	;; unbind list directory
     "<mouse-2>" ;; pasting with mouse wheel click
-    ) 
+    )
+
 
   (patrl/leader-keys
     "SPC" '(execute-extended-command :wk "execute command")
     "." '(find-file :wk "find file")
-    "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
+    "TAB" '(:keymap tab-prefix-map :wk "tab")
+    ;; remap tab bindings
     )
 
   ;; help
   (patrl/leader-keys
     "h" '(:ignore t :wk "help")
-                )
+    )
 
   ;; file
   (patrl/leader-keys
     "f" '(:ignore t :wk "file")
-    "ff" '(find-file :wk "find file") ;; gets overridden by consult
+    "ff" '(find-file :wk "find file")
+    ;; gets overridden by consult
     "fs" '(save-buffer :wk "save file")
     )
 
   ;; buffer 
   (patrl/leader-keys
     "b" '(:ignore t :wk "buffer")
-    "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
+    "bb" '(switch-to-buffer :wk "switch buffer")
+    ;; gets overridden by consult
     "bk" '(kill-this-buffer :wk "kill this buffer")
     "br" '(revert-buffer :wk "reload buffer")
     )
@@ -134,19 +139,23 @@
 
   ;; notes
   (patrl/leader-keys
-    "n" '(:ignore t :wk "notes") ;; see org-roam and citar sections
-    "na" '(org-todo-list :wk "agenda todos") ;; agenda
+    "n" '(:ignore t :wk "notes")
+    ;; see org-roam and citar sections
+    "na" '(org-todo-list :wk "agenda todos")
+    ;; agenda
     )
 
   ;; code
   (patrl/leader-keys
-    "c" '(:ignore t :wk "code") ;; see flymake
+    "c" '(:ignore t :wk "code")
+    ;; see flymake
     )
 
   ;; open
   (patrl/leader-keys
     "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar") ;; FIXME I never use this
+    "os" '(speedbar t :wk "speedbar")
+    ;; FIXME I never use this
     )
 
   ;; search
@@ -237,6 +246,10 @@
   :config
   (which-key-setup-minibuffer))
 
+;; (use-package which-key-posframe
+;;   :init (which-key-posframe-mode)
+;;   )
+
 (use-package all-the-icons
   :if (display-graphic-p))
 
@@ -277,15 +290,15 @@
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
+        doom-themes-enable-italic t)
+                                        ; if nil, italics is universally disabled
   (load-theme 'doom-nord t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
   ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config)
-  )
+  (doom-themes-org-config))
 
 (use-package hl-todo
   :init
@@ -356,6 +369,7 @@
     "i" '(:ignore t :wk "insert")
     "ih" '(org-insert-heading :wk "insert heading")
     "is" '(org-insert-subheading :wk "insert heading")
+    "f" '(org-footnote-action :wk "footnote action")
     )
   (:keymaps 'org-agenda-mode-map
             "j" '(org-agenda-next-line)
@@ -437,6 +451,8 @@
     "xr" '(racket-xp-rename :wk "rename")
     ))
 
+(use-package pollen-mode)
+
 (use-package nix-mode
   ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
   :mode "\\.nix\\'")
@@ -502,6 +518,14 @@
   :hook (LaTeX-mode . evil-tex-mode))
 
 (use-package citar
+  :after all-the-icons
+  :config
+  ;; icon support via all-the-icons
+  (setq citar-symbols
+        `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+          (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+  (setq citar-symbol-separator "  ")
   :general
   (patrl/leader-keys
     "nb" '(citar-insert-citation :wk "citar")
@@ -615,6 +639,7 @@
     "sf" '(consult-find :wk "consult find")
     "sF" '(consult-locate :wk "consult locate")
     "sl" '(consult-line :wk "consult line")
+    "sy" '(consult-yank-from-kill-ring :wk "consult yank from kill ring")
     )
   )
 
@@ -650,6 +675,15 @@
   :init
   (corfu-global-mode)
   )
+
+;; add icons to corfu
+;; (use-package kind-icon
+;;   :after corfu
+;;   :custom
+;;   (kind-icon-default-style '(:padding 0 :stroke 0 :margin 0 :radius 0 :height 0.5 :scale 0.5))
+;;   (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
+;;   :config
+;;   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (general-unbind
   :states '(insert)
@@ -709,33 +743,26 @@
     )
   )
 
-(use-package lsp-mode
-  :custom
-  (lsp-completion-provider :none) ;; probably want to delete this if I reenable company
-  :hook
-  (lsp-mode . lsp-enable-which-key-integration)
-  :commands
-  lsp
-)
-
-(use-package lsp-ui
-  :after lsp-mode
-  :commands lsp-ui-mode
-  )
-
-(use-package lsp-haskell
-  :after lsp-mode
+(use-package eglot
   :init
-  (add-hook 'haskell-mode-hook #'lsp)
-  (add-hook 'haskell-literate-mode-hook #'lsp)
-  :config
-  (setq lsp-haskell-server-path "haskell-language-server") ;; for some reason this doesn't get found automatically
-  ;; (setq lsp-haskell-formatting-provider "brittany")
-  )
+  (add-hook 'haskell-mode-hook 'eglot-ensure))
 
 (use-package direnv
   :config
   (direnv-mode))
+
+(use-package 0x0
+  :general
+  (patrl/leader-keys
+    "0" '(:ignore t :wk "0x0")
+    "0;" '(0x0-dwim t :wk "0x0 dwim")
+    "0t" '(0x0-upload-text :wk "upload text")
+    "0f" '(0x0-upload-file :wk "upload file")
+    "0k" '(0x0-upload-kill-ring :wk "upload kill ring")
+    "0p" '(0x0-popup :wk "0x0 popup")
+    "0s" '(0x0-shorten-uri :wk "shorten url")
+    )
+)
 
 (use-package popper
   :general
@@ -750,14 +777,18 @@
   (setq popper-reference-buffers
         '("\\*Messages\\*"
           "Output\\*$"
+          "\\*helpful"
           "\\*Async Shell Command\\*"
           help-mode
           compilation-mode
+          magit-process-mode
           "^\\*eshell.*\\*" eshell-mode
           "\\*direnv\\*"
           "\\*elfeed-log\\*"
           "\\*straight-process\\*"
           "\\*Async-native-compile-log\\*"
+          "\\*TeX Help\\*"
+          "\\*Embark Collect Live\\*"
           ))
   (popper-mode +1)
   (popper-echo-mode +1))
@@ -806,15 +837,15 @@
 (use-package sly)
 
 (use-package lispy
+  :general
+  (:keymaps 'lispy-mode-map 
+            "TAB" 'indent-for-tab-command)
   :hook (emacs-lisp-mode . lispy-mode)
   (racket-mode . lispy-mode))
 
 (use-package lispyville
   :hook (lispy-mode . lispyville-mode)
-  ;; the following is necessary to retain tab completion in lispy mode
-  :general
-  (:keymaps 'lispy-mode-map 
-            "TAB" 'indent-for-tab-command)
+  ;; the following is necessary to retain tab completion in lispy mode 
   :config
   ;; TODO play around with keythemes 
   (lispyville-set-key-theme '(operators c-w additional)))
