@@ -2,6 +2,7 @@
 #+author: Patrick D. Elliott
 #+email: patrick.d.elliott@gmail.com
 #+date: <2021-11-08 Mon>
+#+EXPORT_FILE_NAME: ./docs/index.html
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
 Currently tailored for GNU Emacs 29.0.50.
@@ -9,7 +10,6 @@ Currently tailored for GNU Emacs 29.0.50.
 * Useful resources
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
-- [[https://github.com/pniedzielski/emacs.d/][GitHub - pniedzielski/emacs.d: My Emacs Configuration, finally git-ified]] 
 - [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]]   
 - [[https://github.com/abo-abo/oremacs][GitHub - abo-abo/oremacs: My Emacs config]]
 - [[https://github.com/jwiegley/dot-emacs][GitHub - jwiegley/dot-emacs: My .emacs.el file and other personal Emacs goodies]]
@@ -23,9 +23,9 @@ Currently tailored for GNU Emacs 29.0.50.
 Since we're using ~straight.el~  as our package manager, we add the following to ~early-init.el~ to prevent ~package.el~ from loading packages, prior to our init file loading.
 
 #+begin_src emacs-lisp
-;;; early-init.el --- Early Init File -*- lexical-binding: t; no-byte-compile: t -*-
+  ;;; early-init.el --- Early Init File -*- lexical-binding: t; no-byte-compile: t -*-
 
-(setq package-enable-at-startup nil)
+  (setq package-enable-at-startup nil)
 #+end_src
 
 Disable GUI elements before we have a chance to peek.
@@ -40,18 +40,21 @@ Disable GUI elements before we have a chance to peek.
 
   (setq tab-bar-new-button-show nil) ;; don't show new tab button
   (setq tab-bar-close-button-show nil) ;; don't show tab close button
+  (setq tab-line-close-button-show nil) ;; don't show tab close button
   ;;; early-init.el ends here
 #+end_src
 
-* Init file
+* Package management
+
+** ~init.el~ header
 
 #+begin_src emacs-lisp :tangle init.el
 ;;; init.el --- Personal configuration file -*- lexical-binding: t; no-byte-compile: t; -*-
 ;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
 #+end_src
 
-** Package management: ~straight.el~
-   
+** ~straight.el~
+ 
 - [[https://github.com/raxod502/straight.el][GitHub - raxod502/straight.el: 🍀 Next-generation, purely functional package m...]]
 
 Some rules/conventions:
@@ -102,7 +105,7 @@ Quick how-to for straight:
 
       (setq indent-tabs-mode nil) ;; tabs are evil
 
-      (setq make-backup-files nil) ;; no littering
+      (setq make-backup-files nil) ;; keep everything under vc 
       (setq auto-save-default nil)
       (setq create-lockfiles nil)
 
@@ -149,10 +152,11 @@ Quick how-to for straight:
     )
 #+end_src
 
-
 * Keybindings
 
-** TODO Cheatsheet
+Mnemonic keybindings with ~SPC~ as the leader key, inspired by spacemacs and doom emacs.
+
+The local leader ~,~ is used for mode-specific bindings.
 
 ** General
 
@@ -166,7 +170,7 @@ Quick how-to for straight:
       (general-create-definer patrl/leader-keys
         :states '(normal insert visual emacs)
         :keymaps 'override
-        :prefix "SPC"
+        :prefix "SPC" ;; set leader
         :global-prefix "M-SPC" ;; access leader in insert mode
         )
 
@@ -174,7 +178,7 @@ Quick how-to for straight:
       (general-create-definer patrl/local-leader-keys
         :states '(normal insert visual emacs)
         :keymaps 'override
-        :prefix ","
+        :prefix "," ;; set local leader
         :global-prefix "M-SPC m" ;; access local leader in insert mode
         )
 
@@ -183,7 +187,7 @@ Quick how-to for straight:
        "C-g" 'evil-normal-state ;; don't stretch for ESC
        )
 
-      ;; unbind some useless bindings
+      ;; unbind some annoying default bindings
       (general-unbind
         "C-x C-r"	;; unbind find file read only
         "C-x C-z"	;; unbind suspend frame
@@ -193,13 +197,12 @@ Quick how-to for straight:
 
 
       (patrl/leader-keys
-        "SPC" '(execute-extended-command :wk "execute command")
-        "." '(find-file :wk "find file")
-        "TAB" '(:keymap tab-prefix-map :wk "tab")
-        ;; remap tab bindings
+        "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
+        "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
         )
 
       ;; help
+      ;; namespace mostly used by 'helpful'
       (patrl/leader-keys
         "h" '(:ignore t :wk "help")
         )
@@ -207,18 +210,24 @@ Quick how-to for straight:
       ;; file
       (patrl/leader-keys
         "f" '(:ignore t :wk "file")
-        "ff" '(find-file :wk "find file")
-        ;; gets overridden by consult
+        "ff" '(find-file :wk "find file") ;; gets overridden by consult
         "fs" '(save-buffer :wk "save file")
         )
 
       ;; buffer 
+      ;; see 'bufler' and 'popper'
       (patrl/leader-keys
         "b" '(:ignore t :wk "buffer")
-        "bb" '(switch-to-buffer :wk "switch buffer")
-        ;; gets overridden by consult
+        "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
         "bk" '(kill-this-buffer :wk "kill this buffer")
         "br" '(revert-buffer :wk "reload buffer")
+        )
+
+      ;; bookmark
+      (patrl/leader-keys
+        "B" '(:ignore t :wk "bookmark")
+        "Bs" '(bookmark-set :wk "set bookmark")
+        "Bj" '(bookmark-jump :wk "jump to bookmark")
         )
 
       ;; universal argument
@@ -227,6 +236,7 @@ Quick how-to for straight:
         )
 
       ;; notes
+      ;; see 'citar' and 'org-roam'
       (patrl/leader-keys
         "n" '(:ignore t :wk "notes")
         ;; see org-roam and citar sections
@@ -235,19 +245,19 @@ Quick how-to for straight:
         )
 
       ;; code
+      ;; see 'flymake'
       (patrl/leader-keys
         "c" '(:ignore t :wk "code")
-        ;; see flymake
         )
 
       ;; open
       (patrl/leader-keys
         "o" '(:ignore t :wk "open")
-        "os" '(speedbar t :wk "speedbar")
-        ;; FIXME I never use this
+        "os" '(speedbar t :wk "speedbar") ;; FIXME this needs some love
         )
 
       ;; search
+      ;; see 'consult'
       (patrl/leader-keys
         "s" '(:ignore t :wk "search")
         )
@@ -263,7 +273,7 @@ Quick how-to for straight:
       "w" '(:keymap evil-window-map :wk "window") ;; window bindings
       )
     :init
-    (setq evil-search-module 'evil-search) ;; makes evil search more like vim
+    (setq evil-search-module 'isearch)
 
     (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
     (setq evil-want-C-d-scroll t) ;; allow scroll down with 'C-d'
@@ -279,8 +289,10 @@ Quick how-to for straight:
     (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
     :config
     (evil-mode t) ;; globally enable evil mode
+    ;; set the initial state for some kinds of buffers.
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal)
+    ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
     (evil-set-initial-state 'eshell-mode 'insert)
     (evil-set-initial-state 'magit-diff-mode 'insert)
     )
@@ -298,7 +310,6 @@ Quick how-to for straight:
     )
 
   ;; port of Tim Pope's commentary package
-  ;; 'g c c' in normal mode to comment a line.
   (use-package evil-commentary
     :after evil
     :config
@@ -327,7 +338,9 @@ Quick how-to for straight:
     (evil-goggles-use-diff-faces))
 #+end_src 
 
-** Avy
+** TODO Avy
+
+Super-charged navigaton.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package avy
@@ -336,7 +349,7 @@ Quick how-to for straight:
       "s" 'evil-avy-goto-char-timer
       "f" 'evil-avy-goto-char-in-line
       "gl" 'evil-avy-goto-line ;; this rules
-      ;; TODO incorporate avy-resume (maybe ";")
+      ";" 'avy-resume
       )
     )
 #+end_src
@@ -401,6 +414,7 @@ Minimal mode line.
     (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
     (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
     (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+    (set-fontset-font t nil "Twitter Color Emoji")
     )
 
   ;; run this hook after we have initialized the first time
@@ -410,8 +424,6 @@ Minimal mode line.
 #+end_src
 
 N.b. that this interacts with ~org-superstars-mode~.
-
-*** TODO get emoji font working
 
 ** Themes
 
@@ -455,14 +467,68 @@ Visually highlight todo.
 #+end_src
   
 * Organization
-   
+
+** Buffer management
+
+*** ~Popper~
+
+Classify certain buffer types as popups.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package popper
+    :general
+    (patrl/leader-keys
+          "bp" '(:ignore t :wk "popper")
+          "bpc" '(popper-cycle t :wk "cycle")
+          "bpt" '(popper-toggle-latest t :wk "toggle latest")
+          "bpb" '(popper-toggle-type t :wk "toggle type")
+          "bpk" '(popper-kill-latest-popup t :wk "kill latest")
+      )
+    :init
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "Output\\*$"
+            "\\*helpful"
+            "\\*Async Shell Command\\*"
+            help-mode
+            compilation-mode
+            magit-process-mode
+            "^\\*eshell.*\\*" eshell-mode
+            "\\*direnv\\*"
+            "\\*elfeed-log\\*"
+            "\\*straight-process\\*"
+            "\\*Async-native-compile-log\\*"
+            "\\*TeX Help\\*"
+            "\\*Embark Collect Live\\*"
+            ))
+    (popper-mode +1)
+    (popper-echo-mode +1))
+#+end_src
+
+*** ~bufler~
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package bufler
+    :custom
+    (bufler-workspace-mode t)
+    ;; (bufler-workspace-tabs-mode t)
+    :general
+    (patrl/leader-keys
+      "bB" '(bufler :wk "bufler") ;; overrides consult
+      "bf" '(bufler-workspace-frame-set :wk "bufler workspace frame set") 
+      "bl" '(bufler-list :wk "bufler list") 
+      )
+    (:keymaps 'bufler-list-mode-map
+              :states 'normal
+              "?" 'hydra:bufler/body
+              "RET" 'bufler-list-buffer-switch
+              "SPC" 'bufler-list-buffer-peek)
+    )
+#+end_src
+
 ** Tabs and projects
   
 #+begin_src emacs-lisp :tangle init.el 
-  (use-package tab-bar
-    :init (tab-bar-mode)
-    :straight (:type built-in))
-
   ;; use emacs' built-in 'project.el'
   (use-package project
     :general
@@ -470,13 +536,6 @@ Visually highlight todo.
       "p" '(:keymap project-prefix-map :wk "project")
       )
     :straight (:type built-in))
-
-  ;; automatically organize projects
-  ;; TODO consider replacing this with bufler
-  (use-package project-tab-groups
-    :after (project tab-bar)
-    :config
-    (project-tab-groups-mode 1))
 #+end_src
 
 ** File management
@@ -505,63 +564,99 @@ Visually highlight todo.
   
 * Languages
 
-** Org mode
+** Lua
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package lua-mode
+    :mode "\\.lua\\'")
+#+end_src
+
+** Lisp
+
+*** Sly
+
+#+begin_src emacs-lisp :tangle init.el
+  ;; FIXME - compatibility with corfu
+  (use-package sly)
+#+end_src
+
+*** lispy
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package lispy
+    :general
+    (:keymaps 'lispy-mode-map 
+              "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+    :hook (emacs-lisp-mode . lispy-mode)
+    (racket-mode . lispy-mode))
+
+  (use-package lispyville
+    :hook (lispy-mode . lispyville-mode)
+    :general
+    (:keymaps 'lispyville-mode-map
+              "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+    ;; the following is necessary to retain tab completion in lispy mode 
+    :config
+    ;; TODO play around with keythemes 
+    (lispyville-set-key-theme '(operators c-w additional)))
+#+end_src
+
+** Org 
+
+*** Org mode
 
 Resources:
 - [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
 - [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
    
   #+begin_src emacs-lisp :tangle init.el
-    (use-package org
-      ;; :straight (:type built-in)
-      :init
-      (setq org-todo-keywords
-            ;; it's extremely useful to distinguish between short-term goals and long-term projects
-            '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)")))
-      (setq org-src-fontify-natively t) ;; fontify code in src blocks
-      (setq org-highlight-latex-and-related '(native))
-      (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
-      :custom
-      (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
-      :general
-      (patrl/local-leader-keys
-        :keymaps 'org-mode-map
-        "l" '(:ignore t :wk "link")
-        "ll" '(org-insert-link t :wk "link")
-        "s" '(consult-org-heading :wk "consult heading")
-        "d" '(org-cut-special :wk "org cut special")
-        "y" '(org-copy-special :wk "org copy special")
-        "p" '(org-paste-special :wk "org paste special")
-        "b" '(:keymap org-babel-map :wk "babel")
-        "t" '(org-insert-structure-template :wk "template")
-        "e" '(org-edit-special :wk "edit")
-        "i" '(:ignore t :wk "insert")
-        "ih" '(org-insert-heading :wk "insert heading")
-        "is" '(org-insert-subheading :wk "insert heading")
-        "f" '(org-footnote-action :wk "footnote action")
-        )
-      (:keymaps 'org-agenda-mode-map
-                "j" '(org-agenda-next-line)
-                "h" '(org-agenda-previous-line))
+            (use-package org
+              ;; :straight (:type built-in)
+              :init
+              (setq org-todo-keywords
+                    ;; it's extremely useful to distinguish between short-term goals and long-term projects
+                    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+                      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+                      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+              (setq org-src-fontify-natively t) ;; fontify code in src blocks
+              (setq org-highlight-latex-and-related '(native))
+              (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+              :custom
+              (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
+              :general
+              (patrl/local-leader-keys
+                :keymaps 'org-mode-map
+                "l" '(:ignore t :wk "link")
+                "ll" '(org-insert-link t :wk "link")
+                "s" '(consult-org-heading :wk "consult heading")
+                "d" '(org-cut-special :wk "org cut special")
+                "y" '(org-copy-special :wk "org copy special")
+                "p" '(org-paste-special :wk "org paste special")
+                "b" '(:keymap org-babel-map :wk "babel")
+                "t" '(org-insert-structure-template :wk "template")
+                "e" '(org-edit-special :wk "edit")
+                "i" '(:ignore t :wk "insert")
+                "ih" '(org-insert-heading :wk "insert heading")
+                "is" '(org-insert-subheading :wk "insert heading")
+                "f" '(org-footnote-action :wk "footnote action")
+                ">" '(org-demote-subtree :wk "demote subtree")
+                "<" '(org-promote-subtree :wk "demote subtree")
+                )
+              (:keymaps 'org-agenda-mode-map
+                        "j" '(org-agenda-next-line)
+                        "h" '(org-agenda-previous-line))
 
-      :hook
-      (org-mode . olivetti-mode)
-      (org-mode . variable-pitch-mode)
-      (org-mode . visual-line-mode)
-      (org-mode . org-indent-mode)
-      (org-mode . org-num-mode)
-      (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-      ;; :config
-      ;; FIXME this turns out to be a bad idea, since the symbols conflict
-      ;; (defvar org-electric-pairs '((?\* . ?\*)\ (?/ . ?/) (?= . ?=) (?\_ . ?\_) (?~ . ?~) (?+ . ?+) (?$ . ?$))) ;; electric pairs for org-mode
-      ;; (defun org-add-electric-pairs ()
-      ;;   (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
-      ;;   (setq-local electric-pair-text-pairs electric-pair-pairs))
-      ;; (add-hook 'org-mode-hook 'org-add-electric-pairs)
-      )
+              :hook
+              (org-mode . olivetti-mode)
+              (org-mode . variable-pitch-mode)
+              (org-mode . visual-line-mode)
+              (org-mode . org-indent-mode) ;; indent
+              (org-mode . org-num-mode) ;; enable section numbers
+              (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+    )
   #+end_src
    
-Install org-cliplink.   
+***  Cliplink 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-cliplink
@@ -574,13 +669,15 @@ Install org-cliplink.
     )
 #+end_src
    
-N.b. this currently doesn't play nicely with most fonts.
+*** Superstar
    
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-superstar
     :after org
     :hook
-    (org-mode . (lambda () (org-superstar-mode 1))))
+    (org-mode . (lambda () (org-superstar-mode 1)))
+    :config
+    (setq org-superstar-special-todo-items t)) ;; SOMEDAY consider using emoji for this
 #+end_src
 
 *** Org roam
@@ -590,21 +687,28 @@ N.b. this currently doesn't play nicely with most fonts.
     :general
     (patrl/leader-keys
       "nr" '(:ignore t :wk "roam")
-      "nrf" '(org-roam-node-find :wk "find")
+      "nri" '(org-roam-node-insert t :wk "insert node")
+      "nrt" '(org-roam-buffer-toggle t :wk "roam buffer toggle")
+      "nrc" '(org-roam-capture t :wk "roam capture")
+      "nrf" '(org-roam-node-find :wk "find node")
       "nrd" '(:ignore t :wk "dailies")
       "nrdt" '(org-roam-dailies-goto-today :wk "today")
       "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
       "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
+      "nrdd" '(org-roam-dailies-goto-date :wk "goto date")
       )
     :init
     (setq org-roam-v2-ack t) ;; disables v2 warning
     :config
     (setq org-roam-directory (file-truename "~/notes"))
-    (org-roam-db-autosync-enable)
+    (setq org-roam-dailies-directory "daily/")
+    (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
     )
 #+end_src
 
-*** Org latex export 
+**** TODO configure the org-roam buffer display
+
+*** Export 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citeproc
@@ -623,11 +727,25 @@ N.b. this currently doesn't play nicely with most fonts.
 
 #+end_src
 
-*** Syntax highlighting
+*** Highlighting
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package htmlize)
 #+end_src
+
+*** Org-noter
+
+#+begin_src emacs-lisp :tangle init.el 
+    (use-package org-noter
+      :commands
+      org-noter
+      :config
+      (setq org-noter-notes-search-path '("~/notes"))
+      (setq org-noter-default-notes-file-names '("literature-notes.org"))
+  )
+#+end_src
+
+*** TODO checkout org-appear
 
 ** TODO haskell
 
@@ -733,16 +851,6 @@ Auto-activating snippets:
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package auctex-latexmk
-  ;;   :after latex 
-  ;;   :init
-  ;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-  ;;   :config
-  ;;   (auctex-latexmk-setup)
-  ;;   )
-#+end_src
-
-#+begin_src emacs-lisp :tangle init.el
   (use-package pdf-tools
     :config
     (pdf-tools-install)
@@ -770,15 +878,30 @@ Auto-activating snippets:
     (setq citar-symbol-separator "  ")
     :general
     (patrl/leader-keys
-      "nb" '(citar-insert-citation :wk "citar")
+      "nb" '(citar-open :wk "citar")
       )
     :custom
+    (citar-notes-paths '("~/notes"))
     (citar-library-paths '("~/Dropbox (MIT)/library"))
     (citar-bibliography '("~/repos/bibliography/master.bib"))
     )
 #+end_src
 
 **** TODO add "citep" and "citealt" to the supported list of latex citation commands.
+
+**** TODO latexmk
+
+#+begin_src emacs-lisp :tangle init.el
+  ;; FIXME
+  (use-package auctex-latexmk
+    :disabled
+    :after latex 
+    :init
+    (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+    :config
+    (auctex-latexmk-setup)
+    )
+#+end_src
 
 *** Snippets
 
@@ -812,6 +935,8 @@ Auto-activating snippets:
       ;; bind to functions!
       "sum" (lambda () (interactive)
               (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+      "grandu" (lambda () (interactive)
+              (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
       "Span" (lambda () (interactive)
                (yas-expand-snippet "\\Span($1)$0"))
       "lam" (lambda () (interactive)
@@ -832,7 +957,6 @@ Auto-activating snippets:
 #+end_src
 
 *** Issues
-**** TODO "LatexMk" is duplicated in ~TeX-command~.
 **** TODO pdf buffer isn't reverted in preview continuously mode.
 I think probably I just need to use zathura as the pdf viewer, which has its own smart revert functionality.
 
@@ -852,8 +976,6 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (setq markdown-header-scaling t))
 #+end_src
    
-*** TODO pandoc mode
-
 #+begin_src emacs-lisp :tangle init.el 
   (use-package pandoc-mode
     :after markdown-mode
@@ -870,19 +992,19 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (setq vertico-cycle t) ;; enable cycling for 'vertico-next' and 'vertico-prev'
     :general
     (:keymaps 'vertico-map
-	      ;; keybindings to cycle through vertico results.
-	      "C-j" 'vertico-next
-	      "C-k" 'vertico-previous
-	      "C-f" 'vertico-exit)
+              ;; keybindings to cycle through vertico results.
+              "C-j" 'vertico-next
+              "C-k" 'vertico-previous
+              "C-f" 'vertico-exit)
     (:keymaps 'minibuffer-local-map
-	      "M-h" 'backward-kill-word)
+              "M-h" 'backward-kill-word)
     )
 
   (use-package orderless
     :init
     (setq completion-styles '(orderless)
-	  completion-category-defaults nil
-	  completion-category-overrides '((file (styles partial-completion)))))
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles partial-completion)))))
 
   (use-package savehist
     :init
@@ -903,6 +1025,7 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     :general
     (patrl/leader-keys
       "bb" '(consult-buffer :wk "consult buffer")
+      "Bb" '(consult-bookmark :wk "consult bookmark")
       "ht" '(consult-theme :wk "consult theme")
       "sr" '(consult-ripgrep :wk "consult rg")
       "sg" '(consult-grep :wk "consult grep")
@@ -911,21 +1034,24 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
       "sF" '(consult-locate :wk "consult locate")
       "sl" '(consult-line :wk "consult line")
       "sy" '(consult-yank-from-kill-ring :wk "consult yank from kill ring")
+      "i" '(consult-imenu :wk "consult imenu")
       )
-    )
+    :config
+    ;; use project.el to retrieve the project root
+    (setq consult-project-root-function
+          (lambda ()
+            (when-let (project (project-current))
+              (car (project-roots project))))))
 #+end_src
 
-  
-
-** TODO Embark
+** Embark
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package embark
     :general
-    (
-     "C-." 'embark-act
-     "C-;" 'embark-dwim
-     )
+    (patrl/leader-keys
+       "." 'embark-act) ;; easily accessible 'embark-act' binding.
+    ("C-;" 'embark-dwim)
     :init
     (setq prefix-help-command #'embark-prefix-help-command)
     )
@@ -939,48 +1065,23 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
-*** Embark ~which-key~ indicator:
+*** Integration with ~avy~
 
-- source: [[https://github.com/oantolin/embark/wiki/Additional-Configuration#use-which-key-like-a-key-menu-prompt][Additional Configuration · oantolin/embark Wiki · GitHub]]
+Source: [[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything | Karthinks]]
 
-#+begin_src emacs-lisp :tangle init.el 
-  (defun embark-which-key-indicator ()
-    "An embark indicator that displays keymaps using which-key.
-  The which-key help message will show the type and value of the
-  current target followed by an ellipsis if there are further
-  targets."
-    (lambda (&optional keymap targets prefix)
-      (if (null keymap)
-          (which-key--hide-popup-ignore-command)
-        (which-key--show-keymap
-         (if (eq (plist-get (car targets) :type) 'embark-become)
-             "Become"
-           (format "Act on %s '%s'%s"
-                   (plist-get (car targets) :type)
-                   (embark--truncate-target (plist-get (car targets) :target))
-                   (if (cdr targets) "…" "")))
-         (if prefix
-             (pcase (lookup-key keymap prefix 'accept-default)
-               ((and (pred keymapp) km) km)
-               (_ (key-binding prefix 'accept-default)))
-           keymap)
-         nil nil t (lambda (binding)
-                     (not (string-suffix-p "-argument" (cdr binding))))))))
+Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate. 
 
-  (setq embark-indicators
-    '(embark-which-key-indicator
-      embark-highlight-indicator
-      embark-isearch-highlight-indicator))
+#+begin_src emacs-lisp :tangle init.el
+  (defun patrl/avy-action-embark (pt)
+    (unwind-protect
+        (save-excursion
+          (goto-char pt)
+          (embark-act))
+      (select-window
+       (cdr (ring-ref avy-ring 0))))
+    t)
 
-  (defun embark-hide-which-key-indicator (fn &rest args)
-    "Hide the which-key indicator immediately when using the completing-read prompter."
-    (which-key--hide-popup-ignore-command)
-    (let ((embark-indicators
-           (remq #'embark-which-key-indicator embark-indicators)))
-        (apply fn args)))
-
-  (advice-add #'embark-completing-read-prompter
-              :around #'embark-hide-which-key-indicator)
+  (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark)
 #+end_src
 
 ** Corfu
@@ -1003,7 +1104,7 @@ A minimal ui for ~completion-in-region~.
     (corfu-global-mode)
     )
 
-  ;; add icons to corfu
+  ;; FIXME add icons to corfu
   ;; (use-package kind-icon
   ;;   :after corfu
   ;;   :custom
@@ -1019,11 +1120,11 @@ A minimal ui for ~completion-in-region~.
 
   (use-package emacs
     :init
-    (setq tab-always-indent 'complete)
+    (setq tab-always-indent 'complete) ;; enable tab completion
     )
 #+end_src
 
-*** TODO this isn't working so well with lsp-mode
+*** TODO this isn't working so well with haskell-mode
 *** TODO consider incorporating the ~cape~ package
  
 * Checkers
@@ -1054,8 +1155,6 @@ A minimal ui for ~completion-in-region~.
    
 ** Spell check  
 
-- These hooks don't appear to be doing anything.
-
 #+begin_src emacs-lisp :tangle init.el
   (use-package flymake-aspell
     :after flymake)
@@ -1080,7 +1179,7 @@ A minimal ui for ~completion-in-region~.
     :commands httpd-serve-directory)
 #+end_src
 
-** TODO git
+** Magit
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package magit
@@ -1104,18 +1203,24 @@ A minimal ui for ~completion-in-region~.
     )
 #+end_src
 
-** TODO LSP
+** LSP
 
 Note I still need to set keybindings
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle init.el
   (use-package lsp-mode
     :custom
-    (lsp-completion-provider :none) ;; probably want to delete this if I reenable company
+    (lsp-completion-provider :none) ;; we use corfu!
+    :init
+    ;; FIXME function isn't getting auto-loaded.
+    (defun patrl/lsp-mode-setup-completion ()
+      (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+            '(orderless))) ;; Configure orderless
     :hook
     (lsp-mode . lsp-enable-which-key-integration)
+    (lsp-completion-mode . patrl/lsp-mode-setup) ;; setup orderless completion style.
     :commands
-    lsp
+    lsp patrl/lsp-mode-setup-completion
   )
 
   (use-package lsp-ui
@@ -1125,23 +1230,13 @@ Note I still need to set keybindings
 
   (use-package lsp-haskell
     :after lsp-mode
-    :init
-    (add-hook 'haskell-mode-hook #'lsp)
-    (add-hook 'haskell-literate-mode-hook #'lsp)
     :config
     (setq lsp-haskell-server-path "haskell-language-server") ;; for some reason this doesn't get found automatically
     ;; (setq lsp-haskell-formatting-provider "brittany")
     )
 #+end_src
 
-#+begin_src emacs-lisp :tangle init.el
-  (use-package eglot
-    :init
-    (add-hook 'haskell-mode-hook 'eglot-ensure))
-#+end_src
-
-
-** TODO direnv
+** direnv
 
 Essential, since I'm on NixOS.
 
@@ -1151,74 +1246,21 @@ Essential, since I'm on NixOS.
     (direnv-mode))
 #+end_src
 
-* Staging grounds
-
 ** ~0x0~
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package 0x0
     :general
     (patrl/leader-keys
-      "0" '(:ignore t :wk "0x0")
-      "0;" '(0x0-dwim t :wk "0x0 dwim")
-      "0t" '(0x0-upload-text :wk "upload text")
-      "0f" '(0x0-upload-file :wk "upload file")
-      "0k" '(0x0-upload-kill-ring :wk "upload kill ring")
-      "0p" '(0x0-popup :wk "0x0 popup")
-      "0s" '(0x0-shorten-uri :wk "shorten url")
+      "x" '(:ignore t :wk "web")
+      "x;" '(0x0-dwim t :wk "0x0 dwim")
+      "xt" '(0x0-upload-text :wk "0x0 upload text")
+      "xf" '(0x0-upload-file :wk "0x0 upload file")
+      "xk" '(0x0-upload-kill-ring :wk "0x0 upload kill ring")
+      "xp" '(0x0-popup :wk "0x0 popup")
+      "xs" '(0x0-shorten-uri :wk "0x0 shorten url")
       )
   )
-#+end_src
-
-** Popup management
-
-Classify certain buffer types as popups.
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package popper
-    :general
-    (patrl/leader-keys
-          "P" '(:ignore t :wk "popper")
-          "Pc" '(popper-cycle t :wk "cycle")
-          "Pt" '(popper-toggle-latest t :wk "toggle latest")
-          "Pb" '(popper-toggle-type t :wk "toggle type")
-          "Pk" '(popper-kill-latest-popup t :wk "kill latest")
-      )
-    :init
-    (setq popper-reference-buffers
-          '("\\*Messages\\*"
-            "Output\\*$"
-            "\\*helpful"
-            "\\*Async Shell Command\\*"
-            help-mode
-            compilation-mode
-            magit-process-mode
-            "^\\*eshell.*\\*" eshell-mode
-            "\\*direnv\\*"
-            "\\*elfeed-log\\*"
-            "\\*straight-process\\*"
-            "\\*Async-native-compile-log\\*"
-            "\\*TeX Help\\*"
-            "\\*Embark Collect Live\\*"
-            ))
-    (popper-mode +1)
-    (popper-echo-mode +1))
-#+end_src
-
-** Lua
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package lua-mode
-    :mode "\\.lua\\'")
-#+end_src
-
-** TODO Cape
-
-** Numbex
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package numbex
-    :straight (:type git :host github :repo "enricoflor/numbex"))
 #+end_src
 
 ** TODO Elfeed
@@ -1227,8 +1269,28 @@ Resources:
 - [[https://karthinks.com/software/lazy-elfeed/][Lazy Elfeed | Karthinks]]
 
 #+begin_src emacs-lisp :tangle init.el
+  ;; We write a function to determine how we want elfeed to display the buffer with the current entry.
+  (defun patrl/elfeed-display-buffer (buf &optional act)
+    (pop-to-buffer buf)
+    (set-window-text-height (get-buffer-window) (round (* 0.7 (frame-height)))))
+
+  (defun patrl/elfeed-search-show-entry-pre (&optional lines)
+    "Returns a function to scroll forward or back in the Elfeed search results, displaying entries without switching to them."
+    (lambda (times)
+      (interactive "p")
+      (forward-line (* times (or lines 0)))
+      (recenter)
+      (call-interactively #'elfeed-search-show-entry)
+      (select-window (previous-window))
+      (unless elfeed-search-remain-on-entry (forward-line -1))))
+
   (use-package elfeed
-    :commands elfeed)
+    :commands elfeed
+    :general
+    (patrl/leader-keys
+      "oE" '(elfeed :wk "elfeed"))
+    ;; :config
+    (setq elfeed-show-entry-switch #'patrl/elfeed-display-buffer))
 
   (use-package elfeed-org
     :init
@@ -1237,14 +1299,19 @@ Resources:
     (elfeed-org))
 #+end_src
 
-** Notmuch
+** TODO Notmuch
+
+A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package notmuch
     :init
+    ;; in gmail, messages are trashed by removing the 'inbox' tag, and adding the 'trash' tag. This will move messages to the gmail trash folder, but won't permnanently delete them.
     (defvar +notmuch-delete-tags '("+trash" "-inbox" "-unread" "-new"))
+    ;; in gmail, messages are archived simply by removing the 'inbox' tag.
     (setq notmuch-archive-tags '("-inbox" "-new"))
     :config
+    ;; the 'new' tag isn't synced to the gmail server; messages new to notmuch aquire this tag.
     (add-to-list 'notmuch-saved-searches '(:name "new" :query "tag:new" :key "n"))
     (defun +notmuch/search-delete ()
       (interactive)
@@ -1257,6 +1324,7 @@ Resources:
     :general
     (patrl/leader-keys
       "on" '(notmuch :wk "notmuch")) 
+    ;; single key deletion.
     (:keymaps 'notmuch-search-mode-map
               :states 'normal
               "D" '+notmuch/search-delete
@@ -1267,33 +1335,15 @@ Resources:
     )
 #+end_src
 
-** Lisp
+* Staging grounds
 
-#+begin_src emacs-lisp :tangle init.el
-  (use-package sly)
+** TODO Cape
+** Numbex
+
+#+begin_src emacs-lisp
+  (use-package numbex
+    :straight (:type git :host github :repo "enricoflor/numbex"))
 #+end_src
-
-*** FIXME compatibility with ~corfu~
-
-** lispy
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package lispy
-    :general
-    (:keymaps 'lispy-mode-map 
-              "TAB" 'indent-for-tab-command)
-    :hook (emacs-lisp-mode . lispy-mode)
-    (racket-mode . lispy-mode))
-
-  (use-package lispyville
-    :hook (lispy-mode . lispyville-mode)
-    ;; the following is necessary to retain tab completion in lispy mode 
-    :config
-    ;; TODO play around with keythemes 
-    (lispyville-set-key-theme '(operators c-w additional)))
-#+end_src
-
-*** FIXME tab completion currently doesn't work properly
 
 ** Deadgrep
 
@@ -1304,20 +1354,6 @@ Resources:
       "sd" '(deadgrep :wk "deadgrep")
       )
     )
-#+end_src
-
-** TODO bufler
-
-#+begin_src emacs-lisp :tangle init.el
-  ;; (use-package bufler
-  ;;   :general
-  ;;   (patrl/leader-keys
-  ;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
-  ;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
-  ;;     )
-  ;;   :config
-  ;;   (bufler-mode)
-  ;;   (bufler-tabs-mode))
 #+end_src
 
 ** TODO snippets and templates
@@ -1345,6 +1381,20 @@ Resources:
   (use-package aas
     :hook (LaTeX-mode . aas-activate-for-major-mode)
     :hook (org-mode . aas-activate-for-major-mode)
+    :config
+    (aas-set-snippets 'text-mode
+      ":-)" "🙂"
+      "8-)" "😎"
+      ":rofl" "🤣"
+      ":lol" "😂"
+      "<3" "❤️"
+      ":eyes" "👀"
+      ":dragon" "🐉"
+      ":fire" "🔥"
+      ":hole" "🕳️"
+      ":flush" "😳"
+      ":wow" "😮"
+      )
     )
 #+end_src
 
@@ -1372,66 +1422,63 @@ Resources:
       "hk" '(helpful-key :wk "helpful key")))
 #+end_src
 
-* Footer
-
-#+begin_src emacs-lisp :tangle init.el
-#+end_src
-
 * Graveyard
 
 Packages i've tried out which, for whatever reason, haven't suited me.
 
 ** Cdrt
 
-#+begin_src emacs-lisp
-  ;; (use-package crdt)
+#+begin_src emacs-lisp :tangle init.el
+  (use-package crdt
+    :disabled)
 #+end_src
 
 ** cdlatex
 
-#+begin_src emacs-lisp 
-  ;; (use-package cdlatex)
+#+begin_src emacs-lisp :tangle init.el 
+  (use-package cdlatex
+    :disabled)
 #+end_src
 
 ** company
 
-#+begin_src emacs-lisp
-  ;; (use-package company
-  ;;   :custom
-  ;;   (company-idle-delay nil) ;; turn off auto-completion
-  ;;   :general
-  ;;   (:keymap 'company-mode-map
-  ;;            "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-  ;;   :hook
-  ;;   (prog-mode . company-mode)
-  ;;   (LaTeX-mode . company-mode)
-  ;;   :config
-  ;;   ;; the following stops company from using the orderless completion style
-  ;;   ;; makes company much more useful
-  ;;   (define-advice company-capf
-  ;;       (:around (orig-fun &rest args) set-completion-styles)
-  ;;     (let ((completion-styles '(basic partial-completion)))
-  ;;       (apply orig-fun args)))
-  ;;   )
+#+begin_src emacs-lisp :tangle init.el
+  (use-package company
+    :disabled
+    :custom
+    (company-idle-delay nil) ;; turn off auto-completion
+    :general
+    (:keymap 'company-mode-map
+             "C-SPC" 'company-complete) ;; keybinding to trigger company completion
+    :hook
+    (prog-mode . company-mode)
+    (LaTeX-mode . company-mode)
+    :config
+    ;; the following stops company from using the orderless completion style
+    ;; makes company much more useful
+    (define-advice company-capf
+        (:around (orig-fun &rest args) set-completion-styles)
+      (let ((completion-styles '(basic partial-completion)))
+        (apply orig-fun args)))
+    )
 #+end_src 
 
-#+begin_src emacs-lisp
-#+end_src
-
-#+begin_src emacs-lisp
-  ;; (use-package company-bibtex
-  ;;   :init
-  ;;   (setq company-bibtex-bibliography
-  ;; 	'("/home/patrl/repos/bibliography/master.bib"))
-  ;;   :after company
-  ;;   :config
-  ;;   (add-to-list 'company-backends 'company-bibtex)
-  ;;   )
+#+begin_src emacs-lisp :tangle init.el
+  (use-package company-bibtex
+    :disabled
+    :init
+    (setq company-bibtex-bibliography
+          '("/home/patrl/repos/bibliography/master.bib"))
+    :after company
+    :config
+    (add-to-list 'company-backends 'company-bibtex)
+    )
 #+end_src
  
 * File local variables                                             :noexport:
 
 ;; Local Variables: 
+;; eval: (add-hook 'after-save-hook (lambda nil (if (y-or-n-p "Export?") (org-html-export-to-html))) nil t) 
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t) 
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t) 
 ;; End:

@@ -11,4 +11,5 @@
 
 (setq tab-bar-new-button-show nil) ;; don't show new tab button
 (setq tab-bar-close-button-show nil) ;; don't show tab close button
+(setq tab-line-close-button-show nil) ;; don't show tab close button
 ;;; early-init.el ends here

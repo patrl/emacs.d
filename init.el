@@ -27,7 +27,7 @@
 
   (setq indent-tabs-mode nil) ;; tabs are evil
 
-  (setq make-backup-files nil) ;; no littering
+  (setq make-backup-files nil) ;; keep everything under vc 
   (setq auto-save-default nil)
   (setq create-lockfiles nil)
 
@@ -64,7 +64,7 @@
 (use-package electric
   :straight (:type built-in)
   :init
-  (electric-pair-mode +1) ;; automatically insert closing parens
+  (electric-pair-mode +1) ;; automatically insert closing parens 
   (setq electric-pair-preserve-balance nil) ;; more annoying than useful
   )
 
@@ -77,7 +77,7 @@
   (general-create-definer patrl/leader-keys
     :states '(normal insert visual emacs)
     :keymaps 'override
-    :prefix "SPC"
+    :prefix "SPC" ;; set leader
     :global-prefix "M-SPC" ;; access leader in insert mode
     )
 
@@ -85,7 +85,7 @@
   (general-create-definer patrl/local-leader-keys
     :states '(normal insert visual emacs)
     :keymaps 'override
-    :prefix ","
+    :prefix "," ;; set local leader
     :global-prefix "M-SPC m" ;; access local leader in insert mode
     )
 
@@ -94,7 +94,7 @@
    "C-g" 'evil-normal-state ;; don't stretch for ESC
    )
 
-  ;; unbind some useless bindings
+  ;; unbind some annoying default bindings
   (general-unbind
     "C-x C-r"	;; unbind find file read only
     "C-x C-z"	;; unbind suspend frame
@@ -104,13 +104,12 @@
 
 
   (patrl/leader-keys
-    "SPC" '(execute-extended-command :wk "execute command")
-    "." '(find-file :wk "find file")
-    "TAB" '(:keymap tab-prefix-map :wk "tab")
-    ;; remap tab bindings
+    "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
+    "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
     )
 
   ;; help
+  ;; namespace mostly used by 'helpful'
   (patrl/leader-keys
     "h" '(:ignore t :wk "help")
     )
@@ -118,18 +117,24 @@
   ;; file
   (patrl/leader-keys
     "f" '(:ignore t :wk "file")
-    "ff" '(find-file :wk "find file")
-    ;; gets overridden by consult
+    "ff" '(find-file :wk "find file") ;; gets overridden by consult
     "fs" '(save-buffer :wk "save file")
     )
 
   ;; buffer 
+  ;; see 'bufler' and 'popper'
   (patrl/leader-keys
     "b" '(:ignore t :wk "buffer")
-    "bb" '(switch-to-buffer :wk "switch buffer")
-    ;; gets overridden by consult
+    "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
     "bk" '(kill-this-buffer :wk "kill this buffer")
     "br" '(revert-buffer :wk "reload buffer")
+    )
+
+  ;; bookmark
+  (patrl/leader-keys
+    "B" '(:ignore t :wk "bookmark")
+    "Bs" '(bookmark-set :wk "set bookmark")
+    "Bj" '(bookmark-jump :wk "jump to bookmark")
     )
 
   ;; universal argument
@@ -138,6 +143,7 @@
     )
 
   ;; notes
+  ;; see 'citar' and 'org-roam'
   (patrl/leader-keys
     "n" '(:ignore t :wk "notes")
     ;; see org-roam and citar sections
@@ -146,19 +152,19 @@
     )
 
   ;; code
+  ;; see 'flymake'
   (patrl/leader-keys
     "c" '(:ignore t :wk "code")
-    ;; see flymake
     )
 
   ;; open
   (patrl/leader-keys
     "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar")
-    ;; FIXME I never use this
+    "os" '(speedbar t :wk "speedbar") ;; FIXME this needs some love
     )
 
   ;; search
+  ;; see 'consult'
   (patrl/leader-keys
     "s" '(:ignore t :wk "search")
     )
@@ -170,21 +176,26 @@
     "w" '(:keymap evil-window-map :wk "window") ;; window bindings
     )
   :init
-  (setq evil-search-module 'evil-search) ;; makes evil search more like vim
+  (setq evil-search-module 'isearch)
 
   (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
+  (setq evil-want-C-d-scroll t) ;; allow scroll down with 'C-d'
 
   (setq evil-want-integration t) ;; necessary for evil collection
   (setq evil-want-keybinding nil)
 
   (setq evil-split-window-below t)
-  (setq evil-split-window-right t)
+  (setq evil-vsplit-window-right t)
+
+  (setq evil-want-C-i-jump nil) ;; hopefully this will fix weird tab behaviour
 
   (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
   :config
   (evil-mode t) ;; globally enable evil mode
+  ;; set the initial state for some kinds of buffers.
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal)
+  ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
   (evil-set-initial-state 'eshell-mode 'insert)
   (evil-set-initial-state 'magit-diff-mode 'insert)
   )
@@ -202,7 +213,6 @@
   )
 
 ;; port of Tim Pope's commentary package
-;; 'g c c' in normal mode to comment a line.
 (use-package evil-commentary
   :after evil
   :config
@@ -236,7 +246,7 @@
     "s" 'evil-avy-goto-char-timer
     "f" 'evil-avy-goto-char-in-line
     "gl" 'evil-avy-goto-line ;; this rules
-    ;; TODO incorporate avy-resume (maybe ";")
+    ";" 'avy-resume
     )
   )
 
@@ -272,6 +282,7 @@
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
   (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+  (set-fontset-font t nil "Twitter Color Emoji")
   )
 
 ;; run this hook after we have initialized the first time
@@ -304,9 +315,51 @@
   :init
   (global-hl-todo-mode))
 
-(use-package tab-bar
-  :init (tab-bar-mode)
-  :straight (:type built-in))
+(use-package popper
+  :general
+  (patrl/leader-keys
+        "bp" '(:ignore t :wk "popper")
+        "bpc" '(popper-cycle t :wk "cycle")
+        "bpt" '(popper-toggle-latest t :wk "toggle latest")
+        "bpb" '(popper-toggle-type t :wk "toggle type")
+        "bpk" '(popper-kill-latest-popup t :wk "kill latest")
+    )
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*helpful"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode
+          magit-process-mode
+          "^\\*eshell.*\\*" eshell-mode
+          "\\*direnv\\*"
+          "\\*elfeed-log\\*"
+          "\\*straight-process\\*"
+          "\\*Async-native-compile-log\\*"
+          "\\*TeX Help\\*"
+          "\\*Embark Collect Live\\*"
+          ))
+  (popper-mode +1)
+  (popper-echo-mode +1))
+
+(use-package bufler
+  :custom
+  (bufler-workspace-mode t)
+  ;; (bufler-workspace-tabs-mode t)
+  :general
+  (patrl/leader-keys
+    "bB" '(bufler :wk "bufler") ;; overrides consult
+    "bf" '(bufler-workspace-frame-set :wk "bufler workspace frame set") 
+    "bl" '(bufler-list :wk "bufler list") 
+    )
+  (:keymaps 'bufler-list-mode-map
+            :states 'normal
+            "?" 'hydra:bufler/body
+            "RET" 'bufler-list-buffer-switch
+            "SPC" 'bufler-list-buffer-peek)
+  )
 
 ;; use emacs' built-in 'project.el'
 (use-package project
@@ -315,13 +368,6 @@
     "p" '(:keymap project-prefix-map :wk "project")
     )
   :straight (:type built-in))
-
-;; automatically organize projects
-;; TODO consider replacing this with bufler
-(use-package project-tab-groups
-  :after (project tab-bar)
-  :config
-  (project-tab-groups-mode 1))
 
 (use-package dired
   :general
@@ -343,53 +389,73 @@
 ;; makes dired a much more pleasant file manager
 (use-package dired-subtree)
 
-(use-package org
-  ;; :straight (:type built-in)
-  :init
-  (setq org-todo-keywords
-        ;; it's extremely useful to distinguish between short-term goals and long-term projects
-        '((sequence "TODO(t)" "PROJ(p)" "|" "DONE(d)")))
-  (setq org-src-fontify-natively t) ;; fontify code in src blocks
-  (setq org-highlight-latex-and-related '(native))
-  (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
-  :custom
-  (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
-  :general
-  (patrl/local-leader-keys
-    :keymaps 'org-mode-map
-    "l" '(:ignore t :wk "link")
-    "ll" '(org-insert-link t :wk "link")
-    "s" '(consult-org-heading :wk "consult heading")
-    "d" '(org-cut-special :wk "org cut special")
-    "y" '(org-copy-special :wk "org copy special")
-    "p" '(org-paste-special :wk "org paste special")
-    "b" '(:keymap org-babel-map :wk "babel")
-    "t" '(org-insert-structure-template :wk "template")
-    "e" '(org-edit-special :wk "edit")
-    "i" '(:ignore t :wk "insert")
-    "ih" '(org-insert-heading :wk "insert heading")
-    "is" '(org-insert-subheading :wk "insert heading")
-    "f" '(org-footnote-action :wk "footnote action")
-    )
-  (:keymaps 'org-agenda-mode-map
-            "j" '(org-agenda-next-line)
-            "h" '(org-agenda-previous-line))
+(use-package lua-mode
+  :mode "\\.lua\\'")
 
-  :hook
-  (org-mode . olivetti-mode)
-  (org-mode . variable-pitch-mode)
-  (org-mode . visual-line-mode)
-  (org-mode . org-indent-mode)
-  (org-mode . org-num-mode)
-  (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-  ;; :config
-  ;; FIXME this turns out to be a bad idea, since the symbols conflict
-  ;; (defvar org-electric-pairs '((?\* . ?\*)\ (?/ . ?/) (?= . ?=) (?\_ . ?\_) (?~ . ?~) (?+ . ?+) (?$ . ?$))) ;; electric pairs for org-mode
-  ;; (defun org-add-electric-pairs ()
-  ;;   (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
-  ;;   (setq-local electric-pair-text-pairs electric-pair-pairs))
-  ;; (add-hook 'org-mode-hook 'org-add-electric-pairs)
-  )
+;; FIXME - compatibility with corfu
+(use-package sly)
+
+(use-package lispy
+  :general
+  (:keymaps 'lispy-mode-map 
+            "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+  :hook (emacs-lisp-mode . lispy-mode)
+  (racket-mode . lispy-mode))
+
+(use-package lispyville
+  :hook (lispy-mode . lispyville-mode)
+  :general
+  (:keymaps 'lispyville-mode-map
+            "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+  ;; the following is necessary to retain tab completion in lispy mode 
+  :config
+  ;; TODO play around with keythemes 
+  (lispyville-set-key-theme '(operators c-w additional)))
+
+(use-package org
+          ;; :straight (:type built-in)
+          :init
+          (setq org-todo-keywords
+                ;; it's extremely useful to distinguish between short-term goals and long-term projects
+                '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+                  (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+                  (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+          (setq org-src-fontify-natively t) ;; fontify code in src blocks
+          (setq org-highlight-latex-and-related '(native))
+          (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+          :custom
+          (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
+          :general
+          (patrl/local-leader-keys
+            :keymaps 'org-mode-map
+            "l" '(:ignore t :wk "link")
+            "ll" '(org-insert-link t :wk "link")
+            "s" '(consult-org-heading :wk "consult heading")
+            "d" '(org-cut-special :wk "org cut special")
+            "y" '(org-copy-special :wk "org copy special")
+            "p" '(org-paste-special :wk "org paste special")
+            "b" '(:keymap org-babel-map :wk "babel")
+            "t" '(org-insert-structure-template :wk "template")
+            "e" '(org-edit-special :wk "edit")
+            "i" '(:ignore t :wk "insert")
+            "ih" '(org-insert-heading :wk "insert heading")
+            "is" '(org-insert-subheading :wk "insert heading")
+            "f" '(org-footnote-action :wk "footnote action")
+            ">" '(org-demote-subtree :wk "demote subtree")
+            "<" '(org-promote-subtree :wk "demote subtree")
+            )
+          (:keymaps 'org-agenda-mode-map
+                    "j" '(org-agenda-next-line)
+                    "h" '(org-agenda-previous-line))
+
+          :hook
+          (org-mode . olivetti-mode)
+          (org-mode . variable-pitch-mode)
+          (org-mode . visual-line-mode)
+          (org-mode . org-indent-mode) ;; indent
+          (org-mode . org-num-mode) ;; enable section numbers
+          (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+)
 
 (use-package org-cliplink
   :after org
@@ -403,23 +469,30 @@
 (use-package org-superstar
   :after org
   :hook
-  (org-mode . (lambda () (org-superstar-mode 1))))
+  (org-mode . (lambda () (org-superstar-mode 1)))
+  :config
+  (setq org-superstar-special-todo-items t)) ;; SOMEDAY consider using emoji for this
 
 (use-package org-roam
   :general
   (patrl/leader-keys
     "nr" '(:ignore t :wk "roam")
-    "nrf" '(org-roam-node-find :wk "find")
+    "nri" '(org-roam-node-insert t :wk "insert node")
+    "nrt" '(org-roam-buffer-toggle t :wk "roam buffer toggle")
+    "nrc" '(org-roam-capture t :wk "roam capture")
+    "nrf" '(org-roam-node-find :wk "find node")
     "nrd" '(:ignore t :wk "dailies")
     "nrdt" '(org-roam-dailies-goto-today :wk "today")
     "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
     "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
+    "nrdd" '(org-roam-dailies-goto-date :wk "goto date")
     )
   :init
   (setq org-roam-v2-ack t) ;; disables v2 warning
   :config
   (setq org-roam-directory (file-truename "~/notes"))
-  (org-roam-db-autosync-enable)
+  (setq org-roam-dailies-directory "daily/")
+  (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
   )
 
 (use-package citeproc
@@ -437,6 +510,14 @@
                   )))
 
 (use-package htmlize)
+
+(use-package org-noter
+    :commands
+    org-noter
+    :config
+    (setq org-noter-notes-search-path '("~/notes"))
+    (setq org-noter-default-notes-file-names '("literature-notes.org"))
+)
 
 (use-package haskell-mode)
 
@@ -501,14 +582,6 @@
   ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
   )
 
-;; (use-package auctex-latexmk
-;;   :after latex 
-;;   :init
-;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-;;   :config
-;;   (auctex-latexmk-setup)
-;;   )
-
 (use-package pdf-tools
   :config
   (pdf-tools-install)
@@ -528,11 +601,22 @@
   (setq citar-symbol-separator "  ")
   :general
   (patrl/leader-keys
-    "nb" '(citar-insert-citation :wk "citar")
+    "nb" '(citar-open :wk "citar")
     )
   :custom
+  (citar-notes-paths '("~/notes"))
   (citar-library-paths '("~/Dropbox (MIT)/library"))
   (citar-bibliography '("~/repos/bibliography/master.bib"))
+  )
+
+;; FIXME
+(use-package auctex-latexmk
+  :disabled
+  :after latex 
+  :init
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+  :config
+  (auctex-latexmk-setup)
   )
 
 (use-package laas
@@ -564,6 +648,8 @@
     ;; bind to functions!
     "sum" (lambda () (interactive)
             (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+    "grandu" (lambda () (interactive)
+            (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
     "Span" (lambda () (interactive)
              (yas-expand-snippet "\\Span($1)$0"))
     "lam" (lambda () (interactive)
@@ -603,19 +689,19 @@
   (setq vertico-cycle t) ;; enable cycling for 'vertico-next' and 'vertico-prev'
   :general
   (:keymaps 'vertico-map
-	    ;; keybindings to cycle through vertico results.
-	    "C-j" 'vertico-next
-	    "C-k" 'vertico-previous
-	    "C-f" 'vertico-exit)
+            ;; keybindings to cycle through vertico results.
+            "C-j" 'vertico-next
+            "C-k" 'vertico-previous
+            "C-f" 'vertico-exit)
   (:keymaps 'minibuffer-local-map
-	    "M-h" 'backward-kill-word)
+            "M-h" 'backward-kill-word)
   )
 
 (use-package orderless
   :init
   (setq completion-styles '(orderless)
-	completion-category-defaults nil
-	completion-category-overrides '((file (styles partial-completion)))))
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package savehist
   :init
@@ -632,6 +718,7 @@
   :general
   (patrl/leader-keys
     "bb" '(consult-buffer :wk "consult buffer")
+    "Bb" '(consult-bookmark :wk "consult bookmark")
     "ht" '(consult-theme :wk "consult theme")
     "sr" '(consult-ripgrep :wk "consult rg")
     "sg" '(consult-grep :wk "consult grep")
@@ -640,15 +727,20 @@
     "sF" '(consult-locate :wk "consult locate")
     "sl" '(consult-line :wk "consult line")
     "sy" '(consult-yank-from-kill-ring :wk "consult yank from kill ring")
+    "i" '(consult-imenu :wk "consult imenu")
     )
-  )
+  :config
+  ;; use project.el to retrieve the project root
+  (setq consult-project-root-function
+        (lambda ()
+          (when-let (project (project-current))
+            (car (project-roots project))))))
 
 (use-package embark
   :general
-  (
-   "C-." 'embark-act
-   "C-;" 'embark-dwim
-   )
+  (patrl/leader-keys
+     "." 'embark-act) ;; easily accessible 'embark-act' binding.
+  ("C-;" 'embark-dwim)
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   )
@@ -660,6 +752,17 @@
   ;; auto-updating embark collect buffer
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
+
+(defun patrl/avy-action-embark (pt)
+  (unwind-protect
+      (save-excursion
+        (goto-char pt)
+        (embark-act))
+    (select-window
+     (cdr (ring-ref avy-ring 0))))
+  t)
+
+(setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark)
 
 (use-package corfu
   :custom
@@ -676,7 +779,7 @@
   (corfu-global-mode)
   )
 
-;; add icons to corfu
+;; FIXME add icons to corfu
 ;; (use-package kind-icon
 ;;   :after corfu
 ;;   :custom
@@ -692,7 +795,7 @@
 
 (use-package emacs
   :init
-  (setq tab-always-indent 'complete)
+  (setq tab-always-indent 'complete) ;; enable tab completion
   )
 
 (use-package flymake
@@ -743,9 +846,32 @@
     )
   )
 
-(use-package eglot
+(use-package lsp-mode
+  :custom
+  (lsp-completion-provider :none) ;; we use corfu!
   :init
-  (add-hook 'haskell-mode-hook 'eglot-ensure))
+  ;; FIXME function isn't getting auto-loaded.
+  (defun patrl/lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless))) ;; Configure orderless
+  :hook
+  (lsp-mode . lsp-enable-which-key-integration)
+  (lsp-completion-mode . patrl/lsp-mode-setup) ;; setup orderless completion style.
+  :commands
+  lsp patrl/lsp-mode-setup-completion
+)
+
+(use-package lsp-ui
+  :after lsp-mode
+  :commands lsp-ui-mode
+  )
+
+(use-package lsp-haskell
+  :after lsp-mode
+  :config
+  (setq lsp-haskell-server-path "haskell-language-server") ;; for some reason this doesn't get found automatically
+  ;; (setq lsp-haskell-formatting-provider "brittany")
+  )
 
 (use-package direnv
   :config
@@ -754,53 +880,38 @@
 (use-package 0x0
   :general
   (patrl/leader-keys
-    "0" '(:ignore t :wk "0x0")
-    "0;" '(0x0-dwim t :wk "0x0 dwim")
-    "0t" '(0x0-upload-text :wk "upload text")
-    "0f" '(0x0-upload-file :wk "upload file")
-    "0k" '(0x0-upload-kill-ring :wk "upload kill ring")
-    "0p" '(0x0-popup :wk "0x0 popup")
-    "0s" '(0x0-shorten-uri :wk "shorten url")
+    "x" '(:ignore t :wk "web")
+    "x;" '(0x0-dwim t :wk "0x0 dwim")
+    "xt" '(0x0-upload-text :wk "0x0 upload text")
+    "xf" '(0x0-upload-file :wk "0x0 upload file")
+    "xk" '(0x0-upload-kill-ring :wk "0x0 upload kill ring")
+    "xp" '(0x0-popup :wk "0x0 popup")
+    "xs" '(0x0-shorten-uri :wk "0x0 shorten url")
     )
 )
 
-(use-package popper
-  :general
-  (patrl/leader-keys
-        "P" '(:ignore t :wk "popper")
-        "Pc" '(popper-cycle t :wk "cycle")
-        "Pt" '(popper-toggle-latest t :wk "toggle latest")
-        "Pb" '(popper-toggle-type t :wk "toggle type")
-        "Pk" '(popper-kill-latest-popup t :wk "kill latest")
-    )
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "Output\\*$"
-          "\\*helpful"
-          "\\*Async Shell Command\\*"
-          help-mode
-          compilation-mode
-          magit-process-mode
-          "^\\*eshell.*\\*" eshell-mode
-          "\\*direnv\\*"
-          "\\*elfeed-log\\*"
-          "\\*straight-process\\*"
-          "\\*Async-native-compile-log\\*"
-          "\\*TeX Help\\*"
-          "\\*Embark Collect Live\\*"
-          ))
-  (popper-mode +1)
-  (popper-echo-mode +1))
+;; We write a function to determine how we want elfeed to display the buffer with the current entry.
+(defun patrl/elfeed-display-buffer (buf &optional act)
+  (pop-to-buffer buf)
+  (set-window-text-height (get-buffer-window) (round (* 0.7 (frame-height)))))
 
-(use-package lua-mode
-  :mode "\\.lua\\'")
-
-(use-package numbex
-  :straight (:type git :host github :repo "enricoflor/numbex"))
+(defun patrl/elfeed-search-show-entry-pre (&optional lines)
+  "Returns a function to scroll forward or back in the Elfeed search results, displaying entries without switching to them."
+  (lambda (times)
+    (interactive "p")
+    (forward-line (* times (or lines 0)))
+    (recenter)
+    (call-interactively #'elfeed-search-show-entry)
+    (select-window (previous-window))
+    (unless elfeed-search-remain-on-entry (forward-line -1))))
 
 (use-package elfeed
-  :commands elfeed)
+  :commands elfeed
+  :general
+  (patrl/leader-keys
+    "oE" '(elfeed :wk "elfeed"))
+  ;; :config
+  (setq elfeed-show-entry-switch #'patrl/elfeed-display-buffer))
 
 (use-package elfeed-org
   :init
@@ -810,9 +921,12 @@
 
 (use-package notmuch
   :init
+  ;; in gmail, messages are trashed by removing the 'inbox' tag, and adding the 'trash' tag. This will move messages to the gmail trash folder, but won't permnanently delete them.
   (defvar +notmuch-delete-tags '("+trash" "-inbox" "-unread" "-new"))
+  ;; in gmail, messages are archived simply by removing the 'inbox' tag.
   (setq notmuch-archive-tags '("-inbox" "-new"))
   :config
+  ;; the 'new' tag isn't synced to the gmail server; messages new to notmuch aquire this tag.
   (add-to-list 'notmuch-saved-searches '(:name "new" :query "tag:new" :key "n"))
   (defun +notmuch/search-delete ()
     (interactive)
@@ -825,6 +939,7 @@
   :general
   (patrl/leader-keys
     "on" '(notmuch :wk "notmuch")) 
+  ;; single key deletion.
   (:keymaps 'notmuch-search-mode-map
             :states 'normal
             "D" '+notmuch/search-delete
@@ -834,22 +949,6 @@
             "D" '+notmuch/tree-delete)
   )
 
-(use-package sly)
-
-(use-package lispy
-  :general
-  (:keymaps 'lispy-mode-map 
-            "TAB" 'indent-for-tab-command)
-  :hook (emacs-lisp-mode . lispy-mode)
-  (racket-mode . lispy-mode))
-
-(use-package lispyville
-  :hook (lispy-mode . lispyville-mode)
-  ;; the following is necessary to retain tab completion in lispy mode 
-  :config
-  ;; TODO play around with keythemes 
-  (lispyville-set-key-theme '(operators c-w additional)))
-
 (use-package deadgrep
   :general
   (patrl/leader-keys
@@ -857,25 +956,36 @@
     )
   )
 
-;; (use-package bufler
-;;   :general
-;;   (patrl/leader-keys
-;;     "bB" '(bufler-switch-buffer :wk "bufler switch") 
-;;     "bw" '(bufler-workspace-frame-set :wk "bufler workspace focus") 
-;;     )
-;;   :config
-;;   (bufler-mode)
-;;   (bufler-tabs-mode))
-
 (use-package yasnippet
   :config
   (yas-reload-all)
-  (add-hook 'LaTeX-mode-hook #'yas-minor-mode)
-)
+  (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
+  (yas-global-mode 1))
+
+(use-package autoinsert
+  :straight (:type built-in)
+  :config
+  (setq auto-insert-query nil)
+  (auto-insert-mode 1)
+  (add-hook 'find-file-hook 'auto-insert))
 
 (use-package aas
   :hook (LaTeX-mode . aas-activate-for-major-mode)
   :hook (org-mode . aas-activate-for-major-mode)
+  :config
+  (aas-set-snippets 'text-mode
+    ":-)" "🙂"
+    "8-)" "😎"
+    ":rofl" "🤣"
+    ":lol" "😂"
+    "<3" "❤️"
+    ":eyes" "👀"
+    ":dragon" "🐉"
+    ":fire" "🔥"
+    ":hole" "🕳️"
+    ":flush" "😳"
+    ":wow" "😮"
+    )
   )
 
 (use-package tree-sitter)
@@ -891,3 +1001,38 @@
     "hF" '(helpful-function :wk "helpful function")
     "hv" '(helpful-variable :wk "helpful variable")
     "hk" '(helpful-key :wk "helpful key")))
+
+(use-package crdt
+  :disabled)
+
+(use-package cdlatex
+  :disabled)
+
+(use-package company
+  :disabled
+  :custom
+  (company-idle-delay nil) ;; turn off auto-completion
+  :general
+  (:keymap 'company-mode-map
+           "C-SPC" 'company-complete) ;; keybinding to trigger company completion
+  :hook
+  (prog-mode . company-mode)
+  (LaTeX-mode . company-mode)
+  :config
+  ;; the following stops company from using the orderless completion style
+  ;; makes company much more useful
+  (define-advice company-capf
+      (:around (orig-fun &rest args) set-completion-styles)
+    (let ((completion-styles '(basic partial-completion)))
+      (apply orig-fun args)))
+  )
+
+(use-package company-bibtex
+  :disabled
+  :init
+  (setq company-bibtex-bibliography
+        '("/home/patrl/repos/bibliography/master.bib"))
+  :after company
+  :config
+  (add-to-list 'company-backends 'company-bibtex)
+  )
