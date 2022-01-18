@@ -18,6 +18,21 @@
 
 (straight-use-package 'use-package) ;; install use-package via straight
 
+(defvar patrl/library-path "~/Dropbox (MIT)/library/"
+  "Directory .pdf collection lives.")
+
+(defvar patrl/notes-path "~/notes/"
+  "Notes.")
+
+(defvar patrl/journal-path (concat patrl/notes-path "daily/")
+  "Journal entries.")
+
+(defvar patrl/global-bib-file "~/repos/bibliography/master.bib"
+  "Bibliography.")
+
+(defvar patrl/org-path "~/Dropbox (MIT)/org/"
+  "Org path.")
+
 (use-package emacs
   :init
   (setq user-full-name "Patrick D. Elliott") ;; my details
@@ -200,6 +215,7 @@
   (evil-set-initial-state 'magit-diff-mode 'insert)
   )
 
+
 (use-package evil-collection ;; evilifies a bunch of things
   :after evil
   :init
@@ -358,7 +374,8 @@
             :states 'normal
             "?" 'hydra:bufler/body
             "RET" 'bufler-list-buffer-switch
-            "SPC" 'bufler-list-buffer-peek)
+            "SPC" 'bufler-list-buffer-peek
+            "d" 'bufler-list-buffer-kill)
   )
 
 ;; use emacs' built-in 'project.el'
@@ -424,7 +441,7 @@
           (setq org-highlight-latex-and-related '(native))
           (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
           :custom
-          (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
+          (org-agenda-files '((concat patrl/org-path "agenda/") patrl/journal-path))
           :general
           (patrl/local-leader-keys
             :keymaps 'org-mode-map
@@ -490,7 +507,7 @@
   :init
   (setq org-roam-v2-ack t) ;; disables v2 warning
   :config
-  (setq org-roam-directory (file-truename "~/notes"))
+  (setq org-roam-directory patrl/roam-dir)
   (setq org-roam-dailies-directory "daily/")
   (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
   )
@@ -514,8 +531,12 @@
 (use-package org-noter
     :commands
     org-noter
+    :general
+    (patrl/local-leader-keys
+      :keyamps 'org-noter-doc-mode-map
+      "i" 'org-noter-insert-note)
     :config
-    (setq org-noter-notes-search-path '("~/notes"))
+    (setq org-noter-notes-search-path (list patrl/notes-path))
     (setq org-noter-default-notes-file-names '("literature-notes.org"))
 )
 
@@ -604,9 +625,9 @@
     "nb" '(citar-open :wk "citar")
     )
   :custom
-  (citar-notes-paths '("~/notes"))
-  (citar-library-paths '("~/Dropbox (MIT)/library"))
-  (citar-bibliography '("~/repos/bibliography/master.bib"))
+  (citar-notes-paths (list patrl/notes-path))
+  (citar-library-paths (list patrl/library-path))
+  (citar-bibliography (list patrl/global-bib-file))
   )
 
 ;; FIXME
@@ -949,6 +970,16 @@
             "D" '+notmuch/tree-delete)
   )
 
+(use-package tempel
+  :general
+  ("M-+" 'tempel-complete
+   "M-*" 'tempel-insert)
+  :init
+  (defun tempel-setup-capf ()
+    (add-hook 'completion-at-point-functions #'tempel-expand))
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf))
+
 (use-package deadgrep
   :general
   (patrl/leader-keys
@@ -1031,7 +1062,7 @@
   :disabled
   :init
   (setq company-bibtex-bibliography
-        '("/home/patrl/repos/bibliography/master.bib"))
+        (list patrl/global-bib-file))
   :after company
   :config
   (add-to-list 'company-backends 'company-bibtex)
