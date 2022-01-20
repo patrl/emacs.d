@@ -1,0 +1,32 @@
+;; -*- mode: lisp -*-
+
+fundamental-mode ;; available everywhere
+
+(today (format-time-string "%Y-%m-%d"))
+
+org-mode
+
+(title "#+title: " p n "#+author: Patrick Elliott" n "#+language: en" n n)
+
+(elisp "#+begin_src emacs-lisp" p n "#+end_src")
+
+latex-mode
+
+(env "\\begin{" (p "Environment: " environment) "}" > n>
+     r> n>
+     "\\end{" (s environment) "}" > n)
+
+
+
+(begin "\\begin{" (s env) "}" > n> r> "\\end{" (s env) "}")
+
+(it "\\textit{" p "}")
+
+(bf "\\textbf{" p "}")
+
+(sc "\\textsc{" p "}")
+
+
+
+
+
