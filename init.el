@@ -215,7 +215,6 @@
   (evil-set-initial-state 'magit-diff-mode 'insert)
   )
 
-
 (use-package evil-collection ;; evilifies a bunch of things
   :after evil
   :init
@@ -257,6 +256,16 @@
   (evil-goggles-use-diff-faces))
 
 (use-package avy
+  :after embark
+  :init
+  (defun patrl/avy-action-embark (pt)
+    (unwind-protect
+        (save-excursion
+          (goto-char pt)
+          (embark-act))
+      (select-window
+       (cdr (ring-ref avy-ring 0))))
+    t)
   :general
   (general-def '(normal motion)
     "s" 'evil-avy-goto-char-timer
@@ -264,7 +273,17 @@
     "gl" 'evil-avy-goto-line ;; this rules
     ";" 'avy-resume
     )
+  :config
+  (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark) ;; avy embark integration
   )
+
+(use-package link-hint
+  :general
+  (patrl/leader-keys
+    "l" '(link-hint-open-link :wk "open link"))
+  :config
+  (setq browse-url-browser-function 'browse-url-firefox)
+  (setq link-hint-avy-style 'pre))
 
 (use-package which-key
   :after evil
@@ -507,7 +526,7 @@
   :init
   (setq org-roam-v2-ack t) ;; disables v2 warning
   :config
-  (setq org-roam-directory patrl/roam-dir)
+  (setq org-roam-directory patrl/notes-path)
   (setq org-roam-dailies-directory "daily/")
   (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
   )
@@ -640,55 +659,6 @@
   (auctex-latexmk-setup)
   )
 
-(use-package laas
-  :hook ((LaTeX-mode . laas-mode)
-         (org-mode . laas-mode))
-  :config
-  (aas-set-snippets 'laas-mode
-    ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
-    "mx" (lambda () (interactive)
-            (yas-expand-snippet "\\\\($0\\\\)"))
-    "mq" (lambda () (interactive)
-            (yas-expand-snippet "\\[\n$0\n\\]"))
-    "*i" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
-    "*I" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
-    "*e" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
-    "*f" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
-    :cond #'texmathp ; expand only while in math 
-    "Olon" "O(n \\log n)"
-    ";:" "\\coloneq"
-    ";;N" "\\mathbb{N}"
-    ";T" "\\top"
-    ";B" "\\bot"
-    ";;x" "\\times"
-    ";;v" "\\veebar"
-    ;; bind to functions!
-    "sum" (lambda () (interactive)
-            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-    "grandu" (lambda () (interactive)
-            (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
-    "Span" (lambda () (interactive)
-             (yas-expand-snippet "\\Span($1)$0"))
-    "lam" (lambda () (interactive)
-            (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
-    ;; "set" (lambda () (interactive)
-    ;;           (yas-expand-snippet "\\set{ $1 | $2} $0"))
-    "txt" (lambda () (interactive)
-              (yas-expand-snippet "\\text{$1} $0"))
-    ";;o" (lambda () (interactive)
-              (yas-expand-snippet "\\oplus"))
-    ;; "ev" (lambda () (interactive)
-    ;;             (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
-    ;; clash with event type sigs
-    ;; add accent snippets
-    :cond #'laas-object-on-left-condition
-    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
-    ))
-
 (use-package markdown-mode
   :hook ((markdown-mode . visual-line-mode)
          (markdown-mode . olivetti-mode)
@@ -762,6 +732,8 @@
   (patrl/leader-keys
      "." 'embark-act) ;; easily accessible 'embark-act' binding.
   ("C-;" 'embark-dwim)
+  (:keymaps 'vertico-map
+            "C-." 'embark-act)
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   )
@@ -774,18 +746,16 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-(defun patrl/avy-action-embark (pt)
-  (unwind-protect
-      (save-excursion
-        (goto-char pt)
-        (embark-act))
-    (select-window
-     (cdr (ring-ref avy-ring 0))))
-  t)
-
-(setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark)
-
 (use-package corfu
+  :init
+  (defun patrl/corfu-enable-in-minibuffer ()
+    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+    (when (where-is-internal #'completion-at-point (current-local-map))
+      (corfu-mode 1)))
+
+  (add-hook 'minibuffer-setup-hook #'patrl/corfu-enable-in-minibuffer)
+
+  (corfu-global-mode)
   :custom
   (corfu-cycle t) ;; allows cycling through candidates
   (corfu-auto nil) ;; disables auto-completion
@@ -795,10 +765,7 @@
   (:keymaps 'corfu-map
             "C-j" 'corfu-next
             "C-k" 'corfu-previous
-            )
-  :init
-  (corfu-global-mode)
-  )
+            ))
 
 ;; FIXME add icons to corfu
 ;; (use-package kind-icon
@@ -847,6 +814,102 @@
   (setq ispell-program-name "aspell")
   (setq ispell-silently-savep t)
 )
+
+(use-package aas
+  :hook (LaTeX-mode . aas-activate-for-major-mode)
+  :hook (org-mode . aas-activate-for-major-mode)
+  :config
+  ;; easy emoji entry in text mode.
+  (aas-set-snippets 'text-mode
+    ":-)" "🙂"
+    "8-)" "😎"
+    ":rofl" "🤣"
+    ":lol" "😂"
+    "<3" "❤️"
+    ":eyes" "👀"
+    ":dragon" "🐉"
+    ":fire" "🔥"
+    ":hole" "🕳️"
+    ":flush" "😳"
+    ":wow" "😮"
+    )
+  )
+
+(use-package laas
+  :hook ((LaTeX-mode . laas-mode)
+         (org-mode . laas-mode))
+  :config
+  (aas-set-snippets 'laas-mode
+    ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+    "mx" (lambda () (interactive)
+            (yas-expand-snippet "\\\\($1\\\\)$0"))
+    "mq" (lambda () (interactive)
+            (yas-expand-snippet "\\[$1\\]$0"))
+    "*i" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
+    "*I" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
+    "*e" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
+    "*f" (lambda () (interactive)
+            (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+    :cond #'texmathp ; expand only while in math 
+    "Olon" "O(n \\log n)"
+    ";:" "\\coloneq"
+    ";;N" "\\mathbb{N}"
+    ";T" "\\top"
+    ";B" "\\bot"
+    ";;x" "\\times"
+    ";;v" "\\veebar"
+    ;; bind to functions!
+    "sum" (lambda () (interactive)
+            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+    "grandu" (lambda () (interactive)
+            (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
+    "Span" (lambda () (interactive)
+             (yas-expand-snippet "\\Span($1)$0"))
+    "lam" (lambda () (interactive)
+            (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+    ;; "set" (lambda () (interactive)
+    ;;           (yas-expand-snippet "\\set{ $1 | $2} $0"))
+    "txt" (lambda () (interactive)
+              (yas-expand-snippet "\\text{$1} $0"))
+    ";;o" (lambda () (interactive)
+              (yas-expand-snippet "\\oplus"))
+    ;; "ev" (lambda () (interactive)
+    ;;             (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+    ;; clash with event type sigs
+    ;; add accent snippets
+    :cond #'laas-object-on-left-condition
+    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
+    ))
+
+(use-package yasnippet
+  :config
+  (yas-reload-all)
+  (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
+  (yas-global-mode 1))
+
+(use-package tempel
+  :general
+  ("M-+" 'tempel-complete
+   "M-*" 'tempel-insert)
+  (:keymaps 'tempel-map
+            "TAB" 'tempel-next) ;; progress through fields via `TAB'
+  :init
+  (defun tempel-setup-capf ()
+    (add-hook 'completion-at-point-functions #'tempel-expand))
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf))
+
+(use-package autoinsert
+  :straight (:type built-in)
+  :config
+  (setq auto-insert-query nil) ;; Do not ask when inserting
+  (auto-insert-mode 1) ;; enable auto-insert-mode globally
+  (add-hook 'find-file-hook 'auto-insert) ;; run auto-insert when a new file is opened
+  (setq auto-insert-alist nil) ;; delete default auto-inserts
+  )
 
 (use-package simple-httpd
   :commands httpd-serve-directory)
@@ -970,52 +1033,10 @@
             "D" '+notmuch/tree-delete)
   )
 
-(use-package tempel
-  :general
-  ("M-+" 'tempel-complete
-   "M-*" 'tempel-insert)
-  :init
-  (defun tempel-setup-capf ()
-    (add-hook 'completion-at-point-functions #'tempel-expand))
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf))
-
 (use-package deadgrep
   :general
   (patrl/leader-keys
     "sd" '(deadgrep :wk "deadgrep")
-    )
-  )
-
-(use-package yasnippet
-  :config
-  (yas-reload-all)
-  (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
-  (yas-global-mode 1))
-
-(use-package autoinsert
-  :straight (:type built-in)
-  :config
-  (setq auto-insert-query nil)
-  (auto-insert-mode 1)
-  (add-hook 'find-file-hook 'auto-insert))
-
-(use-package aas
-  :hook (LaTeX-mode . aas-activate-for-major-mode)
-  :hook (org-mode . aas-activate-for-major-mode)
-  :config
-  (aas-set-snippets 'text-mode
-    ":-)" "🙂"
-    "8-)" "😎"
-    ":rofl" "🤣"
-    ":lol" "😂"
-    "<3" "❤️"
-    ":eyes" "👀"
-    ":dragon" "🐉"
-    ":fire" "🔥"
-    ":hole" "🕳️"
-    ":flush" "😳"
-    ":wow" "😮"
     )
   )
 

@@ -93,6 +93,25 @@ Quick how-to for straight:
 
 * Emacs
 
+** Variables
+
+#+begin_src emacs-lisp :tangle init.el
+  (defvar patrl/library-path "~/Dropbox (MIT)/library/"
+    "Directory .pdf collection lives.")
+
+  (defvar patrl/notes-path "~/notes/"
+    "Notes.")
+
+  (defvar patrl/journal-path (concat patrl/notes-path "daily/")
+    "Journal entries.")
+
+  (defvar patrl/global-bib-file "~/repos/bibliography/master.bib"
+    "Bibliography.")
+
+  (defvar patrl/org-path "~/Dropbox (MIT)/org/"
+    "Org path.")
+#+end_src
+
 ** Defaults
 
 #+begin_src emacs-lisp :tangle init.el
@@ -340,10 +359,24 @@ The local leader ~,~ is used for mode-specific bindings.
 
 ** TODO Avy
 
+- [[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything | Karthinks]]
+
 Super-charged navigaton.
+
+Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate. 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package avy
+    :after embark
+    :init
+    (defun patrl/avy-action-embark (pt)
+      (unwind-protect
+          (save-excursion
+            (goto-char pt)
+            (embark-act))
+        (select-window
+         (cdr (ring-ref avy-ring 0))))
+      t)
     :general
     (general-def '(normal motion)
       "s" 'evil-avy-goto-char-timer
@@ -351,7 +384,21 @@ Super-charged navigaton.
       "gl" 'evil-avy-goto-line ;; this rules
       ";" 'avy-resume
       )
+    :config
+    (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark) ;; avy embark integration
     )
+#+end_src
+
+*** Link hint
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package link-hint
+    :general
+    (patrl/leader-keys
+      "l" '(link-hint-open-link :wk "open link"))
+    :config
+    (setq browse-url-browser-function 'browse-url-firefox)
+    (setq link-hint-avy-style 'pre))
 #+end_src
 
 
@@ -522,7 +569,8 @@ Classify certain buffer types as popups.
               :states 'normal
               "?" 'hydra:bufler/body
               "RET" 'bufler-list-buffer-switch
-              "SPC" 'bufler-list-buffer-peek)
+              "SPC" 'bufler-list-buffer-peek
+              "d" 'bufler-list-buffer-kill)
     )
 #+end_src
 
@@ -622,7 +670,7 @@ Resources:
               (setq org-highlight-latex-and-related '(native))
               (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
               :custom
-              (org-agenda-files '("~/Dropbox (MIT)/org/agenda" "~/notes/daily"))
+              (org-agenda-files '((concat patrl/org-path "agenda/") patrl/journal-path))
               :general
               (patrl/local-leader-keys
                 :keymaps 'org-mode-map
@@ -700,7 +748,7 @@ Resources:
     :init
     (setq org-roam-v2-ack t) ;; disables v2 warning
     :config
-    (setq org-roam-directory (file-truename "~/notes"))
+    (setq org-roam-directory patrl/notes-path)
     (setq org-roam-dailies-directory "daily/")
     (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
     )
@@ -739,8 +787,12 @@ Resources:
     (use-package org-noter
       :commands
       org-noter
+      :general
+      (patrl/local-leader-keys
+        :keyamps 'org-noter-doc-mode-map
+        "i" 'org-noter-insert-note)
       :config
-      (setq org-noter-notes-search-path '("~/notes"))
+      (setq org-noter-notes-search-path (list patrl/notes-path))
       (setq org-noter-default-notes-file-names '("literature-notes.org"))
   )
 #+end_src
@@ -881,9 +933,9 @@ Auto-activating snippets:
       "nb" '(citar-open :wk "citar")
       )
     :custom
-    (citar-notes-paths '("~/notes"))
-    (citar-library-paths '("~/Dropbox (MIT)/library"))
-    (citar-bibliography '("~/repos/bibliography/master.bib"))
+    (citar-notes-paths (list patrl/notes-path))
+    (citar-library-paths (list patrl/library-path))
+    (citar-bibliography (list patrl/global-bib-file))
     )
 #+end_src
 
@@ -901,59 +953,6 @@ Auto-activating snippets:
     :config
     (auctex-latexmk-setup)
     )
-#+end_src
-
-*** Snippets
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package laas
-    :hook ((LaTeX-mode . laas-mode)
-           (org-mode . laas-mode))
-    :config
-    (aas-set-snippets 'laas-mode
-      ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
-      "mx" (lambda () (interactive)
-              (yas-expand-snippet "\\\\($0\\\\)"))
-      "mq" (lambda () (interactive)
-              (yas-expand-snippet "\\[\n$0\n\\]"))
-      "*i" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
-      "*I" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
-      "*e" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
-      "*f" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
-      :cond #'texmathp ; expand only while in math 
-      "Olon" "O(n \\log n)"
-      ";:" "\\coloneq"
-      ";;N" "\\mathbb{N}"
-      ";T" "\\top"
-      ";B" "\\bot"
-      ";;x" "\\times"
-      ";;v" "\\veebar"
-      ;; bind to functions!
-      "sum" (lambda () (interactive)
-              (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-      "grandu" (lambda () (interactive)
-              (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
-      "Span" (lambda () (interactive)
-               (yas-expand-snippet "\\Span($1)$0"))
-      "lam" (lambda () (interactive)
-              (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
-      ;; "set" (lambda () (interactive)
-      ;;           (yas-expand-snippet "\\set{ $1 | $2} $0"))
-      "txt" (lambda () (interactive)
-                (yas-expand-snippet "\\text{$1} $0"))
-      ";;o" (lambda () (interactive)
-                (yas-expand-snippet "\\oplus"))
-      ;; "ev" (lambda () (interactive)
-      ;;             (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
-      ;; clash with event type sigs
-      ;; add accent snippets
-      :cond #'laas-object-on-left-condition
-      "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
-      ))
 #+end_src
 
 *** Issues
@@ -1052,6 +1051,8 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (patrl/leader-keys
        "." 'embark-act) ;; easily accessible 'embark-act' binding.
     ("C-;" 'embark-dwim)
+    (:keymaps 'vertico-map
+              "C-." 'embark-act)
     :init
     (setq prefix-help-command #'embark-prefix-help-command)
     )
@@ -1065,31 +1066,21 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
-*** Integration with ~avy~
-
-Source: [[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything | Karthinks]]
-
-Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate. 
-
-#+begin_src emacs-lisp :tangle init.el
-  (defun patrl/avy-action-embark (pt)
-    (unwind-protect
-        (save-excursion
-          (goto-char pt)
-          (embark-act))
-      (select-window
-       (cdr (ring-ref avy-ring 0))))
-    t)
-
-  (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark)
-#+end_src
-
 ** Corfu
 
 A minimal ui for ~completion-in-region~.
 
 #+begin_src emacs-lisp :tangle init.el 
   (use-package corfu
+    :init
+    (defun patrl/corfu-enable-in-minibuffer ()
+      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+      (when (where-is-internal #'completion-at-point (current-local-map))
+        (corfu-mode 1)))
+
+    (add-hook 'minibuffer-setup-hook #'patrl/corfu-enable-in-minibuffer)
+
+    (corfu-global-mode)
     :custom
     (corfu-cycle t) ;; allows cycling through candidates
     (corfu-auto nil) ;; disables auto-completion
@@ -1099,10 +1090,7 @@ A minimal ui for ~completion-in-region~.
     (:keymaps 'corfu-map
               "C-j" 'corfu-next
               "C-k" 'corfu-previous
-              )
-    :init
-    (corfu-global-mode)
-    )
+              ))
 
   ;; FIXME add icons to corfu
   ;; (use-package kind-icon
@@ -1171,6 +1159,130 @@ A minimal ui for ~completion-in-region~.
 #+end_src
 
 * Tools   
+
+** Snippets
+
+*** Auto-activating snippets
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package aas
+    :hook (LaTeX-mode . aas-activate-for-major-mode)
+    :hook (org-mode . aas-activate-for-major-mode)
+    :config
+    ;; easy emoji entry in text mode.
+    (aas-set-snippets 'text-mode
+      ":-)" "🙂"
+      "8-)" "😎"
+      ":rofl" "🤣"
+      ":lol" "😂"
+      "<3" "❤️"
+      ":eyes" "👀"
+      ":dragon" "🐉"
+      ":fire" "🔥"
+      ":hole" "🕳️"
+      ":flush" "😳"
+      ":wow" "😮"
+      )
+    )
+#+end_src
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package laas
+    :hook ((LaTeX-mode . laas-mode)
+           (org-mode . laas-mode))
+    :config
+    (aas-set-snippets 'laas-mode
+      ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+      "mx" (lambda () (interactive)
+              (yas-expand-snippet "\\\\($1\\\\)$0"))
+      "mq" (lambda () (interactive)
+              (yas-expand-snippet "\\[$1\\]$0"))
+      "*i" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
+      "*I" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
+      "*e" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
+      "*f" (lambda () (interactive)
+              (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+      :cond #'texmathp ; expand only while in math 
+      "Olon" "O(n \\log n)"
+      ";:" "\\coloneq"
+      ";;N" "\\mathbb{N}"
+      ";T" "\\top"
+      ";B" "\\bot"
+      ";;x" "\\times"
+      ";;v" "\\veebar"
+      ;; bind to functions!
+      "sum" (lambda () (interactive)
+              (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+      "grandu" (lambda () (interactive)
+              (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
+      "Span" (lambda () (interactive)
+               (yas-expand-snippet "\\Span($1)$0"))
+      "lam" (lambda () (interactive)
+              (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+      ;; "set" (lambda () (interactive)
+      ;;           (yas-expand-snippet "\\set{ $1 | $2} $0"))
+      "txt" (lambda () (interactive)
+                (yas-expand-snippet "\\text{$1} $0"))
+      ";;o" (lambda () (interactive)
+                (yas-expand-snippet "\\oplus"))
+      ;; "ev" (lambda () (interactive)
+      ;;             (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
+      ;; clash with event type sigs
+      ;; add accent snippets
+      :cond #'laas-object-on-left-condition
+      "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
+      ))
+#+end_src
+
+*** Yasnippet
+
+#+begin_src emacs-lisp :tangle init.el 
+    (use-package yasnippet
+      :config
+      (yas-reload-all)
+      (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
+      (yas-global-mode 1))
+#+end_src
+
+*** TODO Tempel
+
+Templates can be found in ~~/.config/emacs-vanilla/templates~.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package tempel
+    :general
+    ("M-+" 'tempel-complete
+     "M-*" 'tempel-insert)
+    (:keymaps 'tempel-map
+              "TAB" 'tempel-next) ;; progress through fields via `TAB'
+    :init
+    (defun tempel-setup-capf ()
+      (add-hook 'completion-at-point-functions #'tempel-expand))
+    (add-hook 'prog-mode-hook 'tempel-setup-capf)
+    (add-hook 'text-mode-hook 'tempel-setup-capf))
+#+end_src
+
+N.b. this currently triggers an error when snippets are used in org-mode.
+
+*** Autoinsert 
+
+- [[https://emacs.stackexchange.com/questions/45629/template-for-new-file][Template for new file - Emacs Stack Exchange]]
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package autoinsert
+    :straight (:type built-in)
+    :config
+    (setq auto-insert-query nil) ;; Do not ask when inserting
+    (auto-insert-mode 1) ;; enable auto-insert-mode globally
+    (add-hook 'find-file-hook 'auto-insert) ;; run auto-insert when a new file is opened
+    (setq auto-insert-alist nil) ;; delete default auto-inserts
+    )
+#+end_src
+
+**** TODO setup built in package ~autoinsert~ for file templates via yasnippet.
 
 ** Web preview
 
@@ -1356,50 +1468,6 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
     )
 #+end_src
 
-** TODO snippets and templates
-
-- [[https://emacs.stackexchange.com/questions/45629/template-for-new-file][Template for new file - Emacs Stack Exchange]]
-
-#+begin_src emacs-lisp :tangle init.el 
-    (use-package yasnippet
-      :config
-      (yas-reload-all)
-      (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
-      (yas-global-mode 1))
-#+end_src
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package autoinsert
-    :straight (:type built-in)
-    :config
-    (setq auto-insert-query nil)
-    (auto-insert-mode 1)
-    (add-hook 'find-file-hook 'auto-insert))
-#+end_src
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package aas
-    :hook (LaTeX-mode . aas-activate-for-major-mode)
-    :hook (org-mode . aas-activate-for-major-mode)
-    :config
-    (aas-set-snippets 'text-mode
-      ":-)" "🙂"
-      "8-)" "😎"
-      ":rofl" "🤣"
-      ":lol" "😂"
-      "<3" "❤️"
-      ":eyes" "👀"
-      ":dragon" "🐉"
-      ":fire" "🔥"
-      ":hole" "🕳️"
-      ":flush" "😳"
-      ":wow" "😮"
-      )
-    )
-#+end_src
-
-*** TODO setup built in package ~autoinsert~ for file templates via yasnippet.
-
 ** Tree-sitter
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1468,7 +1536,7 @@ Packages i've tried out which, for whatever reason, haven't suited me.
     :disabled
     :init
     (setq company-bibtex-bibliography
-          '("/home/patrl/repos/bibliography/master.bib"))
+          (list patrl/global-bib-file))
     :after company
     :config
     (add-to-list 'company-backends 'company-bibtex)
