@@ -747,14 +747,9 @@
   (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package corfu
+  :hook
+  (eval-expression-minibuffer-setup . corfu-mode)
   :init
-  (defun patrl/corfu-enable-in-minibuffer ()
-    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-    (when (where-is-internal #'completion-at-point (current-local-map))
-      (corfu-mode 1)))
-
-  (add-hook 'minibuffer-setup-hook #'patrl/corfu-enable-in-minibuffer)
-
   (corfu-global-mode)
   :custom
   (corfu-cycle t) ;; allows cycling through candidates
