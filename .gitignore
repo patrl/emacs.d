@@ -11,3 +11,6 @@ projects
 bookmarks
 org-roam.db
 .lsp-session-*
+.cache/
+multisession/
+straight/modified/
