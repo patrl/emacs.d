@@ -10,13 +10,13 @@ org-mode
 
 (elisp "#+begin_src emacs-lisp" p n "#+end_src")
 
+(lingex "#+name: " p n> "#+begin_exe" n>  "\\ex " r> n> "#+end_exe")
+
 latex-mode
 
 (env "\\begin{" (p "Environment: " environment) "}" > n>
      r> n>
      "\\end{" (s environment) "}" > n)
-
-
 
 (begin "\\begin{" (s env) "}" > n> r> "\\end{" (s env) "}")
 
