@@ -70,6 +70,9 @@
   (setq native-comp-async-report-warnings-errors nil)
   (setq load-prefer-newer t)
 
+  ;; FIXME currently using templates in org-mode triggers this warning
+  (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+
   (show-paren-mode t)
 
   ;; Hide commands in M-x which don't work in the current mode
@@ -256,7 +259,6 @@
   (evil-goggles-use-diff-faces))
 
 (use-package avy
-  :after embark
   :init
   (defun patrl/avy-action-embark (pt)
     (unwind-protect
@@ -265,7 +267,7 @@
           (embark-act))
       (select-window
        (cdr (ring-ref avy-ring 0))))
-    t)
+    t) ;; adds an avy action for embark
   :general
   (general-def '(normal motion)
     "s" 'evil-avy-goto-char-timer
@@ -460,12 +462,13 @@
           (setq org-highlight-latex-and-related '(native))
           (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
           :custom
-          (org-agenda-files '((concat patrl/org-path "agenda/") patrl/journal-path))
+          (org-agenda-files '("~/Dropbox (MIT)/org/agenda/" "~/notes/daily/"))
           :general
           (patrl/local-leader-keys
             :keymaps 'org-mode-map
             "l" '(:ignore t :wk "link")
             "ll" '(org-insert-link t :wk "link")
+            "lp" '(org-latex-preview t :wk "prev latex")
             "h" '(consult-org-heading :wk "consult heading")
             "d" '(org-cut-special :wk "org cut special")
             "y" '(org-copy-special :wk "org copy special")
@@ -493,6 +496,10 @@
           (org-mode . org-num-mode) ;; enable section numbers
           (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 )
+
+(use-package org-sidebar
+  :after org
+  :straight (:type git :host github :repo "alphapapa/org-sidebar"))
 
 (use-package org-cliplink
   :after org
@@ -632,22 +639,21 @@
   :hook (LaTeX-mode . evil-tex-mode))
 
 (use-package citar
-  :after all-the-icons
   :config
   ;; icon support via all-the-icons
-  (setq citar-symbols
-        `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-          (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+  ;; (setq citar-symbols
+  ;;       `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+  ;;         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+  ;;         (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
   (setq citar-symbol-separator "  ")
   :general
   (patrl/leader-keys
     "nb" '(citar-open :wk "citar")
     )
-  :custom
-  (citar-notes-paths (list patrl/notes-path))
-  (citar-library-paths (list patrl/library-path))
-  (citar-bibliography (list patrl/global-bib-file))
+  :init
+  (setq citar-notes-paths (list patrl/notes-path))
+  (setq citar-library-paths (list patrl/library-path))
+  (setq citar-bibliography (list patrl/global-bib-file))
   )
 
 ;; FIXME

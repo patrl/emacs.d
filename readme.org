@@ -115,48 +115,51 @@ Quick how-to for straight:
 ** Defaults
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package emacs
-      :init
-      (setq user-full-name "Patrick D. Elliott") ;; my details
-      (setq user-mail-address "patrick.d.elliott@gmail.com")
+  (use-package emacs
+    :init
+    (setq user-full-name "Patrick D. Elliott") ;; my details
+    (setq user-mail-address "patrick.d.elliott@gmail.com")
 
-      (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
+    (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
-      (setq indent-tabs-mode nil) ;; tabs are evil
+    (setq indent-tabs-mode nil) ;; tabs are evil
 
-      (setq make-backup-files nil) ;; keep everything under vc 
-      (setq auto-save-default nil)
-      (setq create-lockfiles nil)
+    (setq make-backup-files nil) ;; keep everything under vc 
+    (setq auto-save-default nil)
+    (setq create-lockfiles nil)
 
-      (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
-      (setq locale-coding-system 'utf-8
-            coding-system-for-read 'utf-8
-            coding-system-for-write 'utf-8)
-      (set-terminal-coding-system 'utf-8)
-      (set-keyboard-coding-system 'utf-8)
-      (set-selection-coding-system 'utf-8)
-      (prefer-coding-system 'utf-8)
-      (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+    (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
+    (setq locale-coding-system 'utf-8
+          coding-system-for-read 'utf-8
+          coding-system-for-write 'utf-8)
+    (set-terminal-coding-system 'utf-8)
+    (set-keyboard-coding-system 'utf-8)
+    (set-selection-coding-system 'utf-8)
+    (prefer-coding-system 'utf-8)
+    (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 
-      (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; escape quits everything
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; escape quits everything
 
-      ;; Don't persist a custom file
-      (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
-      (setq custom-safe-themes t)            ; mark all themes as safe, since we can't persist now
-      (setq enable-local-variables :all)     ; fix =defvar= warnings
+    ;; Don't persist a custom file
+    (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
+    (setq custom-safe-themes t)            ; mark all themes as safe, since we can't persist now
+    (setq enable-local-variables :all)     ; fix =defvar= warnings
 
-      (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
+    (setq delete-by-moving-to-trash t) ;; use trash-cli rather than rm when deleting files.
 
-      ;; less noise when compiling elisp
-      (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
-      (setq native-comp-async-report-warnings-errors nil)
-      (setq load-prefer-newer t)
+    ;; less noise when compiling elisp
+    (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+    (setq native-comp-async-report-warnings-errors nil)
+    (setq load-prefer-newer t)
 
-      (show-paren-mode t)
-  
-      ;; Hide commands in M-x which don't work in the current mode
-      (setq read-extended-command-predicate #'command-completion-default-include-p)
-      )
+    ;; FIXME currently using templates in org-mode triggers this warning
+    (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+
+    (show-paren-mode t)
+
+    ;; Hide commands in M-x which don't work in the current mode
+    (setq read-extended-command-predicate #'command-completion-default-include-p)
+    )
 #+end_src
 
  
@@ -367,7 +370,6 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package avy
-    :after embark
     :init
     (defun patrl/avy-action-embark (pt)
       (unwind-protect
@@ -376,7 +378,7 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
             (embark-act))
         (select-window
          (cdr (ring-ref avy-ring 0))))
-      t)
+      t) ;; adds an avy action for embark
     :general
     (general-def '(normal motion)
       "s" 'evil-avy-goto-char-timer
@@ -656,7 +658,8 @@ Classify certain buffer types as popups.
 Resources:
 - [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
 - [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
-   
+
+
   #+begin_src emacs-lisp :tangle init.el
             (use-package org
               ;; :straight (:type built-in)
@@ -670,12 +673,13 @@ Resources:
               (setq org-highlight-latex-and-related '(native))
               (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
               :custom
-              (org-agenda-files '((concat patrl/org-path "agenda/") patrl/journal-path))
+              (org-agenda-files '("~/Dropbox (MIT)/org/agenda/" "~/notes/daily/"))
               :general
               (patrl/local-leader-keys
                 :keymaps 'org-mode-map
                 "l" '(:ignore t :wk "link")
                 "ll" '(org-insert-link t :wk "link")
+                "lp" '(org-latex-preview t :wk "prev latex")
                 "h" '(consult-org-heading :wk "consult heading")
                 "d" '(org-cut-special :wk "org cut special")
                 "y" '(org-copy-special :wk "org copy special")
@@ -704,6 +708,14 @@ Resources:
               (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
     )
   #+end_src
+  
+*** Sidebar
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-sidebar
+    :after org
+    :straight (:type git :host github :repo "alphapapa/org-sidebar"))
+#+end_src
    
 ***  Cliplink 
 
@@ -921,22 +933,21 @@ Auto-activating snippets:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citar
-    :after all-the-icons
     :config
     ;; icon support via all-the-icons
-    (setq citar-symbols
-          `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-            (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-            (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+    ;; (setq citar-symbols
+    ;;       `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+    ;;         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+    ;;         (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
     (setq citar-symbol-separator "  ")
     :general
     (patrl/leader-keys
       "nb" '(citar-open :wk "citar")
       )
-    :custom
-    (citar-notes-paths (list patrl/notes-path))
-    (citar-library-paths (list patrl/library-path))
-    (citar-bibliography (list patrl/global-bib-file))
+    :init
+    (setq citar-notes-paths (list patrl/notes-path))
+    (setq citar-library-paths (list patrl/library-path))
+    (setq citar-bibliography (list patrl/global-bib-file))
     )
 #+end_src
 
