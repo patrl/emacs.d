@@ -122,11 +122,18 @@ Quick how-to for straight:
 
     (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
-    (setq indent-tabs-mode nil) ;; tabs are evil
+    (setq indent-tabs-mode nil) ;; no tabs
 
     (setq make-backup-files nil) ;; keep everything under vc 
     (setq auto-save-default nil)
-    (setq create-lockfiles nil)
+
+    ;; keep backup and save files in a dedicated directory
+    (setq backup-directory-alist
+          `((".*" . ,(concat user-emacs-directory "backups")))
+          auto-save-file-name-transforms
+          `((".*" ,(concat user-emacs-directory "backups") t)))
+
+    (setq create-lockfiles nil) ;; no need to create lockfiles
 
     (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
     (setq locale-coding-system 'utf-8
@@ -152,7 +159,7 @@ Quick how-to for straight:
     (setq native-comp-async-report-warnings-errors nil)
     (setq load-prefer-newer t)
 
-    ;; FIXME currently using templates in org-mode triggers this warning
+    ;; FIXME currently using tempel in org-mode triggers this warning
     (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
     (show-paren-mode t)
@@ -163,7 +170,7 @@ Quick how-to for straight:
 #+end_src
 
  
-***  Electric 
+**  Electric 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package electric
@@ -173,6 +180,7 @@ Quick how-to for straight:
     (setq electric-pair-preserve-balance nil) ;; more annoying than useful
     )
 #+end_src
+
 
 * Keybindings
 
@@ -201,7 +209,7 @@ The local leader ~,~ is used for mode-specific bindings.
         :states '(normal insert visual emacs)
         :keymaps 'override
         :prefix "," ;; set local leader
-        :global-prefix "M-SPC m" ;; access local leader in insert mode
+        :global-prefix "M-," ;; access local leader in insert mode
         )
 
       (general-define-key
@@ -275,7 +283,7 @@ The local leader ~,~ is used for mode-specific bindings.
       ;; open
       (patrl/leader-keys
         "o" '(:ignore t :wk "open")
-        "os" '(speedbar t :wk "speedbar") ;; FIXME this needs some love
+        "os" '(speedbar t :wk "speedbar") ;; TODO this needs some love
         )
 
       ;; search
@@ -318,7 +326,11 @@ The local leader ~,~ is used for mode-specific bindings.
     (evil-set-initial-state 'eshell-mode 'insert)
     (evil-set-initial-state 'magit-diff-mode 'insert)
     )
+#+end_src 
 
+*** Evil collection
+
+#+begin_src emacs-lisp :tangle init.el
   (use-package evil-collection ;; evilifies a bunch of things
     :after evil
     :init
@@ -330,24 +342,34 @@ The local leader ~,~ is used for mode-specific bindings.
     :config
     (evil-collection-init)
     )
+#+end_src
 
+*** Evil commentary
+
+#+begin_src emacs-lisp :tangle init.el
   ;; port of Tim Pope's commentary package
   (use-package evil-commentary
     :after evil
     :config
     (evil-commentary-mode) ;; globally enable evil-commentary
     )
+#+end_src
 
+*** Evil surround
+
+#+begin_src emacs-lisp :tangle init.el
   ;; port of Tim Pope's surround package
   (use-package evil-surround
     :after evil
-    :hook (
-           (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-           )
+    :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist))))
     :config
     (global-evil-surround-mode 1) ;; globally enable evil-surround
     )
+#+end_src
 
+*** Evil goggles
+
+#+begin_src emacs-lisp :tangle init.el
   ;; show visual hints for evil motions
   (use-package evil-goggles
     :config
@@ -358,9 +380,9 @@ The local leader ~,~ is used for mode-specific bindings.
     ;; some red color (as defined by the color theme)
     ;; other faces such as `diff-added` will be used for other actions
     (evil-goggles-use-diff-faces))
-#+end_src 
+#+end_src
 
-** TODO Avy
+** Avy
 
 - [[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything | Karthinks]]
 
@@ -414,10 +436,6 @@ Display key bindings.
     :init (which-key-mode)
     :config
     (which-key-setup-minibuffer))
-
-  ;; (use-package which-key-posframe
-  ;;   :init (which-key-posframe-mode)
-  ;;   )
 #+end_src
       
 * Appearance
@@ -425,8 +443,7 @@ Display key bindings.
 ** Icons
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package all-the-icons
-    :if (display-graphic-p))
+  (use-package all-the-icons)
 
 
   ;; prettify dired with icons
@@ -443,7 +460,10 @@ Add some margins (useful for writing prose).
 #+begin_src emacs-lisp :tangle init.el
   (use-package olivetti
     :init
-    (setq olivetti-body-width 80))
+    (setq olivetti-body-width 80)
+    (setq olivetti-style 'fancy)
+    (setq olivetti-minimum-body-width 50))
+
 #+end_src
 
 ** Mode line
@@ -519,9 +539,11 @@ Visually highlight todo.
 
 ** Buffer management
 
-*** ~Popper~
+*** TODO ~Popper~
 
 Classify certain buffer types as popups.
+
+Not sure if I want to keep this around.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package popper
@@ -556,6 +578,8 @@ Classify certain buffer types as popups.
 
 *** ~bufler~
 
+This has been quite nice so far.
+
 #+begin_src emacs-lisp :tangle init.el
   (use-package bufler
     :custom
@@ -576,7 +600,7 @@ Classify certain buffer types as popups.
     )
 #+end_src
 
-** Tabs and projects
+** Projects
   
 #+begin_src emacs-lisp :tangle init.el 
   ;; use emacs' built-in 'project.el'
@@ -704,7 +728,7 @@ Resources:
               (org-mode . variable-pitch-mode)
               (org-mode . visual-line-mode)
               (org-mode . org-indent-mode) ;; indent
-              (org-mode . org-num-mode) ;; enable section numbers
+              ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
               (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
     )
   #+end_src
@@ -933,12 +957,13 @@ Auto-activating snippets:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citar
+    :after all-the-icons
     :config
     ;; icon support via all-the-icons
-    ;; (setq citar-symbols
-    ;;       `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-    ;;         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-    ;;         (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+    (setq citar-symbols
+          `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+            (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+            (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
     (setq citar-symbol-separator "  ")
     :general
     (patrl/leader-keys
@@ -1271,8 +1296,6 @@ Templates can be found in ~~/.config/emacs-vanilla/templates~.
     (add-hook 'prog-mode-hook 'tempel-setup-capf)
     (add-hook 'text-mode-hook 'tempel-setup-capf))
 #+end_src
-
-N.b. this currently triggers an error when snippets are used in org-mode.
 
 *** Autoinsert 
 

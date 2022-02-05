@@ -40,11 +40,18 @@
 
   (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
-  (setq indent-tabs-mode nil) ;; tabs are evil
+  (setq indent-tabs-mode nil) ;; no tabs
 
   (setq make-backup-files nil) ;; keep everything under vc 
   (setq auto-save-default nil)
-  (setq create-lockfiles nil)
+
+  ;; keep backup and save files in a dedicated directory
+  (setq backup-directory-alist
+        `((".*" . ,(concat user-emacs-directory "backups")))
+        auto-save-file-name-transforms
+        `((".*" ,(concat user-emacs-directory "backups") t)))
+
+  (setq create-lockfiles nil) ;; no need to create lockfiles
 
   (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
   (setq locale-coding-system 'utf-8
@@ -70,7 +77,7 @@
   (setq native-comp-async-report-warnings-errors nil)
   (setq load-prefer-newer t)
 
-  ;; FIXME currently using templates in org-mode triggers this warning
+  ;; FIXME currently using tempel in org-mode triggers this warning
   (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
   (show-paren-mode t)
@@ -104,7 +111,7 @@
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "," ;; set local leader
-    :global-prefix "M-SPC m" ;; access local leader in insert mode
+    :global-prefix "M-," ;; access local leader in insert mode
     )
 
   (general-define-key
@@ -178,7 +185,7 @@
   ;; open
   (patrl/leader-keys
     "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar") ;; FIXME this needs some love
+    "os" '(speedbar t :wk "speedbar") ;; TODO this needs some love
     )
 
   ;; search
@@ -240,9 +247,7 @@
 ;; port of Tim Pope's surround package
 (use-package evil-surround
   :after evil
-  :hook (
-         (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-         )
+  :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist))))
   :config
   (global-evil-surround-mode 1) ;; globally enable evil-surround
   )
@@ -293,12 +298,7 @@
   :config
   (which-key-setup-minibuffer))
 
-;; (use-package which-key-posframe
-;;   :init (which-key-posframe-mode)
-;;   )
-
-(use-package all-the-icons
-  :if (display-graphic-p))
+(use-package all-the-icons)
 
 
 ;; prettify dired with icons
@@ -309,7 +309,9 @@
 
 (use-package olivetti
   :init
-  (setq olivetti-body-width 80))
+  (setq olivetti-body-width 80)
+  (setq olivetti-style 'fancy)
+  (setq olivetti-minimum-body-width 50))
 
 (use-package mood-line
   :config (mood-line-mode))
@@ -493,12 +495,14 @@
           (org-mode . variable-pitch-mode)
           (org-mode . visual-line-mode)
           (org-mode . org-indent-mode) ;; indent
-          (org-mode . org-num-mode) ;; enable section numbers
+          ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
           (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 )
 
 (use-package org-sidebar
-  :after org
+  :after org solaire-mode
+  :init
+  (add-hook 'org-sidebar-window-after-display-hook 'turn-on-solaire-mode)
   :straight (:type git :host github :repo "alphapapa/org-sidebar"))
 
 (use-package org-cliplink
@@ -639,12 +643,13 @@
   :hook (LaTeX-mode . evil-tex-mode))
 
 (use-package citar
+  :after all-the-icons
   :config
   ;; icon support via all-the-icons
-  ;; (setq citar-symbols
-  ;;       `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-  ;;         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-  ;;         (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+  (setq citar-symbols
+        `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+          (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
   (setq citar-symbol-separator "  ")
   :general
   (patrl/leader-keys
