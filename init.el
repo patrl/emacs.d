@@ -1045,9 +1045,6 @@
             "D" '+notmuch/tree-delete)
   )
 
-(use-package pdf-continuous-scroll-mode
-  :straight (:type git :host github :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
-
 (use-package deadgrep
   :general
   (patrl/leader-keys
