@@ -1,7 +1,6 @@
 #+title: Emacs configuration
 #+author: Patrick D. Elliott
 #+email: patrick.d.elliott@gmail.com
-#+date: <2022-02-05 Sun>
 #+EXPORT_FILE_NAME: ./docs/index.html
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
