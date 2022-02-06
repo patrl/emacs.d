@@ -499,10 +499,15 @@
           (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 )
 
+(use-package evil-org
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
 (use-package org-sidebar
-  :after org solaire-mode
-  :init
-  (add-hook 'org-sidebar-window-after-display-hook 'turn-on-solaire-mode)
+  :after org
   :straight (:type git :host github :repo "alphapapa/org-sidebar"))
 
 (use-package org-cliplink
