@@ -1490,6 +1490,13 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
 
 * Staging grounds
 
+** Smooth scrolling
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package pdf-continuous-scroll-mode
+    :straight (:type git :host github :repo "dalanicolai/pdf-continuous-scroll-mode.el"))  
+#+end_src
+
 ** TODO Cape
 ** Numbex
 
