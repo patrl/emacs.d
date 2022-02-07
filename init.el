@@ -574,6 +574,8 @@
     :config
     (setq org-noter-notes-search-path (list patrl/notes-path))
     (setq org-noter-default-notes-file-names '("literature-notes.org"))
+    (setq org-noter-hide-other nil)
+    (setq org-noter-always-create-frame nil)
 )
 
 (use-package haskell-mode)
