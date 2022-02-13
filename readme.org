@@ -164,8 +164,7 @@ Quick how-to for straight:
     (show-paren-mode t)
 
     ;; Hide commands in M-x which don't work in the current mode
-    (setq read-extended-command-predicate #'command-completion-default-include-p)
-    )
+    (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+end_src
 
  
@@ -176,8 +175,7 @@ Quick how-to for straight:
     :straight (:type built-in)
     :init
     (electric-pair-mode +1) ;; automatically insert closing parens 
-    (setq electric-pair-preserve-balance nil) ;; more annoying than useful
-    )
+    (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
 #+end_src
 
 
