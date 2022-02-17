@@ -541,6 +541,7 @@
   :init
   (setq org-roam-v2-ack t) ;; disables v2 warning
   :config
+  (setq org-roam-completion-everywhere nil) ;; roam completion anywhere
   (setq org-roam-directory patrl/notes-path)
   (setq org-roam-dailies-directory "daily/")
   (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
@@ -771,7 +772,7 @@
   :custom
   (corfu-cycle t) ;; allows cycling through candidates
   (corfu-auto nil) ;; disables auto-completion
-  (corfu-quit-at-boundary nil) ;; needed to use orderless completion with corfu
+  (corfu-quit-at-boundary nil) ;; FIXME needed to use orderless completion with corfu
   :bind
   :general
   (:keymaps 'corfu-map
