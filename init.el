@@ -772,12 +772,12 @@
   :custom
   (corfu-cycle t) ;; allows cycling through candidates
   (corfu-auto nil) ;; disables auto-completion
-  (corfu-quit-at-boundary nil) ;; FIXME needed to use orderless completion with corfu
   :bind
   :general
   (:keymaps 'corfu-map
             "C-j" 'corfu-next
             "C-k" 'corfu-previous
+            "SPC" 'corfu-insert-separator ;; for compatibility with orderless
             ))
 
 ;; FIXME add icons to corfu
