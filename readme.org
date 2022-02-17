@@ -707,7 +707,7 @@ Resources:
                 "p" '(org-paste-special :wk "org paste special")
                 "b" '(:keymap org-babel-map :wk "babel")
                 "t" '(org-todo :wk "todo")
-                "T" '(org-insert-structure-template :wk "template")
+                "s" '(org-insert-structure-template :wk "template")
                 "e" '(org-edit-special :wk "edit")
                 "i" '(:ignore t :wk "insert")
                 "ih" '(org-insert-heading :wk "insert heading")
@@ -1255,6 +1255,7 @@ A minimal ui for ~completion-in-region~.
       ";B" "\\bot"
       ";;x" "\\times"
       ";;v" "\\veebar"
+      ";;{" "\\subseteq"
       ;; bind to functions!
       "sum" (lambda () (interactive)
               (yas-expand-snippet "\\sum_{$1}^{$2} $0"))

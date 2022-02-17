@@ -83,15 +83,13 @@
   (show-paren-mode t)
 
   ;; Hide commands in M-x which don't work in the current mode
-  (setq read-extended-command-predicate #'command-completion-default-include-p)
-  )
+  (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (use-package electric
   :straight (:type built-in)
   :init
   (electric-pair-mode +1) ;; automatically insert closing parens 
-  (setq electric-pair-preserve-balance nil) ;; more annoying than useful
-  )
+  (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
 
 (use-package general
   :config
@@ -477,7 +475,7 @@
             "p" '(org-paste-special :wk "org paste special")
             "b" '(:keymap org-babel-map :wk "babel")
             "t" '(org-todo :wk "todo")
-            "T" '(org-insert-structure-template :wk "template")
+            "s" '(org-insert-structure-template :wk "template")
             "e" '(org-edit-special :wk "edit")
             "i" '(:ignore t :wk "insert")
             "ih" '(org-insert-heading :wk "insert heading")
@@ -875,6 +873,7 @@
     ";B" "\\bot"
     ";;x" "\\times"
     ";;v" "\\veebar"
+    ";;{" "\\subseteq"
     ;; bind to functions!
     "sum" (lambda () (interactive)
             (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
