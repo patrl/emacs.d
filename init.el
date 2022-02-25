@@ -245,7 +245,9 @@
 ;; port of Tim Pope's surround package
 (use-package evil-surround
   :after evil
-  :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist))))
+  :hook (
+         (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+         (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
   :config
   (global-evil-surround-mode 1) ;; globally enable evil-surround
   )
@@ -1046,6 +1048,10 @@
             :states 'normal
             "D" '+notmuch/tree-delete)
   )
+
+(use-package org-modern
+  :straight (:type git :host github :repo
+                   "minad/org-modern"))
 
 (use-package deadgrep
   :general
