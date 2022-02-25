@@ -14,8 +14,15 @@ org-mode
 (verse "#+begin_verse" n> r> n> "#+end_verse")
 (src "#+begin_src " p n> r> n> "#+end_src")
 (elisp "#+begin_src emacs-lisp" n> r> n "#+end_src")
-
 (lingex "#+name: " p n> "#+begin_exe" n> "\\ex " r> n> "#+end_exe")
+
+;; awesomeblock snippets for org-mode
+(note "#+begin_noteblock" n> r> n> "#+end_noteblock")
+(tip "#+begin_tipblock" n> r> n> "#+end_tipblock")
+(warning "#+begin_warningblock" n> r> n> "#+end_warningblock")
+(caution "#+begin_cautionblock" n> r> n> "#+end_cautionblock")
+(important "#+begin_importantblock" n> r> n> "#+end_importantblock")
+
 (def "#+begin_definition" n> r> n> "#+end_definition")
 (box "#+begin_tcolorbox" n> r> n> "#+end_tcolorbox")
 
