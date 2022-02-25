@@ -178,7 +178,6 @@ Quick how-to for straight:
     (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
 #+end_src
 
-
 * Keybindings
 
 Mnemonic keybindings with ~SPC~ as the leader key, inspired by spacemacs and doom emacs.
@@ -358,7 +357,9 @@ The local leader ~,~ is used for mode-specific bindings.
   ;; port of Tim Pope's surround package
   (use-package evil-surround
     :after evil
-    :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist))))
+    :hook (
+           (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+           (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
     :config
     (global-evil-surround-mode 1) ;; globally enable evil-surround
     )
@@ -378,6 +379,7 @@ The local leader ~,~ is used for mode-specific bindings.
     ;; other faces such as `diff-added` will be used for other actions
     (evil-goggles-use-diff-faces))
 #+end_src
+
 
 ** Avy
 
@@ -1490,6 +1492,14 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
 #+end_src
 
 * Staging grounds
+
+** Org modern
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-modern
+    :straight (:type git :host github :repo
+                     "minad/org-modern"))
+#+end_src
 
 ** FIXME Smooth scrolling
 
