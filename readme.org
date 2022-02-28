@@ -1493,6 +1493,17 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
 
 * Staging grounds
 
+** Org transclusion
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-transclusion
+    :after org
+    :general
+    (patrl/leader-keys
+      "nt" '(org-transclusion-mode :wk "transclusion mode")))
+#+end_src
+
+
 ** Org modern
 
 #+begin_src emacs-lisp :tangle init.el
