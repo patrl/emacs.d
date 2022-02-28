@@ -1049,6 +1049,12 @@
             "D" '+notmuch/tree-delete)
   )
 
+(use-package org-transclusion
+  :after org
+  :general
+  (patrl/leader-keys
+    "nt" '(org-transclusion-mode :wk "transclusion mode")))
+
 (use-package org-modern
   :straight (:type git :host github :repo
                    "minad/org-modern"))
