@@ -1103,6 +1103,8 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     ("C-;" 'embark-dwim)
     (:keymaps 'vertico-map
               "C-." 'embark-act)
+    (:keymaps 'embark-heading-map
+              "l" 'org-id-store-link)
     :init
     (setq prefix-help-command #'embark-prefix-help-command)
     )
