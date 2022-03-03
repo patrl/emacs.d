@@ -754,6 +754,8 @@
   ("C-;" 'embark-dwim)
   (:keymaps 'vertico-map
             "C-." 'embark-act)
+  (:keymaps 'embark-heading-map
+            "l" 'org-id-store-link)
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   )
@@ -876,6 +878,7 @@
     ";B" "\\bot"
     ";;x" "\\times"
     ";;v" "\\veebar"
+    ";;u" "\\cup"
     ";;{" "\\subseteq"
     ;; bind to functions!
     "sum" (lambda () (interactive)
