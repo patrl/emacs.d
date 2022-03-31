@@ -497,6 +497,8 @@
           (org-mode . org-indent-mode) ;; indent
           ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
           (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+          :config
+          (add-to-list 'org-latex-packages-alist '("" "braket" t))
 )
 
 (use-package evil-org
@@ -543,10 +545,21 @@
   :init
   (setq org-roam-v2-ack t) ;; disables v2 warning
   :config
+  ;; get tags to show up in 'org-roam-node-find':
+  (setq org-roam-node-display-template
+        (concat "${title:*} "
+                (propertize "${tags:10}" 'face 'org-tag)))
   (setq org-roam-completion-everywhere nil) ;; roam completion anywhere
   (setq org-roam-directory patrl/notes-path)
-  (setq org-roam-dailies-directory "daily/")
   (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
+
+  ;; dailies config
+  (setq org-roam-dailies-directory "daily/")
+  (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           "* %?"
+           :target (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%Y-%m-%d>\n#+filetags: daily\n"))))
   )
 
 (use-package citeproc
@@ -880,6 +893,8 @@
     ";;v" "\\veebar"
     ";;u" "\\cup"
     ";;{" "\\subseteq"
+    ";D" "\\Diamond"
+    ";;b" "\\Box" 
     ;; bind to functions!
     "sum" (lambda () (interactive)
             (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -1029,6 +1044,8 @@
   ;; in gmail, messages are archived simply by removing the 'inbox' tag.
   (setq notmuch-archive-tags '("-inbox" "-new"))
   :config
+  ;; show new mail first
+  (setq notmuch-search-oldest-first nil)
   ;; the 'new' tag isn't synced to the gmail server; messages new to notmuch aquire this tag.
   (add-to-list 'notmuch-saved-searches '(:name "new" :query "tag:new" :key "n"))
   (defun +notmuch/search-delete ()
