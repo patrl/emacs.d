@@ -696,7 +696,7 @@ Resources:
               (setq org-highlight-latex-and-related '(native))
               (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
               :custom
-              (org-agenda-files '("~/Dropbox (MIT)/org/agenda/" "~/notes/daily/"))
+              (org-agenda-files '("~/Dropbox (MIT)/org/agenda/"))
               :general
               (patrl/local-leader-keys
                 :keymaps 'org-mode-map
