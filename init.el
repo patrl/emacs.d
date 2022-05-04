@@ -785,7 +785,7 @@
   :hook
   (eval-expression-minibuffer-setup . corfu-mode)
   :init
-  (corfu-global-mode)
+  (global-corfu-mode) 
   :custom
   (corfu-cycle t) ;; allows cycling through candidates
   (corfu-auto nil) ;; disables auto-completion
