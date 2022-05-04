@@ -24,6 +24,7 @@ org-mode
 (important "#+begin_importantblock" n> r> n> "#+end_importantblock")
 
 (def "#+begin_definition" n> r> n> "#+end_definition")
+(fact "#+begin_fact" n> r> n> "#+end_fact")
 (box "#+begin_tcolorbox" n> r> n> "#+end_tcolorbox")
 
 latex-mode
