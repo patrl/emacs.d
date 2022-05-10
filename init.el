@@ -78,7 +78,7 @@
   (setq load-prefer-newer t)
 
   ;; FIXME currently using tempel in org-mode triggers this warning
-  (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+  ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
   (show-paren-mode t)
 
@@ -542,8 +542,6 @@
     "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
     "nrdd" '(org-roam-dailies-goto-date :wk "goto date")
     )
-  :init
-  (setq org-roam-v2-ack t) ;; disables v2 warning
   :config
   ;; get tags to show up in 'org-roam-node-find':
   (setq org-roam-node-display-template
@@ -551,7 +549,7 @@
                 (propertize "${tags:10}" 'face 'org-tag)))
   (setq org-roam-completion-everywhere nil) ;; roam completion anywhere
   (setq org-roam-directory patrl/notes-path)
-  (org-roam-db-autosync-enable) ;; ensures that org-roam is available on startup
+  (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
 
   ;; dailies config
   (setq org-roam-dailies-directory "daily/")
