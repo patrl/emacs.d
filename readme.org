@@ -287,7 +287,13 @@ The local leader ~,~ is used for mode-specific bindings.
       (patrl/leader-keys
         "s" '(:ignore t :wk "search")
         )
+
+      ;; capture
+      (patrl/leader-keys
+        "c" '(org-capture :wk "capture"))
       )
+
+
   #+end_src
 
 ** Evil
@@ -380,7 +386,6 @@ The local leader ~,~ is used for mode-specific bindings.
     (evil-goggles-use-diff-faces))
 #+end_src
 
-
 ** Avy
 
 - [[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything | Karthinks]]
@@ -392,6 +397,14 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 #+begin_src emacs-lisp :tangle init.el
   (use-package avy
     :init
+    (defun patrl/avy-action-kill-whole-line (pt)
+      (save-excursion
+        (goto-char pt)
+        (kill-whole-line))
+      (select-window
+       (cdr
+        (ring-ref avy-ring 0)))
+      )
     (defun patrl/avy-action-embark (pt)
       (unwind-protect
           (save-excursion
@@ -408,7 +421,9 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
       ";" 'avy-resume
       )
     :config
-    (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark) ;; avy embark integration
+    (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark ;; embark integration
+          (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line ;; kill lines with avy
+          )
     )
 #+end_src
 
@@ -512,13 +527,21 @@ Some nice themes:
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
+    (use-package catppuccin-theme
+      :config
+      (setq catppuccin-height-title1 1.5)
+      (load-theme 'catppuccin t)
+  )
+#+end_src
+
+#+begin_src emacs-lisp :tangle init.el
   (use-package doom-themes
     :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
           doom-themes-enable-italic t)
                                           ; if nil, italics is universally disabled
-    (load-theme 'doom-nord t)
+    ;; (load-theme 'doom-nord t)
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -1523,6 +1546,16 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
       "nt" '(org-transclusion-mode :wk "transclusion mode")))
 #+end_src
 
+
+** Kmonad
+
+#+begin_src emacs-lisp :tangle init.el
+    (use-package kbd-mode 
+      :straight (:type git :host github :repo
+                       "kmonad/kbd-mode"))
+#+end_src
+
+*** TODO disable flymake mode in kbd-mode
 
 ** Org modern
 
