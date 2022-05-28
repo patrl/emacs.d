@@ -191,6 +191,10 @@
   (patrl/leader-keys
     "s" '(:ignore t :wk "search")
     )
+
+  ;; capture
+  (patrl/leader-keys
+    "c" '(org-capture :wk "capture"))
   )
 
 (use-package evil
@@ -265,6 +269,14 @@
 
 (use-package avy
   :init
+  (defun patrl/avy-action-kill-whole-line (pt)
+    (save-excursion
+      (goto-char pt)
+      (kill-whole-line))
+    (select-window
+     (cdr
+      (ring-ref avy-ring 0)))
+    )
   (defun patrl/avy-action-embark (pt)
     (unwind-protect
         (save-excursion
@@ -281,7 +293,9 @@
     ";" 'avy-resume
     )
   :config
-  (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark) ;; avy embark integration
+  (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark ;; embark integration
+        (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line ;; kill lines with avy
+        )
   )
 
 (use-package link-hint
@@ -337,13 +351,19 @@
   :config
   (setq tron-legacy-theme-vivid-cursor t))
 
+(use-package catppuccin-theme
+    :config
+    (setq catppuccin-height-title1 1.5)
+    (load-theme 'catppuccin t)
+)
+
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
         doom-themes-enable-italic t)
                                         ; if nil, italics is universally disabled
-  (load-theme 'doom-nord t)
+  ;; (load-theme 'doom-nord t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1072,6 +1092,10 @@
   :general
   (patrl/leader-keys
     "nt" '(org-transclusion-mode :wk "transclusion mode")))
+
+(use-package kbd-mode 
+  :straight (:type git :host github :repo
+                   "kmonad/kbd-mode"))
 
 (use-package org-modern
   :straight (:type git :host github :repo
