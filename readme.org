@@ -754,7 +754,10 @@ Resources:
               (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
               :config
               (add-to-list 'org-latex-packages-alist '("" "braket" t))
-    )
+              ;; set up org paths
+              (setq org-directory "~/Dropbox (MIT)/org/agenda")
+              (setq org-default-notes-file (concat org-directory "/notes.org"))
+)
   #+end_src
   
 *** Extra bindings  
