@@ -41,6 +41,8 @@ latex-mode
 
 (sc "\\textsc{" p "}")
 
+(lingex "\\begin{exe}" > n> "\\ex " r> n> "\\end{exe}")
+
 emacs-lisp-mode
 
 (lambda "(lambda (" p ")" n> r> ")")
