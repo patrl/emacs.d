@@ -101,48 +101,41 @@
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC" ;; access leader in insert mode
-    )
+    :global-prefix "M-SPC") ;; access leader in insert mode
 
   ;; set up ',' as the local leader key
   (general-create-definer patrl/local-leader-keys
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "," ;; set local leader
-    :global-prefix "M-," ;; access local leader in insert mode
-    )
+    :global-prefix "M-,") ;; access local leader in insert mode
 
   (general-define-key
    :states 'insert
-   "C-g" 'evil-normal-state ;; don't stretch for ESC
-   )
+   "C-g" 'evil-normal-state) ;; don't stretch for ESC
 
   ;; unbind some annoying default bindings
   (general-unbind
     "C-x C-r"	;; unbind find file read only
     "C-x C-z"	;; unbind suspend frame
     "C-x C-d"	;; unbind list directory
-    "<mouse-2>" ;; pasting with mouse wheel click
-    )
+    "<mouse-2>") ;; pasting with mouse wheel click
 
 
   (patrl/leader-keys
     "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
-    "TAB" '(:keymap tab-prefix-map :wk "tab") ;; remap tab bindings
-    )
+    "TAB" '(:keymap tab-prefix-map :wk "tab")) ;; remap tab bindings
 
   ;; help
   ;; namespace mostly used by 'helpful'
   (patrl/leader-keys
-    "h" '(:ignore t :wk "help")
-    )
+    "h" '(:ignore t :wk "help"))
 
   ;; file
   (patrl/leader-keys
     "f" '(:ignore t :wk "file")
     "ff" '(find-file :wk "find file") ;; gets overridden by consult
-    "fs" '(save-buffer :wk "save file")
-    )
+    "fs" '(save-buffer :wk "save file"))
 
   ;; buffer 
   ;; see 'bufler' and 'popper'
@@ -150,58 +143,48 @@
     "b" '(:ignore t :wk "buffer")
     "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
     "bk" '(kill-this-buffer :wk "kill this buffer")
-    "br" '(revert-buffer :wk "reload buffer")
-    )
+    "br" '(revert-buffer :wk "reload buffer"))
 
   ;; bookmark
   (patrl/leader-keys
     "B" '(:ignore t :wk "bookmark")
     "Bs" '(bookmark-set :wk "set bookmark")
-    "Bj" '(bookmark-jump :wk "jump to bookmark")
-    )
+    "Bj" '(bookmark-jump :wk "jump to bookmark"))
 
   ;; universal argument
   (patrl/leader-keys
-    "u" '(universal-argument :wk "universal prefix")
-    )
+    "u" '(universal-argument :wk "universal prefix"))
 
   ;; notes
   ;; see 'citar' and 'org-roam'
   (patrl/leader-keys
     "n" '(:ignore t :wk "notes")
     ;; see org-roam and citar sections
-    "na" '(org-todo-list :wk "agenda todos")
-    ;; agenda
-    )
+    "na" '(org-todo-list :wk "agenda todos")) ;; agenda
 
   ;; code
   ;; see 'flymake'
   (patrl/leader-keys
-    "c" '(:ignore t :wk "code")
-    )
+    "c" '(:ignore t :wk "code"))
 
   ;; open
   (patrl/leader-keys
     "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar") ;; TODO this needs some love
-    )
+    "os" '(speedbar t :wk "speedbar")) ;; TODO this needs some love
 
   ;; search
   ;; see 'consult'
   (patrl/leader-keys
-    "s" '(:ignore t :wk "search")
-    )
+    "s" '(:ignore t :wk "search"))
 
   ;; capture
   (patrl/leader-keys
-    "c" '(org-capture :wk "capture"))
-  )
+    "c" '(org-capture :wk "capture")))
 
 (use-package evil
   :general
   (patrl/leader-keys
-    "w" '(:keymap evil-window-map :wk "window") ;; window bindings
-    )
+    "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
   :init
   (setq evil-search-module 'isearch)
 
@@ -224,8 +207,7 @@
   (evil-set-initial-state 'dashboard-mode 'normal)
   ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
   (evil-set-initial-state 'eshell-mode 'insert)
-  (evil-set-initial-state 'magit-diff-mode 'insert)
-  )
+  (evil-set-initial-state 'magit-diff-mode 'insert))
 
 (use-package evil-collection ;; evilifies a bunch of things
   :after evil
@@ -236,25 +218,21 @@
   ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
   ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
   :config
-  (evil-collection-init)
-  )
+  (evil-collection-init))
 
 ;; port of Tim Pope's commentary package
 (use-package evil-commentary
   :after evil
   :config
-  (evil-commentary-mode) ;; globally enable evil-commentary
-  )
+  (evil-commentary-mode)) ;; globally enable evil-commentary
 
 ;; port of Tim Pope's surround package
 (use-package evil-surround
   :after evil
-  :hook (
-         (org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+  :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
          (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
   :config
-  (global-evil-surround-mode 1) ;; globally enable evil-surround
-  )
+  (global-evil-surround-mode 1)) ;; globally enable evil-surround
 
 ;; show visual hints for evil motions
 (use-package evil-goggles
@@ -275,8 +253,7 @@
       (kill-whole-line))
     (select-window
      (cdr
-      (ring-ref avy-ring 0)))
-    )
+      (ring-ref avy-ring 0))))
   (defun patrl/avy-action-embark (pt)
     (unwind-protect
         (save-excursion
@@ -290,13 +267,10 @@
     "s" 'evil-avy-goto-char-timer
     "f" 'evil-avy-goto-char-in-line
     "gl" 'evil-avy-goto-line ;; this rules
-    ";" 'avy-resume
-    )
+    ";" 'avy-resume)
   :config
   (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark ;; embark integration
-        (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line ;; kill lines with avy
-        )
-  )
+        (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line)) ;; kill lines with avy
 
 (use-package link-hint
   :general
@@ -318,8 +292,7 @@
 ;; prettify dired with icons
 (use-package all-the-icons-dired
   :hook
-  (dired-mode . all-the-icons-dired-mode)
-  )
+  (dired-mode . all-the-icons-dired-mode))
 
 (use-package olivetti
   :init
@@ -335,8 +308,7 @@
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
   (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-  (set-fontset-font t nil "Twitter Color Emoji")
-  )
+  (set-fontset-font t nil "Twitter Color Emoji"))
 
 ;; run this hook after we have initialized the first time
 (add-hook 'after-init-hook 'patrl/setup-font-faces)
@@ -352,10 +324,9 @@
   (setq tron-legacy-theme-vivid-cursor t))
 
 (use-package catppuccin-theme
-    :config
-    (setq catppuccin-height-title1 1.5)
-    (load-theme 'catppuccin t)
-)
+  :config
+  (setq catppuccin-height-title1 1.5)
+  (load-theme 'catppuccin t))
 
 (use-package doom-themes
   :config
@@ -381,8 +352,7 @@
         "bpc" '(popper-cycle t :wk "cycle")
         "bpt" '(popper-toggle-latest t :wk "toggle latest")
         "bpb" '(popper-toggle-type t :wk "toggle type")
-        "bpk" '(popper-kill-latest-popup t :wk "kill latest")
-    )
+        "bpk" '(popper-kill-latest-popup t :wk "kill latest"))
   :init
   (setq popper-reference-buffers
         '("\\*Messages\\*"
@@ -398,8 +368,7 @@
           "\\*straight-process\\*"
           "\\*Async-native-compile-log\\*"
           "\\*TeX Help\\*"
-          "\\*Embark Collect Live\\*"
-          ))
+          "\\*Embark Collect Live\\*"))
   (popper-mode +1)
   (popper-echo-mode +1))
 
@@ -411,22 +380,18 @@
   (patrl/leader-keys
     "bB" '(bufler :wk "bufler") ;; overrides consult
     "bf" '(bufler-workspace-frame-set :wk "bufler workspace frame set") 
-    "bl" '(bufler-list :wk "bufler list") 
-    )
+    "bl" '(bufler-list :wk "bufler list"))
   (:keymaps 'bufler-list-mode-map
             :states 'normal
             "?" 'hydra:bufler/body
             "RET" 'bufler-list-buffer-switch
             "SPC" 'bufler-list-buffer-peek
-            "d" 'bufler-list-buffer-kill)
-  )
+            "d" 'bufler-list-buffer-kill))
 
 ;; use emacs' built-in 'project.el'
 (use-package project
   :general
-  (patrl/leader-keys
-    "p" '(:keymap project-prefix-map :wk "project")
-    )
+  (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project"))
   :straight (:type built-in))
 
 (use-package dired
@@ -439,8 +404,7 @@
             :states 'normal
             "h" 'dired-up-directory
             "q" 'kill-current-buffer
-            "l" 'dired-find-file
-            )
+            "l" 'dired-find-file)
   :hook
   (dired-mode . dired-hide-details-mode) ;; make dired prettier
   :straight (:type built-in))
@@ -473,56 +437,53 @@
   (lispyville-set-key-theme '(operators c-w additional)))
 
 (use-package org
-              ;; :straight (:type built-in)
-              :init
-              (setq org-todo-keywords
-                    ;; it's extremely useful to distinguish between short-term goals and long-term projects
-                    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-                      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-                      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
-              (setq org-src-fontify-natively t) ;; fontify code in src blocks
-              (setq org-highlight-latex-and-related '(native))
-              (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
-              :custom
-              (org-agenda-files '("~/Dropbox (MIT)/org/agenda/"))
-              :general
-              (patrl/local-leader-keys
-                :keymaps 'org-mode-map
-                "l" '(:ignore t :wk "link")
-                "ll" '(org-insert-link t :wk "link")
-                "lp" '(org-latex-preview t :wk "prev latex")
-                "h" '(consult-org-heading :wk "consult heading")
-                "d" '(org-cut-special :wk "org cut special")
-                "y" '(org-copy-special :wk "org copy special")
-                "p" '(org-paste-special :wk "org paste special")
-                "b" '(:keymap org-babel-map :wk "babel")
-                "t" '(org-todo :wk "todo")
-                "s" '(org-insert-structure-template :wk "template")
-                "e" '(org-edit-special :wk "edit")
-                "i" '(:ignore t :wk "insert")
-                "ih" '(org-insert-heading :wk "insert heading")
-                "is" '(org-insert-subheading :wk "insert heading")
-                "f" '(org-footnote-action :wk "footnote action")
-                ">" '(org-demote-subtree :wk "demote subtree")
-                "<" '(org-promote-subtree :wk "demote subtree")
-                )
-              (:keymaps 'org-agenda-mode-map
-                        "j" '(org-agenda-next-line)
-                        "h" '(org-agenda-previous-line))
-
-              :hook
-              (org-mode . olivetti-mode)
-              (org-mode . variable-pitch-mode)
-              (org-mode . visual-line-mode)
-              (org-mode . org-indent-mode) ;; indent
-              ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
-              (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-              :config
-              (add-to-list 'org-latex-packages-alist '("" "braket" t))
-              ;; set up org paths
-              (setq org-directory "~/Dropbox (MIT)/org/agenda")
-              (setq org-default-notes-file (concat org-directory "/notes.org"))
-)
+  ;; :straight (:type built-in)
+  :init
+  (setq org-todo-keywords
+        ;; it's extremely useful to distinguish between short-term goals and long-term projects
+        '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+          (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+          (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+  (setq org-src-fontify-natively t) ;; fontify code in src blocks
+  (setq org-highlight-latex-and-related '(native))
+  (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+  :custom
+  (org-agenda-files '("~/Dropbox (MIT)/org/agenda/"))
+  :general
+  (patrl/local-leader-keys
+    :keymaps 'org-mode-map
+    "l" '(:ignore t :wk "link")
+    "ll" '(org-insert-link t :wk "link")
+    "lp" '(org-latex-preview t :wk "prev latex")
+    "h" '(consult-org-heading :wk "consult heading")
+    "d" '(org-cut-special :wk "org cut special")
+    "y" '(org-copy-special :wk "org copy special")
+    "p" '(org-paste-special :wk "org paste special")
+    "b" '(:keymap org-babel-map :wk "babel")
+    "t" '(org-todo :wk "todo")
+    "s" '(org-insert-structure-template :wk "template")
+    "e" '(org-edit-special :wk "edit")
+    "i" '(:ignore t :wk "insert")
+    "ih" '(org-insert-heading :wk "insert heading")
+    "is" '(org-insert-subheading :wk "insert heading")
+    "f" '(org-footnote-action :wk "footnote action")
+    ">" '(org-demote-subtree :wk "demote subtree")
+    "<" '(org-promote-subtree :wk "demote subtree"))
+  (:keymaps 'org-agenda-mode-map
+            "j" '(org-agenda-next-line)
+            "h" '(org-agenda-previous-line))
+  :hook
+  (org-mode . olivetti-mode)
+  (org-mode . variable-pitch-mode)
+  (org-mode . visual-line-mode)
+  (org-mode . org-indent-mode) ;; indent
+  ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
+  (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+  :config
+  (add-to-list 'org-latex-packages-alist '("" "braket" t))
+  ;; set up org paths
+  (setq org-directory "~/Dropbox (MIT)/org/agenda")
+  (setq org-default-notes-file (concat org-directory "/notes.org")))
 
 (use-package evil-org
   :after org
@@ -540,9 +501,7 @@
   :general
   (patrl/local-leader-keys
     :keymaps 'org-mode-map 
-    "lc" '(org-cliplink :wk "cliplink")
-    )
-  )
+    "lc" '(org-cliplink :wk "cliplink")))
 
 (use-package org-superstar
   :after org
@@ -563,8 +522,7 @@
     "nrdt" '(org-roam-dailies-goto-today :wk "today")
     "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
     "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
-    "nrdd" '(org-roam-dailies-goto-date :wk "goto date")
-    )
+    "nrdd" '(org-roam-dailies-goto-date :wk "goto date"))
   :config
   ;; get tags to show up in 'org-roam-node-find':
   (setq org-roam-node-display-template
@@ -580,8 +538,7 @@
         '(("d" "default" entry
            "* %?"
            :target (file+head "%<%Y-%m-%d>.org"
-                              "#+title: %<%Y-%m-%d>\n#+filetags: daily\n"))))
-  )
+                              "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 
 (use-package citeproc
   :after org)
@@ -594,24 +551,22 @@
                   ("\\subsection{%s}" . "\\subsection*{%s}")
                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")
-                  )))
+                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
 (use-package htmlize)
 
 (use-package org-noter
-    :commands
-    org-noter
-    :general
-    (patrl/local-leader-keys
-      :keyamps 'org-noter-doc-mode-map
-      "i" 'org-noter-insert-note)
-    :config
-    (setq org-noter-notes-search-path (list patrl/notes-path))
-    (setq org-noter-default-notes-file-names '("literature-notes.org"))
-    (setq org-noter-hide-other nil)
-    (setq org-noter-always-create-frame nil)
-)
+  :commands
+  org-noter
+  :general
+  (patrl/local-leader-keys
+    :keyamps 'org-noter-doc-mode-map
+    "i" 'org-noter-insert-note)
+  :config
+  (setq org-noter-notes-search-path (list patrl/notes-path))
+  (setq org-noter-default-notes-file-names '("literature-notes.org"))
+  (setq org-noter-hide-other nil)
+  (setq org-noter-always-create-frame nil))
 
 (use-package haskell-mode)
 
@@ -623,8 +578,7 @@
     "r" '(racket-run-and-switch-to-repl :wk "run")
     "e" '(racket-eval-last-sexp :wk "eval last sexp")
     :keymaps 'racket-xp-mode-map
-    "xr" '(racket-xp-rename :wk "rename")
-    ))
+    "xr" '(racket-xp-rename :wk "rename")))
 
 (use-package pollen-mode)
 
@@ -634,8 +588,7 @@
 
 (use-package nix-update
   :commands
-  nix-update-fetch
-)
+  nix-update-fetch)
 
 (use-package auctex
   :no-require t
@@ -648,8 +601,7 @@
       TeX-source-correlate-start-server nil
       TeX-electric-sub-and-superscript t
       TeX-engine 'luatex ;; use lualatex by default
-      TeX-save-query nil) 
-      )
+      TeX-save-query nil))
 
 (use-package tex
   :straight auctex
@@ -662,8 +614,7 @@
     "e" '(LaTeX-environment :wk "insert environment")
     "p" '(preview-at-point :wk "preview at point")
     "f" '(TeX-font :wk "font")
-    "c" '(TeX-command-run-all :wk "compile")
-    )
+    "c" '(TeX-command-run-all :wk "compile"))
   :init
   (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
   :config
@@ -674,7 +625,7 @@
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   (add-hook 'TeX-mode-hook #'outline-minor-mode)
   ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
-  )
+  (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
 
 (use-package pdf-tools
   :config
@@ -695,13 +646,11 @@
   (setq citar-symbol-separator "  ")
   :general
   (patrl/leader-keys
-    "nb" '(citar-open :wk "citar")
-    )
+    "nb" '(citar-open :wk "citar"))
   :init
   (setq citar-notes-paths (list patrl/notes-path))
   (setq citar-library-paths (list patrl/library-path))
-  (setq citar-bibliography (list patrl/global-bib-file))
-  )
+  (setq citar-bibliography (list patrl/global-bib-file)))
 
 ;; FIXME
 (use-package auctex-latexmk
@@ -710,8 +659,7 @@
   :init
   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
   :config
-  (auctex-latexmk-setup)
-  )
+  (auctex-latexmk-setup))
 
 (use-package markdown-mode
   :hook ((markdown-mode . visual-line-mode)
@@ -739,8 +687,7 @@
             "C-k" 'vertico-previous
             "C-f" 'vertico-exit)
   (:keymaps 'minibuffer-local-map
-            "M-h" 'backward-kill-word)
-  )
+            "M-h" 'backward-kill-word))
 
 (use-package orderless
   :init
@@ -772,8 +719,7 @@
     "sF" '(consult-locate :wk "consult locate")
     "sl" '(consult-line :wk "consult line")
     "sy" '(consult-yank-from-kill-ring :wk "consult yank from kill ring")
-    "i" '(consult-imenu :wk "consult imenu")
-    )
+    "i" '(consult-imenu :wk "consult imenu"))
   :config
   ;; use project.el to retrieve the project root
   (setq consult-project-root-function
@@ -791,8 +737,7 @@
   (:keymaps 'embark-heading-map
             "l" 'org-id-store-link)
   :init
-  (setq prefix-help-command #'embark-prefix-help-command)
-  )
+  (setq prefix-help-command #'embark-prefix-help-command))
 
 (use-package embark-consult
   :after (embark consult)
@@ -815,8 +760,7 @@
   (:keymaps 'corfu-map
             "C-j" 'corfu-next
             "C-k" 'corfu-previous
-            "SPC" 'corfu-insert-separator ;; for compatibility with orderless
-            ))
+            "SPC" 'corfu-insert-separator)) ;; for compatibility with orderless
 
 ;; FIXME add icons to corfu
 ;; (use-package kind-icon
@@ -829,13 +773,11 @@
 
 (general-unbind
   :states '(insert)
-  "C-k" ;; this was interfering with corfu completion
-  )
+  "C-k") ;; this was interfering with corfu completion
 
 (use-package emacs
   :init
-  (setq tab-always-indent 'complete) ;; enable tab completion
-  )
+  (setq tab-always-indent 'complete)) ;; enable tab completion
 
 (use-package flymake
   :straight (:type built-in)
@@ -843,8 +785,7 @@
   (patrl/leader-keys
     :keymaps 'flymake-mode-map
     "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
-    "cc" '(flymake-mode :wk "toggle flymake") ;; depends on consult
-    )
+    "cc" '(flymake-mode :wk "toggle flymake")) ;; depends on consult
   :hook
   (TeX-mode . flymake-mode) ;; this is now working
   (emacs-lisp-mode . flymake-mode)
@@ -852,8 +793,7 @@
   (flymake-no-changes-timeout nil)
   :general
   (general-nmap "] !" 'flymake-goto-next-error)
-  (general-nmap "[ !" 'flymake-goto-prev-error)
-  )
+  (general-nmap "[ !" 'flymake-goto-prev-error))
 
 (use-package flymake-aspell
   :after flymake)
@@ -863,8 +803,7 @@
   :init
   (setq ispell-dictionary "en_US")
   (setq ispell-program-name "aspell")
-  (setq ispell-silently-savep t)
-)
+  (setq ispell-silently-savep t))
 
 (use-package aas
   :hook (LaTeX-mode . aas-activate-for-major-mode)
@@ -882,9 +821,7 @@
     ":fire" "🔥"
     ":hole" "🕳️"
     ":flush" "😳"
-    ":wow" "😮"
-    )
-  )
+    ":wow" "😮"))
 
 (use-package laas
   :hook ((LaTeX-mode . laas-mode)
@@ -936,8 +873,7 @@
     ;; clash with event type sigs
     ;; add accent snippets
     :cond #'laas-object-on-left-condition
-    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))
-    ))
+    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 
 (use-package yasnippet
   :config
@@ -963,8 +899,7 @@
   (setq auto-insert-query nil) ;; Do not ask when inserting
   (auto-insert-mode 1) ;; enable auto-insert-mode globally
   (add-hook 'find-file-hook 'auto-insert) ;; run auto-insert when a new file is opened
-  (setq auto-insert-alist nil) ;; delete default auto-inserts
-  )
+  (setq auto-insert-alist nil)) ;; delete default auto-inserts
 
 (use-package simple-httpd
   :commands httpd-serve-directory)
@@ -973,17 +908,13 @@
   :general
   (patrl/leader-keys
     "g" '(:ignore t :wk "git")
-    "gg" '(magit-status :wk "status")
-    )
-  )
+    "gg" '(magit-status :wk "status")))
 
 (use-package eshell
   :straight (:type built-in)
   :general
   (patrl/leader-keys
-    "oe" '(eshell :wk "eshell")
-    )
-  )
+    "oe" '(eshell :wk "eshell")))
 
 (use-package lsp-mode
   :custom
@@ -997,13 +928,11 @@
   (lsp-mode . lsp-enable-which-key-integration)
   (lsp-completion-mode . patrl/lsp-mode-setup) ;; setup orderless completion style.
   :commands
-  lsp patrl/lsp-mode-setup-completion
-)
+  lsp patrl/lsp-mode-setup-completion)
 
 (use-package lsp-ui
   :after lsp-mode
-  :commands lsp-ui-mode
-  )
+  :commands lsp-ui-mode)
 
 (use-package lsp-haskell
   :after lsp-mode
@@ -1025,9 +954,7 @@
     "xf" '(0x0-upload-file :wk "0x0 upload file")
     "xk" '(0x0-upload-kill-ring :wk "0x0 upload kill ring")
     "xp" '(0x0-popup :wk "0x0 popup")
-    "xs" '(0x0-shorten-uri :wk "0x0 shorten url")
-    )
-)
+    "xs" '(0x0-shorten-uri :wk "0x0 shorten url")))
 
 ;; We write a function to determine how we want elfeed to display the buffer with the current entry.
 (defun patrl/elfeed-display-buffer (buf &optional act)
@@ -1083,12 +1010,10 @@
   ;; single key deletion.
   (:keymaps 'notmuch-search-mode-map
             :states 'normal
-            "D" '+notmuch/search-delete
-            )
+            "D" '+notmuch/search-delete)
   (:keymaps 'notmuch-tree-mode-map
             :states 'normal
-            "D" '+notmuch/tree-delete)
-  )
+            "D" '+notmuch/tree-delete))
 
 (use-package org-transclusion
   :after org
@@ -1107,9 +1032,7 @@
 (use-package deadgrep
   :general
   (patrl/leader-keys
-    "sd" '(deadgrep :wk "deadgrep")
-    )
-  )
+    "sd" '(deadgrep :wk "deadgrep")))
 
 (use-package tree-sitter)
 
@@ -1147,8 +1070,7 @@
   (define-advice company-capf
       (:around (orig-fun &rest args) set-completion-styles)
     (let ((completion-styles '(basic partial-completion)))
-      (apply orig-fun args)))
-  )
+      (apply orig-fun args))))
 
 (use-package company-bibtex
   :disabled
@@ -1157,5 +1079,4 @@
         (list patrl/global-bib-file))
   :after company
   :config
-  (add-to-list 'company-backends 'company-bibtex)
-  )
+  (add-to-list 'company-backends 'company-bibtex))
