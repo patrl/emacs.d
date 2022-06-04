@@ -1254,6 +1254,8 @@ A minimal ui for ~completion-in-region~.
               (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
       "*f" (lambda () (interactive)
               (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+      "*\"" (lambda () (interactive)
+              (yas-expand-snippet "\\enquote{$1}$0"))
       :cond #'texmathp ; expand only while in math 
       "Olon" "O(n \\log n)"
       ";:" "\\coloneq"
