@@ -271,13 +271,12 @@ The local leader ~,~ is used for mode-specific bindings.
       ;; search
       ;; see 'consult'
       (patrl/leader-keys
-        "s" '(:ignore t :wk "search"))
+        "s" '(:ignore t :wk "search")))
 
       ;; capture
-      (patrl/leader-keys
-        "c" '(org-capture :wk "capture")))
+      ;; (patrl/leader-keys
 
-
+        ;; "c" '(org-capture :wk "capture")))
   #+end_src
 
 ** Evil
@@ -879,7 +878,7 @@ Resources:
     nix-update-fetch)
 #+end_src
 
-** latex
+** SOMEDAY latex
 
 Useful resources:
 
@@ -902,42 +901,42 @@ Auto-activating snippets:
 
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package auctex
-    :no-require t
-    :mode ("\\.tex\\'" . LaTeX-mode)
-    :init
-    (setq TeX-parse-self t ; parse on load
-        TeX-auto-save t  ; parse on save
-        TeX-source-correlate-mode t
-        TeX-source-correlate-method 'synctex
-        TeX-source-correlate-start-server nil
-        TeX-electric-sub-and-superscript t
-        TeX-engine 'luatex ;; use lualatex by default
-        TeX-save-query nil))
+    (use-package auctex
+      :no-require t
+      :mode ("\\.tex\\'" . LaTeX-mode)
+      :init
+      (setq TeX-parse-self t ; parse on load
+          TeX-auto-save t  ; parse on save
+          TeX-source-correlate-mode t
+          TeX-source-correlate-method 'synctex
+          TeX-source-correlate-start-server nil
+          TeX-electric-sub-and-superscript t
+          TeX-engine 'luatex ;; use lualatex by default
+          TeX-save-query nil))
 
-  (use-package tex
-    :straight auctex
-    :general
-    (patrl/local-leader-keys
-      :keymaps 'LaTeX-mode-map
-      ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
-      "m" '(LaTeX-macro :wk "insert macro")
-      "s" '(LaTeX-section :wk "insert section header")
-      "e" '(LaTeX-environment :wk "insert environment")
-      "p" '(preview-at-point :wk "preview at point")
-      "f" '(TeX-font :wk "font")
-      "c" '(TeX-command-run-all :wk "compile"))
-    :init
-    (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
-    :config
-    (add-hook 'TeX-mode-hook #'visual-line-mode)
-    (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
-    (add-hook 'TeX-after-compilation-finished-functions
-                #'TeX-revert-document-buffer)
-    (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
-    (add-hook 'TeX-mode-hook #'outline-minor-mode)
-    ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
-    (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
+    (use-package tex
+      :straight auctex
+      :general
+      (patrl/local-leader-keys
+        :keymaps 'LaTeX-mode-map
+        ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
+        "m" '(LaTeX-macro :wk "insert macro")
+        "s" '(LaTeX-section :wk "insert section header")
+        "e" '(LaTeX-environment :wk "insert environment")
+        "p" '(preview-at-point :wk "preview at point")
+        "f" '(TeX-font :wk "font")
+        "c" '(TeX-command-run-all :wk "compile"))
+      :init
+      (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+      :config
+      (add-hook 'TeX-mode-hook #'visual-line-mode)
+      (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
+      (add-hook 'TeX-after-compilation-finished-functions
+                  #'TeX-revert-document-buffer)
+      (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+      (add-hook 'TeX-mode-hook #'outline-minor-mode)
+      ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
+      (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
@@ -978,6 +977,22 @@ Auto-activating snippets:
 **** TODO add "citep" and "citealt" to the supported list of latex citation commands.
 
 **** TODO add hook for ~reftex-mode~ 
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package reftex
+    :after auctex
+    :straight (:type built-in)
+    :general
+    (patrl/local-leader-keys
+      :keymaps 'LaTeX-mode-map
+      "=" '(reftex-toc :wk "reftex toc")
+      "(" '(reftex-latex :wk "reftex label")
+      ")" '(reftex-reference :wk "reftex ref"))
+    :hook
+    (LaTeX-mode . reftex-mode)
+    :config
+    (setq reftex-plug-into-AUCTeX t))
+#+end_src
 
 **** TODO latexmk
 
@@ -1118,8 +1133,6 @@ A minimal ui for ~completion-in-region~.
     :bind
     :general
     (:keymaps 'corfu-map
-              "C-j" 'corfu-next
-              "C-k" 'corfu-previous
               "SPC" 'corfu-insert-separator)) ;; for compatibility with orderless
 
   ;; FIXME add icons to corfu
@@ -1142,7 +1155,16 @@ A minimal ui for ~completion-in-region~.
 
 *** TODO this isn't working so well with haskell-mode
 *** TODO consider incorporating the ~cape~ package
- 
+
+*** SOMEDAY Cape
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package cape
+    :init
+    (add-to-list 'completion-at-point-functions #'cape-file)
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+#+end_src
+
 * Checkers
 
 - Use ~flymake~ over ~flycheck~.
@@ -1209,6 +1231,8 @@ A minimal ui for ~completion-in-region~.
       ":wow" "😮"))
 #+end_src
 
+- Accents are interfering with apostrophes!
+
 #+begin_src emacs-lisp :tangle init.el
   (use-package laas
     :hook ((LaTeX-mode . laas-mode)
@@ -1216,12 +1240,14 @@ A minimal ui for ~completion-in-region~.
     :config
     (aas-set-snippets 'laas-mode
       ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+      "*b" (lambda () (interactive)
+             (yas-expand-snippet "\\textbf{$1}$0"))
+      "*i" (lambda () (interactive)
+             (yas-expand-snippet "\\textit{$1}$0"))
       "mx" (lambda () (interactive)
               (yas-expand-snippet "\\\\($1\\\\)$0"))
       "mq" (lambda () (interactive)
               (yas-expand-snippet "\\[$1\\]$0"))
-      "*i" (lambda () (interactive)
-              (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
       "*I" (lambda () (interactive)
               (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
       "*e" (lambda () (interactive)
@@ -1501,7 +1527,6 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
     :straight (:type git :host github :repo "dalanicolai/pdf-continuous-scroll-mode.el"))  
 #+end_src
 
-** TODO Cape
 ** Numbex
 
 #+begin_src emacs-lisp
