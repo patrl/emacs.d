@@ -175,11 +175,12 @@
   ;; search
   ;; see 'consult'
   (patrl/leader-keys
-    "s" '(:ignore t :wk "search"))
+    "s" '(:ignore t :wk "search")))
 
   ;; capture
-  (patrl/leader-keys
-    "c" '(org-capture :wk "capture")))
+  ;; (patrl/leader-keys
+
+    ;; "c" '(org-capture :wk "capture")))
 
 (use-package evil
   :general
@@ -652,6 +653,20 @@
   (setq citar-library-paths (list patrl/library-path))
   (setq citar-bibliography (list patrl/global-bib-file)))
 
+(use-package reftex
+  :after auctex
+  :straight (:type built-in)
+  :general
+  (patrl/local-leader-keys
+    :keymaps 'LaTeX-mode-map
+    "=" '(reftex-toc :wk "reftex toc")
+    "(" '(reftex-latex :wk "reftex label")
+    ")" '(reftex-reference :wk "reftex ref"))
+  :hook
+  (LaTeX-mode . reftex-mode)
+  :config
+  (setq reftex-plug-into-AUCTeX t))
+
 ;; FIXME
 (use-package auctex-latexmk
   :disabled
@@ -758,8 +773,6 @@
   :bind
   :general
   (:keymaps 'corfu-map
-            "C-j" 'corfu-next
-            "C-k" 'corfu-previous
             "SPC" 'corfu-insert-separator)) ;; for compatibility with orderless
 
 ;; FIXME add icons to corfu
@@ -778,6 +791,11 @@
 (use-package emacs
   :init
   (setq tab-always-indent 'complete)) ;; enable tab completion
+
+(use-package cape
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev))
 
 (use-package flymake
   :straight (:type built-in)
@@ -829,18 +847,22 @@
   :config
   (aas-set-snippets 'laas-mode
     ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
+    "*b" (lambda () (interactive)
+           (yas-expand-snippet "\\textbf{$1}$0"))
+    "*i" (lambda () (interactive)
+           (yas-expand-snippet "\\textit{$1}$0"))
     "mx" (lambda () (interactive)
             (yas-expand-snippet "\\\\($1\\\\)$0"))
     "mq" (lambda () (interactive)
             (yas-expand-snippet "\\[$1\\]$0"))
-    "*i" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{itemize}\n$>\\item $0\n\\end{itemize}"))
     "*I" (lambda () (interactive)
             (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
     "*e" (lambda () (interactive)
             (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
     "*f" (lambda () (interactive)
             (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+    "*\"" (lambda () (interactive)
+            (yas-expand-snippet "\\enquote{$1}$0"))
     :cond #'texmathp ; expand only while in math 
     "Olon" "O(n \\log n)"
     ";:" "\\coloneq"
