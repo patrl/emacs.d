@@ -670,54 +670,55 @@ Resources:
 
 
   #+begin_src emacs-lisp :tangle init.el
-                (use-package org
-                  ;; :straight (:type built-in)
-                  :init
-                  (setq org-todo-keywords
-                        ;; it's extremely useful to distinguish between short-term goals and long-term projects
-                        '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-                          (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-                          (sequence "PROJ(p)" "|" "COMPLETED(c)")))
-                  (setq org-src-fontify-natively t) ;; fontify code in src blocks
-                  (setq org-highlight-latex-and-related '(native))
-                  (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
-                  :custom
-                  (org-agenda-files '("~/Dropbox (MIT)/org/agenda/"))
-                  :general
-                  (patrl/local-leader-keys
-                    :keymaps 'org-mode-map
-                    "l" '(:ignore t :wk "link")
-                    "ll" '(org-insert-link t :wk "link")
-                    "lp" '(org-latex-preview t :wk "prev latex")
-                    "h" '(consult-org-heading :wk "consult heading")
-                    "d" '(org-cut-special :wk "org cut special")
-                    "y" '(org-copy-special :wk "org copy special")
-                    "p" '(org-paste-special :wk "org paste special")
-                    "b" '(:keymap org-babel-map :wk "babel")
-                    "t" '(org-todo :wk "todo")
-                    "s" '(org-insert-structure-template :wk "template")
-                    "e" '(org-edit-special :wk "edit")
-                    "i" '(:ignore t :wk "insert")
-                    "ih" '(org-insert-heading :wk "insert heading")
-                    "is" '(org-insert-subheading :wk "insert heading")
-                    "f" '(org-footnote-action :wk "footnote action")
-                    ">" '(org-demote-subtree :wk "demote subtree")
-                    "<" '(org-promote-subtree :wk "demote subtree"))
-                  (:keymaps 'org-agenda-mode-map
-                            "j" '(org-agenda-next-line)
-                            "h" '(org-agenda-previous-line))
-                  :hook
-                  (org-mode . olivetti-mode)
-                  (org-mode . variable-pitch-mode)
-                  (org-mode . visual-line-mode)
-                  (org-mode . org-indent-mode) ;; indent
-                  ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
-                  (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-                  :config
-                  (add-to-list 'org-latex-packages-alist '("" "braket" t))
-                  ;; set up org paths
-                  (setq org-directory "~/Dropbox (MIT)/org/agenda")
-                  (setq org-default-notes-file (concat org-directory "/notes.org")))
+    (use-package org
+      ;; :straight (:type built-in)
+      :init
+      (setq org-todo-keywords
+            ;; it's extremely useful to distinguish between short-term goals and long-term projects
+            '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+              (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+              (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+      (setq org-src-fontify-natively t) ;; fontify code in src blocks
+      (setq org-highlight-latex-and-related '(native))
+      (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+      :custom
+      (org-agenda-files '("~/Dropbox (MIT)/org/agenda/"))
+      :general
+      (patrl/local-leader-keys
+        :keymaps 'org-mode-map
+        "a" '(org-archive-subtree :wk "archive")
+        "l" '(:ignore t :wk "link")
+        "ll" '(org-insert-link t :wk "link")
+        "lp" '(org-latex-preview t :wk "prev latex")
+        "h" '(consult-org-heading :wk "consult heading")
+        "d" '(org-cut-special :wk "org cut special")
+        "y" '(org-copy-special :wk "org copy special")
+        "p" '(org-paste-special :wk "org paste special")
+        "b" '(:keymap org-babel-map :wk "babel")
+        "t" '(org-todo :wk "todo")
+        "s" '(org-insert-structure-template :wk "template")
+        "e" '(org-edit-special :wk "edit")
+        "i" '(:ignore t :wk "insert")
+        "ih" '(org-insert-heading :wk "insert heading")
+        "is" '(org-insert-subheading :wk "insert heading")
+        "f" '(org-footnote-action :wk "footnote action")
+        ">" '(org-demote-subtree :wk "demote subtree")
+        "<" '(org-promote-subtree :wk "demote subtree"))
+      (:keymaps 'org-agenda-mode-map
+                "j" '(org-agenda-next-line)
+                "h" '(org-agenda-previous-line))
+      :hook
+      (org-mode . olivetti-mode)
+      (org-mode . variable-pitch-mode)
+      (org-mode . visual-line-mode)
+      (org-mode . org-indent-mode) ;; indent
+      ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
+      (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+      :config
+      (add-to-list 'org-latex-packages-alist '("" "braket" t))
+      ;; set up org paths
+      (setq org-directory "~/Dropbox (MIT)/org/agenda")
+      (setq org-default-notes-file (concat org-directory "/notes.org")))
   #+end_src
   
 *** Extra bindings  
