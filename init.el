@@ -453,6 +453,7 @@
   :general
   (patrl/local-leader-keys
     :keymaps 'org-mode-map
+    "a" '(org-archive-subtree :wk "archive")
     "l" '(:ignore t :wk "link")
     "ll" '(org-insert-link t :wk "link")
     "lp" '(org-latex-preview t :wk "prev latex")
