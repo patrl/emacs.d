@@ -1038,6 +1038,9 @@
             :states 'normal
             "D" '+notmuch/tree-delete))
 
+(setq smtpmail-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-service 587)
+
 (use-package org-transclusion
   :after org
   :general
