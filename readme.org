@@ -4,7 +4,7 @@
 #+EXPORT_FILE_NAME: ./docs/index.html
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
-Currently tailored for GNU Emacs 29.0.50.
+Currently tailored for GNU Emacs 28.1
 
 * Useful resources
 
@@ -1489,6 +1489,13 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
     (:keymaps 'notmuch-tree-mode-map
               :states 'normal
               "D" '+notmuch/tree-delete))
+#+end_src
+
+Sending mail:
+
+#+begin_src emacs-lisp :tangle init.el
+  (setq smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-service 587)
 #+end_src
 
 * Staging grounds
