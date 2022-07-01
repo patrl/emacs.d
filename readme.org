@@ -1500,14 +1500,13 @@ Sending mail:
 
 * Staging grounds
 
-** COMMENT Math symbols
+** math convert
+
+Enrico Flor's math-convert:
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package math-symbols
-    :commands
-    '(math-symbols-from-tex-region
-      math-symbols-to-tex-region
-      math-symbols-to-tex-unicode-region))
+  (use-package math-convert
+    :straight (:type git :repo "git@github.com:enricoflor/math-convert.git"))
 #+end_src
 
 ** Org transclusion
