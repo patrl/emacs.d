@@ -1039,7 +1039,10 @@
             "D" '+notmuch/tree-delete))
 
 (setq smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 587)
+      smtpmail-smtp-service 465)
+
+(use-package math-convert
+  :straight (:type git :repo "git@github.com:enricoflor/math-convert.git"))
 
 (use-package org-transclusion
   :after org
