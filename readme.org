@@ -902,42 +902,43 @@ Auto-activating snippets:
 
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package auctex
-      :no-require t
-      :mode ("\\.tex\\'" . LaTeX-mode)
-      :init
-      (setq TeX-parse-self t ; parse on load
-          TeX-auto-save t  ; parse on save
-          TeX-source-correlate-mode t
-          TeX-source-correlate-method 'synctex
-          TeX-source-correlate-start-server nil
-          TeX-electric-sub-and-superscript t
-          TeX-engine 'luatex ;; use lualatex by default
-          TeX-save-query nil))
+  (use-package auctex
+    :no-require t
+    :mode ("\\.tex\\'" . LaTeX-mode)
+    :init
+    (setq TeX-parse-self t ; parse on load
+        TeX-auto-save t  ; parse on save
+        TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex
+        TeX-source-correlate-start-server nil
+        TeX-electric-sub-and-superscript t
+        TeX-engine 'luatex ;; use lualatex by default
+        TeX-save-query nil))
 
-    (use-package tex
-      :straight auctex
-      :general
-      (patrl/local-leader-keys
-        :keymaps 'LaTeX-mode-map
-        ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
-        "m" '(LaTeX-macro :wk "insert macro")
-        "s" '(LaTeX-section :wk "insert section header")
-        "e" '(LaTeX-environment :wk "insert environment")
-        "p" '(preview-at-point :wk "preview at point")
-        "f" '(TeX-font :wk "font")
-        "c" '(TeX-command-run-all :wk "compile"))
-      :init
-      (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
-      :config
-      (add-hook 'TeX-mode-hook #'visual-line-mode)
-      (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
-      (add-hook 'TeX-after-compilation-finished-functions
-                  #'TeX-revert-document-buffer)
-      (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
-      (add-hook 'TeX-mode-hook #'outline-minor-mode)
-      ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
-      (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
+  (use-package tex
+    :straight auctex
+    :general
+    (patrl/local-leader-keys
+      :keymaps 'LaTeX-mode-map
+      ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
+      "m" '(LaTeX-macro :wk "insert macro")
+      "s" '(LaTeX-section :wk "insert section header")
+      "e" '(LaTeX-environment :wk "insert environment")
+      "p" '(preview-at-point :wk "preview at point")
+      "f" '(TeX-font :wk "font")
+      "c" '(TeX-command-run-all :wk "compile"))
+    :init
+    (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+    :config
+    ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
+    (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
+    (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
+    (add-hook 'TeX-after-compilation-finished-functions
+                #'TeX-revert-document-buffer)
+    (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+    (add-hook 'TeX-mode-hook #'outline-minor-mode)
+    ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
+    (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1378,9 +1379,9 @@ Note I still need to set keybindings
             '(orderless))) ;; Configure orderless
     :hook
     (lsp-mode . lsp-enable-which-key-integration)
-    (lsp-completion-mode . patrl/lsp-mode-setup) ;; setup orderless completion style.
+    (lsp-completion-mode . patrl/lsp-mode-setup-completion) ;; setup orderless completion style.
     :commands
-    lsp patrl/lsp-mode-setup-completion)
+    lsp)
 
   (use-package lsp-ui
     :after lsp-mode
@@ -1466,9 +1467,8 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
     (defvar +notmuch-delete-tags '("+trash" "-inbox" "-unread" "-new"))
     ;; in gmail, messages are archived simply by removing the 'inbox' tag.
     (setq notmuch-archive-tags '("-inbox" "-new"))
-    :config
     ;; show new mail first
-    (setq notmuch-search-oldest-first nil)
+    :config
     ;; the 'new' tag isn't synced to the gmail server; messages new to notmuch aquire this tag.
     (add-to-list 'notmuch-saved-searches '(:name "new" :query "tag:new" :key "n"))
     (defun +notmuch/search-delete ()
@@ -1479,6 +1479,11 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
       (interactive)
       (notmuch-tree-add-tag +notmuch-delete-tags)
       (notmuch-tree-next-message))
+    (setq-default notmuch-search-oldest-first nil)
+    ;; sending mail
+    (setq message-kill-buffer-on-exit t)
+    (setq message-send-mail-function #'smtpmail-send-it)
+    (setq smtpmail-stream-type 'starttls)
     :general
     (patrl/leader-keys
       "on" '(notmuch :wk "notmuch")) 
@@ -1491,14 +1496,16 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
               "D" '+notmuch/tree-delete))
 #+end_src
 
-Sending mail:
-
-#+begin_src emacs-lisp :tangle init.el
-  (setq smtpmail-smtp-server "smtp.gmail.com"
-        smtpmail-smtp-service 465)
-#+end_src
 
 * Staging grounds
+
+** consult-notmuch
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package consult-notmuch
+    :commands consult-notmuch
+    :after notmuch)
+#+end_src
 
 ** math convert
 
