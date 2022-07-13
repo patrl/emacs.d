@@ -620,7 +620,8 @@
   :init
   (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
   :config
-  (add-hook 'TeX-mode-hook #'visual-line-mode)
+  ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
+  (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
   (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
   (add-hook 'TeX-after-compilation-finished-functions
               #'TeX-revert-document-buffer)
@@ -949,9 +950,9 @@
           '(orderless))) ;; Configure orderless
   :hook
   (lsp-mode . lsp-enable-which-key-integration)
-  (lsp-completion-mode . patrl/lsp-mode-setup) ;; setup orderless completion style.
+  (lsp-completion-mode . patrl/lsp-mode-setup-completion) ;; setup orderless completion style.
   :commands
-  lsp patrl/lsp-mode-setup-completion)
+  lsp)
 
 (use-package lsp-ui
   :after lsp-mode
@@ -1014,9 +1015,8 @@
   (defvar +notmuch-delete-tags '("+trash" "-inbox" "-unread" "-new"))
   ;; in gmail, messages are archived simply by removing the 'inbox' tag.
   (setq notmuch-archive-tags '("-inbox" "-new"))
-  :config
   ;; show new mail first
-  (setq notmuch-search-oldest-first nil)
+  :config
   ;; the 'new' tag isn't synced to the gmail server; messages new to notmuch aquire this tag.
   (add-to-list 'notmuch-saved-searches '(:name "new" :query "tag:new" :key "n"))
   (defun +notmuch/search-delete ()
@@ -1027,6 +1027,11 @@
     (interactive)
     (notmuch-tree-add-tag +notmuch-delete-tags)
     (notmuch-tree-next-message))
+  (setq-default notmuch-search-oldest-first nil)
+  ;; sending mail
+  (setq message-kill-buffer-on-exit t)
+  (setq message-send-mail-function #'smtpmail-send-it)
+  (setq smtpmail-stream-type 'starttls)
   :general
   (patrl/leader-keys
     "on" '(notmuch :wk "notmuch")) 
@@ -1038,8 +1043,9 @@
             :states 'normal
             "D" '+notmuch/tree-delete))
 
-(setq smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 465)
+(use-package consult-notmuch
+  :commands consult-notmuch
+  :after notmuch)
 
 (use-package math-convert
   :straight (:type git :repo "git@github.com:enricoflor/math-convert.git"))
