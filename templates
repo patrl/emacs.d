@@ -33,7 +33,7 @@ latex-mode
      r> n>
      "\\end{" (s environment) "}" > n)
 
-(begin "\\begin{" (s env) "}" > n> r> "\\end{" (s env) "}")
+(begin "\\begin{" (s env) "}" > n> r "\\end{" (s env) "}")
 
 (it "\\textit{" p "}")
 
@@ -41,7 +41,7 @@ latex-mode
 
 (sc "\\textsc{" p "}")
 
-(lingex "\\begin{exe}" > n> "\\ex " r> n> "\\end{exe}")
+(lingex "\\begin{exe}" > n> "\\ex " r> n "\\end{exe}")
 
 emacs-lisp-mode
 
