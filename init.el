@@ -532,6 +532,7 @@
                 (propertize "${tags:10}" 'face 'org-tag)))
   (setq org-roam-completion-everywhere nil) ;; roam completion anywhere
   (setq org-roam-directory patrl/notes-path)
+  (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
   (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
 
   ;; dailies config
@@ -597,9 +598,10 @@
   :mode ("\\.tex\\'" . LaTeX-mode)
   :init
   (setq TeX-parse-self t ; parse on load
-      TeX-auto-save t  ; parse on save
-      TeX-source-correlate-mode t
-      TeX-source-correlate-method 'synctex
+        reftex-plug-into-AUCTeX t
+        TeX-auto-save t  ; parse on save
+        TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex
       TeX-source-correlate-start-server nil
       TeX-electric-sub-and-superscript t
       TeX-engine 'luatex ;; use lualatex by default
@@ -611,6 +613,9 @@
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
     ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
+    "=" '(reftex-toc :wk "reftex toc")
+    "(" '(reftex-latex :wk "reftex label")
+    ")" '(reftex-reference :wk "reftex ref")
     "m" '(LaTeX-macro :wk "insert macro")
     "s" '(LaTeX-section :wk "insert section header")
     "e" '(LaTeX-environment :wk "insert environment")
@@ -621,6 +626,8 @@
   (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
   :config
   ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
+  (add-hook 'TeX-mode-hook #'reftex-mode)
+  (add-hook 'TeX-mode-hook #'olivetti-mode)
   (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
   (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
   (add-hook 'TeX-after-compilation-finished-functions
@@ -655,19 +662,9 @@
   (setq citar-library-paths (list patrl/library-path))
   (setq citar-bibliography (list patrl/global-bib-file)))
 
-(use-package reftex
-  :after auctex
-  :straight (:type built-in)
-  :general
-  (patrl/local-leader-keys
-    :keymaps 'LaTeX-mode-map
-    "=" '(reftex-toc :wk "reftex toc")
-    "(" '(reftex-latex :wk "reftex label")
-    ")" '(reftex-reference :wk "reftex ref"))
-  :hook
-  (LaTeX-mode . reftex-mode)
-  :config
-  (setq reftex-plug-into-AUCTeX t))
+(use-package citar-embark
+  :after citar embark
+  :config (citar-embark-mode))
 
 ;; FIXME
 (use-package auctex-latexmk
@@ -1046,9 +1043,6 @@
 (use-package consult-notmuch
   :commands consult-notmuch
   :after notmuch)
-
-(use-package math-convert
-  :straight (:type git :repo "git@github.com:enricoflor/math-convert.git"))
 
 (use-package org-transclusion
   :after org
