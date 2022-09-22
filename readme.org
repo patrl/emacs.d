@@ -951,10 +951,7 @@ Auto-activating snippets:
 #+begin_src emacs-lisp :tangle init.el
   (use-package pdf-tools
     :config
-    (pdf-tools-install)
-    :general
-    (:keymaps 'pdf-view-mode-map
-              "i" 'pdf-annot-add-text-annotation))
+    (pdf-tools-install))
 #+end_src
 
 ~evil-tex~ is a crucial component in my workflow. ~evil-surround~ integration makes things a breeze. Some examples:
