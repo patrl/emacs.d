@@ -639,10 +639,7 @@
 
 (use-package pdf-tools
   :config
-  (pdf-tools-install)
-  :general
-  (:keymaps 'pdf-view-mode-map
-            "i" 'pdf-annot-add-text-annotation))
+  (pdf-tools-install))
 
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
