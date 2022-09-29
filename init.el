@@ -483,6 +483,14 @@
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
   :config
   (add-to-list 'org-latex-packages-alist '("" "braket" t))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((js . t)
+     (emacs-lisp . t)
+     (html . t)
+     (sh . t)
+     (awk . t)
+     (c . t)))
   ;; set up org paths
   (setq org-directory "~/Dropbox (MIT)/org/agenda")
   (setq org-default-notes-file (concat org-directory "/notes.org")))
@@ -571,6 +579,8 @@
   (setq org-noter-hide-other nil)
   (setq org-noter-always-create-frame nil))
 
+(use-package js2-mode)
+
 (use-package haskell-mode)
 
 (use-package racket-mode
@@ -598,16 +608,16 @@
   :mode ("\\.tex\\'" . LaTeX-mode)
   :init
   (setq TeX-parse-self t ; parse on load
-        reftex-plug-into-AUCTeX t
-        TeX-auto-save t  ; parse on save
-        TeX-source-correlate-mode t
-        TeX-source-correlate-method 'synctex
+	reftex-plug-into-AUCTeX t
+	TeX-auto-save t  ; parse on save
+	TeX-source-correlate-mode t
+	TeX-source-correlate-method 'synctex
       TeX-source-correlate-start-server nil
       TeX-electric-sub-and-superscript t
       TeX-engine 'luatex ;; use lualatex by default
       TeX-save-query nil))
 
-(use-package tex
+(use-package latex
   :straight auctex
   :general
   (patrl/local-leader-keys
@@ -631,7 +641,7 @@
   (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
   (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
   (add-hook 'TeX-after-compilation-finished-functions
-              #'TeX-revert-document-buffer)
+	      #'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   (add-hook 'TeX-mode-hook #'outline-minor-mode)
   ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
