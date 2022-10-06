@@ -372,32 +372,40 @@ Super-charged navigaton.
 Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate. 
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package avy
-    :init
-    (defun patrl/avy-action-kill-whole-line (pt)
-      (save-excursion
-        (goto-char pt)
-        (kill-whole-line))
-      (select-window
-       (cdr
-        (ring-ref avy-ring 0))))
-    (defun patrl/avy-action-embark (pt)
-      (unwind-protect
-          (save-excursion
-            (goto-char pt)
-            (embark-act))
+    (use-package avy
+      :init
+  (defun patrl/avy-action-insert-newline (pt)
+        (save-excursion
+          (goto-char pt)
+          (newline))
         (select-window
-         (cdr (ring-ref avy-ring 0))))
-      t) ;; adds an avy action for embark
-    :general
-    (general-def '(normal motion)
-      "s" 'evil-avy-goto-char-timer
-      "f" 'evil-avy-goto-char-in-line
-      "gl" 'evil-avy-goto-line ;; this rules
-      ";" 'avy-resume)
-    :config
-    (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark ;; embark integration
-          (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line)) ;; kill lines with avy
+         (cdr
+          (ring-ref avy-ring 0))))
+      (defun patrl/avy-action-kill-whole-line (pt)
+        (save-excursion
+          (goto-char pt)
+          (kill-whole-line))
+        (select-window
+         (cdr
+          (ring-ref avy-ring 0))))
+      (defun patrl/avy-action-embark (pt)
+        (unwind-protect
+            (save-excursion
+              (goto-char pt)
+              (embark-act))
+          (select-window
+           (cdr (ring-ref avy-ring 0))))
+        t) ;; adds an avy action for embark
+      :general
+      (general-def '(normal motion)
+        "s" 'evil-avy-goto-char-timer
+        "f" 'evil-avy-goto-char-in-line
+        "gl" 'evil-avy-goto-line ;; this rules
+        ";" 'avy-resume)
+      :config
+      (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark ;; embark integration
+            (alist-get ?i avy-dispatch-alist) 'patrl/avy-action-insert-newline
+            (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line)) ;; kill lines with avy
 #+end_src
 
 *** Link hint
@@ -1536,12 +1544,24 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
 
 *** TODO disable flymake mode in kbd-mode
 
+** Fast latex previews
+
+- See https://karthinks.com/software/fast-latex-previews-in-org-mode/
+  
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-auctex
+    :straight (:type git :host github :repo
+                     "karthink/org-auctex"))
+#+end_src
+
 ** Org modern
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-modern
     :straight (:type git :host github :repo
                      "minad/org-modern"))
+
+
 #+end_src
 
 ** FIXME Smooth scrolling
