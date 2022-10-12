@@ -690,7 +690,7 @@ Resources:
       (setq org-highlight-latex-and-related '(native))
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
       :custom
-      (org-agenda-files '("~/Dropbox (MIT)/org/agenda/"))
+      (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
       :general
       (patrl/local-leader-keys
         :keymaps 'org-mode-map
@@ -728,10 +728,7 @@ Resources:
        'org-babel-load-languages
        '((js . t)
          (emacs-lisp . t)
-         (html . t)
-         (sh . t)
-         (awk . t)
-         (c . t)))
+         (awk . t)))
       ;; set up org paths
       (setq org-directory "~/Dropbox (MIT)/org/agenda")
       (setq org-default-notes-file (concat org-directory "/notes.org")))
