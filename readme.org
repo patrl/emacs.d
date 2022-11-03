@@ -30,6 +30,7 @@ Since we're using ~straight.el~  as our package manager, we add the following to
 Disable GUI elements before we have a chance to peek.
 
 #+begin_src emacs-lisp
+  ;; minimal UI
   (menu-bar-mode -1) ;; disables menubar
   (tool-bar-mode -1) ;; disables toolbar
   (scroll-bar-mode -1) ;; disables scrollbar
@@ -927,14 +928,14 @@ Auto-activating snippets:
     :mode ("\\.tex\\'" . LaTeX-mode)
     :init
     (setq TeX-parse-self t ; parse on load
-	  reftex-plug-into-AUCTeX t
-	  TeX-auto-save t  ; parse on save
-	  TeX-source-correlate-mode t
-	  TeX-source-correlate-method 'synctex
-	TeX-source-correlate-start-server nil
-	TeX-electric-sub-and-superscript t
-	TeX-engine 'luatex ;; use lualatex by default
-	TeX-save-query nil))
+          reftex-plug-into-AUCTeX t
+          TeX-auto-save t  ; parse on save
+          TeX-source-correlate-mode t
+          TeX-source-correlate-method 'synctex
+        TeX-source-correlate-start-server nil
+        TeX-electric-sub-and-superscript t
+        TeX-engine 'luatex ;; use lualatex by default
+        TeX-save-query nil))
 
   (use-package latex
     :straight auctex
@@ -953,6 +954,7 @@ Auto-activating snippets:
       "c" '(TeX-command-run-all :wk "compile"))
     :init
     (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+    (setq preview-scale-function 1.5)
     :config
     ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
     (add-hook 'TeX-mode-hook #'reftex-mode)
@@ -960,7 +962,7 @@ Auto-activating snippets:
     (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
     (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
     (add-hook 'TeX-after-compilation-finished-functions
-		#'TeX-revert-document-buffer)
+                #'TeX-revert-document-buffer)
     (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
     (add-hook 'TeX-mode-hook #'outline-minor-mode)
     ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
@@ -968,9 +970,9 @@ Auto-activating snippets:
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package pdf-tools
-    :config
-    (pdf-tools-install))
+    (use-package pdf-tools
+      :config
+      (pdf-tools-install))
 #+end_src
 
 ~evil-tex~ is a crucial component in my workflow. ~evil-surround~ integration makes things a breeze. Some examples:
