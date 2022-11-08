@@ -47,16 +47,16 @@
 
   ;; keep backup and save files in a dedicated directory
   (setq backup-directory-alist
-        `((".*" . ,(concat user-emacs-directory "backups")))
-        auto-save-file-name-transforms
-        `((".*" ,(concat user-emacs-directory "backups") t)))
+	`((".*" . ,(concat user-emacs-directory "backups")))
+	auto-save-file-name-transforms
+	`((".*" ,(concat user-emacs-directory "backups") t)))
 
   (setq create-lockfiles nil) ;; no need to create lockfiles
 
   (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
   (setq locale-coding-system 'utf-8
-        coding-system-for-read 'utf-8
-        coding-system-for-write 'utf-8)
+	coding-system-for-read 'utf-8
+	coding-system-for-write 'utf-8)
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (set-selection-coding-system 'utf-8)
@@ -221,13 +221,11 @@
   :config
   (evil-collection-init))
 
-;; port of Tim Pope's commentary package
 (use-package evil-commentary
   :after evil
   :config
   (evil-commentary-mode)) ;; globally enable evil-commentary
 
-;; port of Tim Pope's surround package
 (use-package evil-surround
   :after evil
   :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
@@ -235,7 +233,6 @@
   :config
   (global-evil-surround-mode 1)) ;; globally enable evil-surround
 
-;; show visual hints for evil motions
 (use-package evil-goggles
   :config
   (evil-goggles-mode)
@@ -247,31 +244,39 @@
   (evil-goggles-use-diff-faces))
 
 (use-package avy
-  :init
-  (defun patrl/avy-action-kill-whole-line (pt)
-    (save-excursion
-      (goto-char pt)
-      (kill-whole-line))
-    (select-window
-     (cdr
-      (ring-ref avy-ring 0))))
-  (defun patrl/avy-action-embark (pt)
-    (unwind-protect
-        (save-excursion
-          (goto-char pt)
-          (embark-act))
+    :init
+(defun patrl/avy-action-insert-newline (pt)
+      (save-excursion
+        (goto-char pt)
+        (newline))
       (select-window
-       (cdr (ring-ref avy-ring 0))))
-    t) ;; adds an avy action for embark
-  :general
-  (general-def '(normal motion)
-    "s" 'evil-avy-goto-char-timer
-    "f" 'evil-avy-goto-char-in-line
-    "gl" 'evil-avy-goto-line ;; this rules
-    ";" 'avy-resume)
-  :config
-  (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark ;; embark integration
-        (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line)) ;; kill lines with avy
+       (cdr
+        (ring-ref avy-ring 0))))
+    (defun patrl/avy-action-kill-whole-line (pt)
+      (save-excursion
+        (goto-char pt)
+        (kill-whole-line))
+      (select-window
+       (cdr
+        (ring-ref avy-ring 0))))
+    (defun patrl/avy-action-embark (pt)
+      (unwind-protect
+          (save-excursion
+            (goto-char pt)
+            (embark-act))
+        (select-window
+         (cdr (ring-ref avy-ring 0))))
+      t) ;; adds an avy action for embark
+    :general
+    (general-def '(normal motion)
+      "s" 'evil-avy-goto-char-timer
+      "f" 'evil-avy-goto-char-in-line
+      "gl" 'evil-avy-goto-line ;; this rules
+      ";" 'avy-resume)
+    :config
+    (setf (alist-get ?. avy-dispatch-alist) 'patrl/avy-action-embark ;; embark integration
+          (alist-get ?i avy-dispatch-alist) 'patrl/avy-action-insert-newline
+          (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line)) ;; kill lines with avy
 
 (use-package link-hint
   :general
@@ -440,16 +445,43 @@
 (use-package org
   ;; :straight (:type built-in)
   :init
+  ;; edit settings
+  (setq org-auto-align-tags nil
+	org-tags-column 0
+	org-catch-invisible-edits 'show-and-error
+	org-special-ctrl-a/e t
+	org-insert-heading-respect-content t)
+
+  ;; styling, hide markup, etc.
+  (setq org-hide-emphasis-markers t
+	org-src-fontify-natively t
+	org-highlight-latex-and-related '(native)
+	org-pretty-entities t
+	org-ellipsis "…")
+
+  ;; agenda styling
+  (setq org-agenda-tags-column 0
+	org-agenda-block-separator ?─
+	org-agenda-time-grid
+	'((daily today require-timed)
+	  (800 1000 1200 1400 1600 1800 2000)
+	  " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+	org-agenda-current-time-string
+	"⭠ now ─────────────────────────────────────────────────")
+
+  ;; todo setup
   (setq org-todo-keywords
-        ;; it's extremely useful to distinguish between short-term goals and long-term projects
-        '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-          (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-          (sequence "PROJ(p)" "|" "COMPLETED(c)")))
-  (setq org-src-fontify-natively t) ;; fontify code in src blocks
-  (setq org-highlight-latex-and-related '(native))
+	;; it's extremely useful to distinguish between short-term goals and long-term projects
+	'((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+	  (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+	  (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+
+
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+
   :custom
-  (org-agenda-files '("~/Dropbox (MIT)/org/agenda/"))
+  (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
+  (org-cite-global-bibliography '("~/repos/bibliography/master.bib"))
   :general
   (patrl/local-leader-keys
     :keymaps 'org-mode-map
@@ -472,25 +504,21 @@
     ">" '(org-demote-subtree :wk "demote subtree")
     "<" '(org-promote-subtree :wk "demote subtree"))
   (:keymaps 'org-agenda-mode-map
-            "j" '(org-agenda-next-line)
-            "h" '(org-agenda-previous-line))
+	    "j" '(org-agenda-next-line)
+	    "h" '(org-agenda-previous-line))
+
   :hook
   (org-mode . olivetti-mode)
   (org-mode . variable-pitch-mode)
-  (org-mode . visual-line-mode)
-  (org-mode . org-indent-mode) ;; indent
-  ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+
   :config
   (add-to-list 'org-latex-packages-alist '("" "braket" t))
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((js . t)
      (emacs-lisp . t)
-     (html . t)
-     (sh . t)
-     (awk . t)
-     (c . t)))
+     (awk . t)))
   ;; set up org paths
   (setq org-directory "~/Dropbox (MIT)/org/agenda")
   (setq org-default-notes-file (concat org-directory "/notes.org")))
@@ -501,6 +529,22 @@
   :config
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
+
+(use-package org-auctex
+  :straight (:type git :host github :repo
+                   "karthink/org-auctex")
+  :hook (org-mode . org-auctex-mode))
+
+(use-package org-transclusion
+  :after org
+  :general
+  (patrl/leader-keys
+    "nt" '(org-transclusion-mode :wk "transclusion mode")))
+
+(use-package org-appear
+  :straight (:type git :host github :repo "awth13/org-appear")
+  :after org
+  :hook (org-mode . org-appear-mode))
 
 (use-package org-sidebar
   :after org
@@ -513,12 +557,9 @@
     :keymaps 'org-mode-map 
     "lc" '(org-cliplink :wk "cliplink")))
 
-(use-package org-superstar
+(use-package org-modern
   :after org
-  :hook
-  (org-mode . (lambda () (org-superstar-mode 1)))
-  :config
-  (setq org-superstar-special-todo-items t)) ;; SOMEDAY consider using emoji for this
+  :config (global-org-modern-mode))
 
 (use-package org-roam
   :general
@@ -534,10 +575,17 @@
     "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
     "nrdd" '(org-roam-dailies-goto-date :wk "goto date"))
   :config
+  ;; org-roam-buffer
+  (add-to-list 'display-buffer-alist
+	       '("\\*org-roam\\*"
+		 (display-buffer-in-direction)
+		 (direction . right)
+		 (window-width . 0.33)
+		 (window-height . fit-window-to-buffer)))
   ;; get tags to show up in 'org-roam-node-find':
   (setq org-roam-node-display-template
-        (concat "${title:*} "
-                (propertize "${tags:10}" 'face 'org-tag)))
+	(concat "${title:*} "
+		(propertize "${tags:10}" 'face 'org-tag)))
   (setq org-roam-completion-everywhere nil) ;; roam completion anywhere
   (setq org-roam-directory patrl/notes-path)
   (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
@@ -546,10 +594,10 @@
   ;; dailies config
   (setq org-roam-dailies-directory "daily/")
   (setq org-roam-dailies-capture-templates
-        '(("d" "default" entry
-           "* %?"
-           :target (file+head "%<%Y-%m-%d>.org"
-                              "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
+	'(("d" "default" entry
+	   "* %?"
+	   :target (file+head "%<%Y-%m-%d>.org"
+			      "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 
 (use-package citeproc
   :after org)
@@ -608,10 +656,10 @@
   :mode ("\\.tex\\'" . LaTeX-mode)
   :init
   (setq TeX-parse-self t ; parse on load
-	reftex-plug-into-AUCTeX t
-	TeX-auto-save t  ; parse on save
-	TeX-source-correlate-mode t
-	TeX-source-correlate-method 'synctex
+        reftex-plug-into-AUCTeX t
+        TeX-auto-save t  ; parse on save
+        TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex
       TeX-source-correlate-start-server nil
       TeX-electric-sub-and-superscript t
       TeX-engine 'luatex ;; use lualatex by default
@@ -634,6 +682,7 @@
     "c" '(TeX-command-run-all :wk "compile"))
   :init
   (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+  (setq preview-scale-function 1.5)
   :config
   ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
   (add-hook 'TeX-mode-hook #'reftex-mode)
@@ -641,7 +690,7 @@
   (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
   (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
   (add-hook 'TeX-after-compilation-finished-functions
-	      #'TeX-revert-document-buffer)
+              #'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   (add-hook 'TeX-mode-hook #'outline-minor-mode)
   ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
@@ -831,6 +880,21 @@
   (setq ispell-program-name "aspell")
   (setq ispell-silently-savep t))
 
+(use-package helpful
+  :general
+  (patrl/leader-keys
+    "hc" '(helpful-command :wk "helpful command")
+    "hf" '(helpful-callable :wk "helpful callable")
+    "hh" '(helpful-at-point :wk "helpful at point")
+    "hF" '(helpful-function :wk "helpful function")
+    "hv" '(helpful-variable :wk "helpful variable")
+    "hk" '(helpful-key :wk "helpful key")))
+
+(use-package deadgrep
+  :general
+  (patrl/leader-keys
+    "sd" '(deadgrep :wk "deadgrep")))
+
 (use-package aas
   :hook (LaTeX-mode . aas-activate-for-major-mode)
   :hook (org-mode . aas-activate-for-major-mode)
@@ -971,6 +1035,12 @@
   ;; (setq lsp-haskell-formatting-provider "brittany")
   )
 
+(use-package eglot
+  :init (setq completion-category-overrides '((eglot (styles orderless))))
+  :commands eglot
+  :config
+  (add-to-list 'eglot-server-programs '(haskell-mode . ("haskell-language-server" "--lsp"))))
+
 (use-package direnv
   :config
   (direnv-mode))
@@ -985,6 +1055,10 @@
     "xk" '(0x0-upload-kill-ring :wk "0x0 upload kill ring")
     "xp" '(0x0-popup :wk "0x0 popup")
     "xs" '(0x0-shorten-uri :wk "0x0 shorten url")))
+
+(use-package kbd-mode 
+  :straight (:type git :host github :repo
+                   "kmonad/kbd-mode"))
 
 ;; We write a function to determine how we want elfeed to display the buffer with the current entry.
 (defun patrl/elfeed-display-buffer (buf &optional act)
@@ -1053,44 +1127,17 @@
   :commands consult-notmuch
   :after notmuch)
 
-(use-package org-transclusion
-  :after org
+(use-package ebib
+  :config
+  (setq ebib-bibtex-dialect 'biblatex)
+  (setq ebib-preload-bib-files (list patrl/global-bib-file))
   :general
   (patrl/leader-keys
-    "nt" '(org-transclusion-mode :wk "transclusion mode")))
-
-(use-package kbd-mode 
-  :straight (:type git :host github :repo
-                   "kmonad/kbd-mode"))
-
-(use-package org-modern
-  :straight (:type git :host github :repo
-                   "minad/org-modern"))
-
-(use-package deadgrep
-  :general
-  (patrl/leader-keys
-    "sd" '(deadgrep :wk "deadgrep")))
+    "ob" '(ebib :wk "ebib")))
 
 (use-package tree-sitter)
 
 (use-package tree-sitter-langs)
-
-(use-package helpful
-  :general
-  (patrl/leader-keys
-    "hc" '(helpful-command :wk "helpful command")
-    "hf" '(helpful-callable :wk "helpful callable")
-    "hh" '(helpful-at-point :wk "helpful at point")
-    "hF" '(helpful-function :wk "helpful function")
-    "hv" '(helpful-variable :wk "helpful variable")
-    "hk" '(helpful-key :wk "helpful key")))
-
-(use-package crdt
-  :disabled)
-
-(use-package cdlatex
-  :disabled)
 
 (use-package company
   :disabled
