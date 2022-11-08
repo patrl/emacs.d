@@ -35,26 +35,28 @@ Disable GUI elements before we have a chance to peek.
   (tool-bar-mode -1) ;; disables toolbar
   (scroll-bar-mode -1) ;; disables scrollbar
 
-  (setq inhibit-splash-screen t) ;; no thanks
-  (setq use-file-dialog nil) ;; don't use system file dialog
-
-  (setq tab-bar-new-button-show nil) ;; don't show new tab button
-  (setq tab-bar-close-button-show nil) ;; don't show tab close button
-  (setq tab-line-close-button-show nil) ;; don't show tab close button
+  (setq inhibit-splash-screen t ;; no thanks
+	use-file-dialog nil ;; don't use system file dialog
+	tab-bar-new-button-show nil ;; don't show new tab button
+	tab-bar-close-button-show nil ;; don't show tab close button
+	tab-line-close-button-show nil) ;; don't show tab close button
   ;;; early-init.el ends here
 #+end_src
 
 * Package management
+:PROPERTIES:
+:header-args: :tangle init.el
+:END:
 
 ** ~init.el~ header
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
 ;;; init.el --- Personal configuration file -*- lexical-binding: t; no-byte-compile: t; -*-
 ;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
 #+end_src
 
 ** ~straight.el~
- 
+
 - [[https://github.com/raxod502/straight.el][GitHub - raxod502/straight.el: 🍀 Next-generation, purely functional package m...]]
 
 Some rules/conventions:
@@ -72,7 +74,7 @@ Quick how-to for straight:
 
 *** Bootstrap ~straight.el~
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp
   (setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
 
   (defvar bootstrap-version)
@@ -91,11 +93,18 @@ Quick how-to for straight:
   (straight-use-package 'use-package) ;; install use-package via straight
 #+end_src
 
+*** TODO consider replacing with ~elpaca~
+
+- [[https://github.com/progfolio/elpaca][GitHub - progfolio/elpaca: An elisp package manager]]
+
 * Emacs
+:PROPERTIES:
+:header-args: :tangle init.el
+:END:
 
 ** Variables
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (defvar patrl/library-path "~/Dropbox (MIT)/library/"
     "Directory .pdf collection lives.")
 
@@ -114,7 +123,7 @@ Quick how-to for straight:
 
 ** Defaults
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (use-package emacs
     :init
     (setq user-full-name "Patrick D. Elliott") ;; my details
@@ -129,16 +138,16 @@ Quick how-to for straight:
 
     ;; keep backup and save files in a dedicated directory
     (setq backup-directory-alist
-          `((".*" . ,(concat user-emacs-directory "backups")))
-          auto-save-file-name-transforms
-          `((".*" ,(concat user-emacs-directory "backups") t)))
+	  `((".*" . ,(concat user-emacs-directory "backups")))
+	  auto-save-file-name-transforms
+	  `((".*" ,(concat user-emacs-directory "backups") t)))
 
     (setq create-lockfiles nil) ;; no need to create lockfiles
 
     (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
     (setq locale-coding-system 'utf-8
-          coding-system-for-read 'utf-8
-          coding-system-for-write 'utf-8)
+	  coding-system-for-read 'utf-8
+	  coding-system-for-write 'utf-8)
     (set-terminal-coding-system 'utf-8)
     (set-keyboard-coding-system 'utf-8)
     (set-selection-coding-system 'utf-8)
@@ -168,10 +177,9 @@ Quick how-to for straight:
     (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+end_src
 
- 
 **  Electric 
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (use-package electric
     :straight (:type built-in)
     :init
@@ -180,6 +188,9 @@ Quick how-to for straight:
 #+end_src
 
 * Keybindings
+:PROPERTIES:
+:header-args: :tangle init.el
+:END:
 
 Mnemonic keybindings with ~SPC~ as the leader key, inspired by spacemacs and doom emacs.
 
@@ -187,7 +198,7 @@ The local leader ~,~ is used for mode-specific bindings.
 
 ** General
 
-  #+begin_src emacs-lisp :tangle init.el
+  #+begin_src emacs-lisp
     (use-package general
       :config
       (general-evil-setup)
@@ -282,7 +293,7 @@ The local leader ~,~ is used for mode-specific bindings.
 
 ** Evil
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp
   (use-package evil
     :general
     (patrl/leader-keys
@@ -314,7 +325,7 @@ The local leader ~,~ is used for mode-specific bindings.
 
 *** Evil collection
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (use-package evil-collection ;; evilifies a bunch of things
     :after evil
     :init
@@ -329,8 +340,9 @@ The local leader ~,~ is used for mode-specific bindings.
 
 *** Evil commentary
 
-#+begin_src emacs-lisp :tangle init.el
-  ;; port of Tim Pope's commentary package
+Port of Tim Pope's commentary package
+
+#+begin_src emacs-lisp
   (use-package evil-commentary
     :after evil
     :config
@@ -339,8 +351,9 @@ The local leader ~,~ is used for mode-specific bindings.
 
 *** Evil surround
 
-#+begin_src emacs-lisp :tangle init.el
-  ;; port of Tim Pope's surround package
+Port of Tim Pope's surround package
+
+#+begin_src emacs-lisp
   (use-package evil-surround
     :after evil
     :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
@@ -351,8 +364,9 @@ The local leader ~,~ is used for mode-specific bindings.
 
 *** Evil goggles
 
-#+begin_src emacs-lisp :tangle init.el
-  ;; show visual hints for evil motions
+Show visual hints for evil motions.
+
+#+begin_src emacs-lisp
   (use-package evil-goggles
     :config
     (evil-goggles-mode)
@@ -372,7 +386,7 @@ Super-charged navigaton.
 
 Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate. 
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
     (use-package avy
       :init
   (defun patrl/avy-action-insert-newline (pt)
@@ -411,7 +425,7 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 
 *** Link hint
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (use-package link-hint
     :general
     (patrl/leader-keys
@@ -421,12 +435,11 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
     (setq link-hint-avy-style 'pre))
 #+end_src
 
-
 ** Which key
    
 Display key bindings.
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (use-package which-key
     :after evil
     :init (which-key-mode)
@@ -485,8 +498,6 @@ Minimal mode line.
   ;; re-run this hook if we create a new frame from daemonized Emacs
   (add-hook 'server-after-make-frame-hook 'patrl/setup-font-faces)
 #+end_src
-
-N.b. that this interacts with ~org-superstars-mode~.
 
 ** Themes
 
@@ -676,66 +687,92 @@ This has been quite nice so far.
 Resources:
 - [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
 - [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
-
+- [[https://github.com/minad/org-modern][GitHub - minad/org-modern: Modern Org Style]]
 
   #+begin_src emacs-lisp :tangle init.el
     (use-package org
       ;; :straight (:type built-in)
       :init
+      ;; edit settings
+      (setq org-auto-align-tags nil
+	    org-tags-column 0
+	    org-catch-invisible-edits 'show-and-error
+	    org-special-ctrl-a/e t
+	    org-insert-heading-respect-content t)
+
+      ;; styling, hide markup, etc.
+      (setq org-hide-emphasis-markers t
+	    org-src-fontify-natively t
+	    org-highlight-latex-and-related '(native)
+	    org-pretty-entities t
+	    org-ellipsis "…")
+
+      ;; agenda styling
+      (setq org-agenda-tags-column 0
+	    org-agenda-block-separator ?─
+	    org-agenda-time-grid
+	    '((daily today require-timed)
+	      (800 1000 1200 1400 1600 1800 2000)
+	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+	    org-agenda-current-time-string
+	    "⭠ now ─────────────────────────────────────────────────")
+
+      ;; todo setup
       (setq org-todo-keywords
-            ;; it's extremely useful to distinguish between short-term goals and long-term projects
-            '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-              (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-              (sequence "PROJ(p)" "|" "COMPLETED(c)")))
-      (setq org-src-fontify-natively t) ;; fontify code in src blocks
-      (setq org-highlight-latex-and-related '(native))
+	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
+	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+
+
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+
       :custom
       (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
+      (org-cite-global-bibliography '("~/repos/bibliography/master.bib"))
       :general
       (patrl/local-leader-keys
-        :keymaps 'org-mode-map
-        "a" '(org-archive-subtree :wk "archive")
-        "l" '(:ignore t :wk "link")
-        "ll" '(org-insert-link t :wk "link")
-        "lp" '(org-latex-preview t :wk "prev latex")
-        "h" '(consult-org-heading :wk "consult heading")
-        "d" '(org-cut-special :wk "org cut special")
-        "y" '(org-copy-special :wk "org copy special")
-        "p" '(org-paste-special :wk "org paste special")
-        "b" '(:keymap org-babel-map :wk "babel")
-        "t" '(org-todo :wk "todo")
-        "s" '(org-insert-structure-template :wk "template")
-        "e" '(org-edit-special :wk "edit")
-        "i" '(:ignore t :wk "insert")
-        "ih" '(org-insert-heading :wk "insert heading")
-        "is" '(org-insert-subheading :wk "insert heading")
-        "f" '(org-footnote-action :wk "footnote action")
-        ">" '(org-demote-subtree :wk "demote subtree")
-        "<" '(org-promote-subtree :wk "demote subtree"))
+	:keymaps 'org-mode-map
+	"a" '(org-archive-subtree :wk "archive")
+	"l" '(:ignore t :wk "link")
+	"ll" '(org-insert-link t :wk "link")
+	"lp" '(org-latex-preview t :wk "prev latex")
+	"h" '(consult-org-heading :wk "consult heading")
+	"d" '(org-cut-special :wk "org cut special")
+	"y" '(org-copy-special :wk "org copy special")
+	"p" '(org-paste-special :wk "org paste special")
+	"b" '(:keymap org-babel-map :wk "babel")
+	"t" '(org-todo :wk "todo")
+	"s" '(org-insert-structure-template :wk "template")
+	"e" '(org-edit-special :wk "edit")
+	"i" '(:ignore t :wk "insert")
+	"ih" '(org-insert-heading :wk "insert heading")
+	"is" '(org-insert-subheading :wk "insert heading")
+	"f" '(org-footnote-action :wk "footnote action")
+	">" '(org-demote-subtree :wk "demote subtree")
+	"<" '(org-promote-subtree :wk "demote subtree"))
       (:keymaps 'org-agenda-mode-map
-                "j" '(org-agenda-next-line)
-                "h" '(org-agenda-previous-line))
+		"j" '(org-agenda-next-line)
+		"h" '(org-agenda-previous-line))
+
       :hook
       (org-mode . olivetti-mode)
       (org-mode . variable-pitch-mode)
-      (org-mode . visual-line-mode)
-      (org-mode . org-indent-mode) ;; indent
-      ;; (org-mode . org-num-mode) ;; FIXME currently too buggy
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+
       :config
       (add-to-list 'org-latex-packages-alist '("" "braket" t))
       (org-babel-do-load-languages
        'org-babel-load-languages
        '((js . t)
-         (emacs-lisp . t)
-         (awk . t)))
+	 (emacs-lisp . t)
+	 (awk . t)))
       ;; set up org paths
       (setq org-directory "~/Dropbox (MIT)/org/agenda")
       (setq org-default-notes-file (concat org-directory "/notes.org")))
   #+end_src
   
-*** Extra bindings  
+*** Evil integration
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package evil-org
@@ -746,7 +783,42 @@ Resources:
     (evil-org-agenda-set-keys))
 #+end_src
 
-*** Sidebar
+*** Org-auctex
+
+Provides faster latex previews for ~org-mode~. 
+
+- [[https://github.com/karthink/org-auctex][GitHub - karthink/org-auctex: Better latex previews for org-mode]]
+- See https://karthinks.com/software/fast-latex-previews-in-org-mode/
+  
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-auctex
+    :straight (:type git :host github :repo
+                     "karthink/org-auctex")
+    :hook (org-mode . org-auctex-mode))
+#+end_src
+
+**** Transclusion
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-transclusion
+    :after org
+    :general
+    (patrl/leader-keys
+      "nt" '(org-transclusion-mode :wk "transclusion mode")))
+#+end_src
+
+**** Appear
+
+Reveals hidden elements interactively.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-appear
+    :straight (:type git :host github :repo "awth13/org-appear")
+    :after org
+    :hook (org-mode . org-appear-mode))
+#+end_src
+
+**** Sidebar
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-sidebar
@@ -754,7 +826,7 @@ Resources:
     :straight (:type git :host github :repo "alphapapa/org-sidebar"))
 #+end_src
    
-***  Cliplink 
+****  Cliplink 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-cliplink
@@ -765,18 +837,17 @@ Resources:
       "lc" '(org-cliplink :wk "cliplink")))
 #+end_src
    
-*** Superstar
-   
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-superstar
-    :after org
-    :hook
-    (org-mode . (lambda () (org-superstar-mode 1)))
-    :config
-    (setq org-superstar-special-todo-items t)) ;; SOMEDAY consider using emoji for this
-#+end_src
+**** Org modern 
 
-*** Org roam
+Enable org-modern mode globally.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-modern
+    :after org
+    :config (global-org-modern-mode))
+#+end_src
+   
+**** Org roam
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-roam
@@ -793,10 +864,17 @@ Resources:
       "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
       "nrdd" '(org-roam-dailies-goto-date :wk "goto date"))
     :config
+    ;; org-roam-buffer
+    (add-to-list 'display-buffer-alist
+		 '("\\*org-roam\\*"
+		   (display-buffer-in-direction)
+		   (direction . right)
+		   (window-width . 0.33)
+		   (window-height . fit-window-to-buffer)))
     ;; get tags to show up in 'org-roam-node-find':
     (setq org-roam-node-display-template
-          (concat "${title:*} "
-                  (propertize "${tags:10}" 'face 'org-tag)))
+	  (concat "${title:*} "
+		  (propertize "${tags:10}" 'face 'org-tag)))
     (setq org-roam-completion-everywhere nil) ;; roam completion anywhere
     (setq org-roam-directory patrl/notes-path)
     (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
@@ -805,15 +883,15 @@ Resources:
     ;; dailies config
     (setq org-roam-dailies-directory "daily/")
     (setq org-roam-dailies-capture-templates
-          '(("d" "default" entry
-             "* %?"
-             :target (file+head "%<%Y-%m-%d>.org"
-                                "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
+	  '(("d" "default" entry
+	     "* %?"
+	     :target (file+head "%<%Y-%m-%d>.org"
+				"#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 #+end_src
 
-**** TODO configure the org-roam buffer display
+***** TODO configure the org-roam buffer display
 
-*** Export 
+**** Export 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citeproc
@@ -831,13 +909,13 @@ Resources:
 
 #+end_src
 
-*** Highlighting
+**** Highlighting
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package htmlize)
 #+end_src
 
-*** Org-noter
+**** Org-noter
 
 #+begin_src emacs-lisp :tangle init.el 
     (use-package org-noter
@@ -854,7 +932,7 @@ Resources:
       (setq org-noter-always-create-frame nil))
 #+end_src
 
-*** TODO checkout org-appear
+**** TODO checkout org-appear
 
 ** TODO js
 
@@ -884,6 +962,7 @@ Resources:
       "xr" '(racket-xp-rename :wk "rename")))
 
   (use-package pollen-mode)
+
 #+end_src
    
 ** nix
@@ -1224,6 +1303,31 @@ A minimal ui for ~completion-in-region~.
 
 * Tools   
 
+** Helpful
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package helpful
+    :general
+    (patrl/leader-keys
+      "hc" '(helpful-command :wk "helpful command")
+      "hf" '(helpful-callable :wk "helpful callable")
+      "hh" '(helpful-at-point :wk "helpful at point")
+      "hF" '(helpful-function :wk "helpful function")
+      "hv" '(helpful-variable :wk "helpful variable")
+      "hk" '(helpful-key :wk "helpful key")))
+#+end_src
+
+** Deadgrep
+
+The best search package.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package deadgrep
+    :general
+    (patrl/leader-keys
+      "sd" '(deadgrep :wk "deadgrep")))
+#+end_src
+
 ** Snippets
 
 *** Auto-activating snippets
@@ -1379,7 +1483,9 @@ Templates can be found in ~~/.config/emacs-vanilla/templates~.
       "oe" '(eshell :wk "eshell")))
 #+end_src
 
-** LSP
+** Language servers
+
+*** LSP mode 
 
 Note I still need to set keybindings
 
@@ -1410,6 +1516,22 @@ Note I still need to set keybindings
     )
 #+end_src
 
+
+*** Eglot
+
+Note that ~eglot~ will be in emacs 29.
+
+- Integrating corfu with eglot: [[https://github.com/minad/corfu/wiki][Home · minad/corfu Wiki · GitHub]]
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package eglot
+    :init (setq completion-category-overrides '((eglot (styles orderless))))
+    :commands eglot
+    :config
+    (add-to-list 'eglot-server-programs '(haskell-mode . ("haskell-language-server" "--lsp"))))
+#+end_src
+
+
 ** direnv
 
 Essential, since I'm on NixOS.
@@ -1434,6 +1556,16 @@ Essential, since I'm on NixOS.
       "xp" '(0x0-popup :wk "0x0 popup")
       "xs" '(0x0-shorten-uri :wk "0x0 shorten url")))
 #+end_src
+
+** Kmonad
+
+#+begin_src emacs-lisp :tangle init.el
+    (use-package kbd-mode 
+      :straight (:type git :host github :repo
+                       "kmonad/kbd-mode"))
+#+end_src
+
+*** TODO disable flymake mode in kbd-mode
 
 ** TODO Elfeed
 
@@ -1511,10 +1643,9 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
               "D" '+notmuch/tree-delete))
 #+end_src
 
+*** consult-notmuch
 
-* Staging grounds
-
-** consult-notmuch
+Search emails interactively using ~consult~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package consult-notmuch
@@ -1522,69 +1653,20 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
     :after notmuch)
 #+end_src
 
-** Org transclusion
+* Staging grounds
+
+** Ebib
+
+- [[https://joostkremers.github.io/ebib/][Ebib]]
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package org-transclusion
-    :after org
+  (use-package ebib
+    :config
+    (setq ebib-bibtex-dialect 'biblatex)
+    (setq ebib-preload-bib-files (list patrl/global-bib-file))
     :general
     (patrl/leader-keys
-      "nt" '(org-transclusion-mode :wk "transclusion mode")))
-#+end_src
-
-
-** Kmonad
-
-#+begin_src emacs-lisp :tangle init.el
-    (use-package kbd-mode 
-      :straight (:type git :host github :repo
-                       "kmonad/kbd-mode"))
-#+end_src
-
-*** TODO disable flymake mode in kbd-mode
-
-** Fast latex previews
-
-- See https://karthinks.com/software/fast-latex-previews-in-org-mode/
-  
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-auctex
-    :straight (:type git :host github :repo
-                     "karthink/org-auctex"))
-#+end_src
-
-** Org modern
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-modern
-    :straight (:type git :host github :repo
-                     "minad/org-modern"))
-
-
-#+end_src
-
-** FIXME Smooth scrolling
-
-#+begin_src emacs-lisp
-  (use-package pdf-continuous-scroll-mode
-    :after pdf-tools
-    :straight (:type git :host github :repo "dalanicolai/pdf-continuous-scroll-mode.el"))  
-#+end_src
-
-** Numbex
-
-#+begin_src emacs-lisp
-  (use-package numbex
-    :straight (:type git :host github :repo "enricoflor/numbex"))
-#+end_src
-
-** Deadgrep
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package deadgrep
-    :general
-    (patrl/leader-keys
-      "sd" '(deadgrep :wk "deadgrep")))
+      "ob" '(ebib :wk "ebib")))
 #+end_src
 
 ** Tree-sitter
@@ -1595,46 +1677,9 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
   (use-package tree-sitter-langs)
 #+end_src
 
-** Helpful
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package helpful
-    :general
-    (patrl/leader-keys
-      "hc" '(helpful-command :wk "helpful command")
-      "hf" '(helpful-callable :wk "helpful callable")
-      "hh" '(helpful-at-point :wk "helpful at point")
-      "hF" '(helpful-function :wk "helpful function")
-      "hv" '(helpful-variable :wk "helpful variable")
-      "hk" '(helpful-key :wk "helpful key")))
-#+end_src
-
 * Graveyard
 
 Packages i've tried out which, for whatever reason, haven't suited me.
-
-** math convert
-
-Enrico Flor's math-convert:
-
-#+begin_src emacs-lisp
-  (use-package math-convert
-    :straight (:type git :repo "git@github.com:enricoflor/math-convert.git"))
-#+end_src
-
-** Cdrt
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package crdt
-    :disabled)
-#+end_src
-
-** cdlatex
-
-#+begin_src emacs-lisp :tangle init.el 
-  (use-package cdlatex
-    :disabled)
-#+end_src
 
 ** company
 
@@ -1668,6 +1713,7 @@ Enrico Flor's math-convert:
     :config
     (add-to-list 'company-backends 'company-bibtex))
 #+end_src
+
  
 * File local variables                                             :noexport:
 
