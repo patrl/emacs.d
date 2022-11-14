@@ -1066,12 +1066,13 @@ Auto-activating snippets:
 #+begin_src emacs-lisp :tangle init.el
   (use-package citar
     :after all-the-icons
+    :hook (LaTeX-mode . (add-to-list 'completion-at-point-functions 'citar-capf))
     :config
     ;; icon support via all-the-icons
     (setq citar-symbols
-          `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-            (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-            (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+	  `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+	    (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+	    (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
     (setq citar-symbol-separator "  ")
     :general
     (patrl/leader-keys
@@ -1260,6 +1261,8 @@ A minimal ui for ~completion-in-region~.
     (add-to-list 'completion-at-point-functions #'cape-file)
     (add-to-list 'completion-at-point-functions #'cape-dabbrev))
 #+end_src
+
+- add ~citar-capf~ to latex buffers using cape!
 
 * Checkers
 
@@ -1654,6 +1657,12 @@ Search emails interactively using ~consult~.
 #+end_src
 
 * Staging grounds
+
+** Mastodon
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package mastodon)
+#+end_src
 
 ** Ebib
 
