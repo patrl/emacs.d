@@ -394,9 +394,9 @@
             "SPC" 'bufler-list-buffer-peek
             "d" 'bufler-list-buffer-kill))
 
-;; use emacs' built-in 'project.el'
 (use-package project
   :general
+  ;; assign built-in project.el bindings a new prefix
   (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project"))
   :straight (:type built-in))
 
@@ -546,10 +546,6 @@
   :after org
   :hook (org-mode . org-appear-mode))
 
-(use-package org-sidebar
-  :after org
-  :straight (:type git :host github :repo "alphapapa/org-sidebar"))
-
 (use-package org-cliplink
   :after org
   :general
@@ -641,15 +637,9 @@
     :keymaps 'racket-xp-mode-map
     "xr" '(racket-xp-rename :wk "rename")))
 
-(use-package pollen-mode)
-
 (use-package nix-mode
   ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
   :mode "\\.nix\\'")
-
-(use-package nix-update
-  :commands
-  nix-update-fetch)
 
 (use-package auctex
   :no-require t
@@ -705,6 +695,12 @@
 
 (use-package citar
   :after all-the-icons
+  :init
+  (defun citar-setup-capf ()
+    (add-hook 'completion-at-point-functions #'citar-capf))
+  :hook
+  (LaTeX-mode . citar-setup-capf)
+  (org-mode . citar-setup-capf) ;; FIXME seems to be broken
   :config
   ;; icon support via all-the-icons
   (setq citar-symbols
@@ -832,15 +828,6 @@
   (:keymaps 'corfu-map
             "SPC" 'corfu-insert-separator)) ;; for compatibility with orderless
 
-;; FIXME add icons to corfu
-;; (use-package kind-icon
-;;   :after corfu
-;;   :custom
-;;   (kind-icon-default-style '(:padding 0 :stroke 0 :margin 0 :radius 0 :height 0.5 :scale 0.5))
-;;   (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
-;;   :config
-;;   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
 (general-unbind
   :states '(insert)
   "C-k") ;; this was interfering with corfu completion
@@ -850,6 +837,22 @@
   (setq tab-always-indent 'complete)) ;; enable tab completion
 
 (use-package cape
+  ;; bindings for dedicated completion commands
+  :general
+  ("M-p p" 'completion-at-point ;; capf
+   "M-p t" 'complete-tag ;; etags
+   "M-p d" 'cape-dabbrev ;; dabbrev
+   "M-p h" 'cape-history
+   "M-p f" 'cape-file
+   "M-p k" 'cape-keyword
+   "M-p s" 'cape-symbol
+   "M-p a" 'cape-abbrev
+   "M-p i" 'cape-ispell
+   "M-p l" 'cape-line
+   "M-p w" 'cape-dict
+   "M-p \\" 'cape-tex
+   "M-p &" 'cape-sgml
+   "M-p r" 'cape-rfc1345)
   :init
   (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-dabbrev))
@@ -914,6 +917,8 @@
     ":wow" "😮"))
 
 (use-package laas
+  ;; disables accent snippets - things like 'l (which expands to \textsl{}) end up being very disruptive in practice.
+  :init (setq laas-accent-snippets nil)
   :hook ((LaTeX-mode . laas-mode)
          (org-mode . laas-mode))
   :config
@@ -969,12 +974,6 @@
     :cond #'laas-object-on-left-condition
     "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 
-(use-package yasnippet
-  :config
-  (yas-reload-all)
-  (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
-  (yas-global-mode 1))
-
 (use-package tempel
   :general
   ("M-+" 'tempel-complete
@@ -986,14 +985,6 @@
     (add-hook 'completion-at-point-functions #'tempel-expand))
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
   (add-hook 'text-mode-hook 'tempel-setup-capf))
-
-(use-package autoinsert
-  :straight (:type built-in)
-  :config
-  (setq auto-insert-query nil) ;; Do not ask when inserting
-  (auto-insert-mode 1) ;; enable auto-insert-mode globally
-  (add-hook 'find-file-hook 'auto-insert) ;; run auto-insert when a new file is opened
-  (setq auto-insert-alist nil)) ;; delete default auto-inserts
 
 (use-package simple-httpd
   :commands httpd-serve-directory)
@@ -1014,7 +1005,6 @@
   :custom
   (lsp-completion-provider :none) ;; we use corfu!
   :init
-  ;; FIXME function isn't getting auto-loaded.
   (defun patrl/lsp-mode-setup-completion ()
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
           '(orderless))) ;; Configure orderless
@@ -1127,6 +1117,21 @@
   :commands consult-notmuch
   :after notmuch)
 
+(use-package burly
+  :init
+  (burly-tabs-mode +1)
+  :general
+  (patrl/leader-keys
+    "Bf" '(burly-bookmark-frames t :wk "bookmark frames")
+    "Bw" '(burly-bookmark-windows t :wk "bookmark windows")
+    "Bo" '(burly-open-bookmark t :wk "open bookmark")
+    "Bl" '(burly-open-last-bookmark t :wk "open last bookmark")))
+
+(use-package mastodon
+  :config
+  (setq mastodon-instance-url "https://types.pl"
+	mastodon-active-user "patrl"))
+
 (use-package ebib
   :config
   (setq ebib-bibtex-dialect 'biblatex)
@@ -1136,32 +1141,4 @@
     "ob" '(ebib :wk "ebib")))
 
 (use-package tree-sitter)
-
 (use-package tree-sitter-langs)
-
-(use-package company
-  :disabled
-  :custom
-  (company-idle-delay nil) ;; turn off auto-completion
-  :general
-  (:keymap 'company-mode-map
-           "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-  :hook
-  (prog-mode . company-mode)
-  (LaTeX-mode . company-mode)
-  :config
-  ;; the following stops company from using the orderless completion style
-  ;; makes company much more useful
-  (define-advice company-capf
-      (:around (orig-fun &rest args) set-completion-styles)
-    (let ((completion-styles '(basic partial-completion)))
-      (apply orig-fun args))))
-
-(use-package company-bibtex
-  :disabled
-  :init
-  (setq company-bibtex-bibliography
-        (list patrl/global-bib-file))
-  :after company
-  :config
-  (add-to-list 'company-backends 'company-bibtex))

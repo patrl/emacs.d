@@ -2,7 +2,7 @@
 #+author: Patrick D. Elliott
 #+email: patrick.d.elliott@gmail.com
 #+EXPORT_FILE_NAME: ./docs/index.html
-#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+SETUPFILE: theme-readtheorg.setup
 
 Currently tailored for GNU Emacs 28.1.
 
@@ -551,7 +551,7 @@ Visually highlight todo.
 
 ** Buffer management
 
-*** TODO ~Popper~
+*** ~Popper~
 
 Classify certain buffer types as popups.
 
@@ -586,7 +586,7 @@ Not sure if I want to keep this around.
     (popper-echo-mode +1))
 #+end_src
 
-*** ~bufler~
+**** ~bufler~
 
 This has been quite nice so far.
 
@@ -608,17 +608,21 @@ This has been quite nice so far.
               "d" 'bufler-list-buffer-kill))
 #+end_src
 
-** Projects
+**** Projects
+
+Use built in ~project.el~.
   
 #+begin_src emacs-lisp :tangle init.el 
-  ;; use emacs' built-in 'project.el'
   (use-package project
     :general
+    ;; assign built-in project.el bindings a new prefix
     (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project"))
     :straight (:type built-in))
 #+end_src
 
-** File management
+**** File management
+
+Use built-in ~dired~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package dired
@@ -679,6 +683,8 @@ This has been quite nice so far.
     ;; TODO play around with keythemes 
     (lispyville-set-key-theme '(operators c-w additional)))
 #+end_src
+
+**** TODO add additional key themes for lispyville
 
 ** Org 
 
@@ -797,7 +803,7 @@ Provides faster latex previews for ~org-mode~.
     :hook (org-mode . org-auctex-mode))
 #+end_src
 
-**** Transclusion
+*** Transclusion
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-transclusion
@@ -807,7 +813,7 @@ Provides faster latex previews for ~org-mode~.
       "nt" '(org-transclusion-mode :wk "transclusion mode")))
 #+end_src
 
-**** Appear
+*** Appear
 
 Reveals hidden elements interactively.
 
@@ -818,15 +824,7 @@ Reveals hidden elements interactively.
     :hook (org-mode . org-appear-mode))
 #+end_src
 
-**** Sidebar
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-sidebar
-    :after org
-    :straight (:type git :host github :repo "alphapapa/org-sidebar"))
-#+end_src
-   
-****  Cliplink 
+***  Cliplink 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-cliplink
@@ -837,7 +835,7 @@ Reveals hidden elements interactively.
       "lc" '(org-cliplink :wk "cliplink")))
 #+end_src
    
-**** Org modern 
+*** Org modern 
 
 Enable org-modern mode globally.
 
@@ -847,7 +845,7 @@ Enable org-modern mode globally.
     :config (global-org-modern-mode))
 #+end_src
    
-**** Org roam
+*** Org roam
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-roam
@@ -889,9 +887,7 @@ Enable org-modern mode globally.
 				"#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 #+end_src
 
-***** TODO configure the org-roam buffer display
-
-**** Export 
+*** Export 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citeproc
@@ -909,13 +905,13 @@ Enable org-modern mode globally.
 
 #+end_src
 
-**** Highlighting
+*** Highlighting
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package htmlize)
 #+end_src
 
-**** Org-noter
+*** Org-noter
 
 #+begin_src emacs-lisp :tangle init.el 
     (use-package org-noter
@@ -932,9 +928,7 @@ Enable org-modern mode globally.
       (setq org-noter-always-create-frame nil))
 #+end_src
 
-**** TODO checkout org-appear
-
-** TODO js
+** js
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package js2-mode)
@@ -943,6 +937,7 @@ Enable org-modern mode globally.
 ** TODO haskell
 
 - Setup LSP
+- Haskell's indentation mode is interacting poorly with tab completion.
 
   #+begin_src emacs-lisp :tangle init.el
     (use-package haskell-mode)
@@ -960,9 +955,6 @@ Enable org-modern mode globally.
       "e" '(racket-eval-last-sexp :wk "eval last sexp")
       :keymaps 'racket-xp-mode-map
       "xr" '(racket-xp-rename :wk "rename")))
-
-  (use-package pollen-mode)
-
 #+end_src
    
 ** nix
@@ -971,12 +963,6 @@ Enable org-modern mode globally.
   (use-package nix-mode
     ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
     :mode "\\.nix\\'")
-#+end_src
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package nix-update
-    :commands
-    nix-update-fetch)
 #+end_src
 
 ** SOMEDAY latex
@@ -1073,7 +1059,7 @@ Auto-activating snippets:
       (add-hook 'completion-at-point-functions #'citar-capf))
     :hook
     (LaTeX-mode . citar-setup-capf)
-    (org-mode .citar-setup-capf)
+    (org-mode . citar-setup-capf) ;; FIXME seems to be broken
     :config
     ;; icon support via all-the-icons
     (setq citar-symbols
@@ -1239,15 +1225,6 @@ A minimal ui for ~completion-in-region~.
     (:keymaps 'corfu-map
               "SPC" 'corfu-insert-separator)) ;; for compatibility with orderless
 
-  ;; FIXME add icons to corfu
-  ;; (use-package kind-icon
-  ;;   :after corfu
-  ;;   :custom
-  ;;   (kind-icon-default-style '(:padding 0 :stroke 0 :margin 0 :radius 0 :height 0.5 :scale 0.5))
-  ;;   (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
-  ;;   :config
-  ;;   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
   (general-unbind
     :states '(insert)
     "C-k") ;; this was interfering with corfu completion
@@ -1256,8 +1233,6 @@ A minimal ui for ~completion-in-region~.
     :init
     (setq tab-always-indent 'complete)) ;; enable tab completion
 #+end_src
-
-**** TODO this isn't working so well with haskell-mode
 
 *** Cape
 
@@ -1284,8 +1259,6 @@ A minimal ui for ~completion-in-region~.
     (add-to-list 'completion-at-point-functions #'cape-dabbrev))
 
 #+end_src
-
-- add ~citar-capf~ to latex buffers using cape!
 
 * Checkers
 
@@ -1440,19 +1413,9 @@ Not sure if laas mode is properly activating in latex mode.
       "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 #+end_src
 
-*** Yasnippet
-
-#+begin_src emacs-lisp :tangle init.el 
-    (use-package yasnippet
-      :config
-      (yas-reload-all)
-      (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
-      (yas-global-mode 1))
-#+end_src
-
 *** TODO Tempel
 
-Templates can be found in ~~/.config/emacs-vanilla/templates~.
+Templates can be found in [[file:templates]].
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package tempel
@@ -1467,22 +1430,6 @@ Templates can be found in ~~/.config/emacs-vanilla/templates~.
     (add-hook 'prog-mode-hook 'tempel-setup-capf)
     (add-hook 'text-mode-hook 'tempel-setup-capf))
 #+end_src
-
-*** Autoinsert 
-
-- [[https://emacs.stackexchange.com/questions/45629/template-for-new-file][Template for new file - Emacs Stack Exchange]]
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package autoinsert
-    :straight (:type built-in)
-    :config
-    (setq auto-insert-query nil) ;; Do not ask when inserting
-    (auto-insert-mode 1) ;; enable auto-insert-mode globally
-    (add-hook 'find-file-hook 'auto-insert) ;; run auto-insert when a new file is opened
-    (setq auto-insert-alist nil)) ;; delete default auto-inserts
-#+end_src
-
-**** TODO setup built in package ~autoinsert~ for file templates via yasnippet.
 
 ** Web preview
 
@@ -1522,7 +1469,6 @@ Note I still need to set keybindings
     :custom
     (lsp-completion-provider :none) ;; we use corfu!
     :init
-    ;; FIXME function isn't getting auto-loaded.
     (defun patrl/lsp-mode-setup-completion ()
       (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
             '(orderless))) ;; Configure orderless
@@ -1683,10 +1629,27 @@ Search emails interactively using ~consult~.
 
 * Staging grounds
 
+** Burly
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package burly
+    :init
+    (burly-tabs-mode +1)
+    :general
+    (patrl/leader-keys
+      "Bf" '(burly-bookmark-frames t :wk "bookmark frames")
+      "Bw" '(burly-bookmark-windows t :wk "bookmark windows")
+      "Bo" '(burly-open-bookmark t :wk "open bookmark")
+      "Bl" '(burly-open-last-bookmark t :wk "open last bookmark")))
+#+end_src
+
 ** Mastodon
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package mastodon)
+  (use-package mastodon
+    :config
+    (setq mastodon-instance-url "https://types.pl"
+	  mastodon-active-user "patrl"))
 #+end_src
 
 ** Ebib
@@ -1707,7 +1670,6 @@ Search emails interactively using ~consult~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package tree-sitter)
-
   (use-package tree-sitter-langs)
 #+end_src
 
@@ -1715,11 +1677,18 @@ Search emails interactively using ~consult~.
 
 Packages i've tried out which, for whatever reason, haven't suited me.
 
+** Sidebar
+
+#+begin_src emacs-lisp
+  (use-package org-sidebar
+    :after org
+    :straight (:type git :host github :repo "alphapapa/org-sidebar"))
+#+end_src
+   
 ** company
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (use-package company
-    :disabled
     :custom
     (company-idle-delay nil) ;; turn off auto-completion
     :general
@@ -1737,9 +1706,8 @@ Packages i've tried out which, for whatever reason, haven't suited me.
         (apply orig-fun args))))
 #+end_src 
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp
   (use-package company-bibtex
-    :disabled
     :init
     (setq company-bibtex-bibliography
           (list patrl/global-bib-file))
