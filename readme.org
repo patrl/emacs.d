@@ -1071,7 +1071,9 @@ Auto-activating snippets:
     :init
     (defun citar-setup-capf ()
       (add-hook 'completion-at-point-functions #'citar-capf))
-    :hook (LaTeX-mode . citar-setup-capf)
+    :hook
+    (LaTeX-mode . citar-setup-capf)
+    (org-mode .citar-setup-capf)
     :config
     ;; icon support via all-the-icons
     (setq citar-symbols
@@ -1255,16 +1257,32 @@ A minimal ui for ~completion-in-region~.
     (setq tab-always-indent 'complete)) ;; enable tab completion
 #+end_src
 
-*** TODO this isn't working so well with haskell-mode
-*** TODO consider incorporating the ~cape~ package
+**** TODO this isn't working so well with haskell-mode
 
-*** SOMEDAY Cape
+*** Cape
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package cape
+    ;; bindings for dedicated completion commands
+    :general
+    ("M-p p" 'completion-at-point ;; capf
+     "M-p t" 'complete-tag ;; etags
+     "M-p d" 'cape-dabbrev ;; dabbrev
+     "M-p h" 'cape-history
+     "M-p f" 'cape-file
+     "M-p k" 'cape-keyword
+     "M-p s" 'cape-symbol
+     "M-p a" 'cape-abbrev
+     "M-p i" 'cape-ispell
+     "M-p l" 'cape-line
+     "M-p w" 'cape-dict
+     "M-p \\" 'cape-tex
+     "M-p &" 'cape-sgml
+     "M-p r" 'cape-rfc1345)
     :init
     (add-to-list 'completion-at-point-functions #'cape-file)
     (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+
 #+end_src
 
 - add ~citar-capf~ to latex buffers using cape!
@@ -1360,7 +1378,7 @@ The best search package.
       ":wow" "😮"))
 #+end_src
 
-- Accents are interfering with apostrophes!
+Not sure if laas mode is properly activating in latex mode. 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package laas
