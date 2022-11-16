@@ -14,7 +14,7 @@ org-roam.db
 .cache/
 multisession/
 straight/modified/
-#!*
+\#\!*
 auto-save-list/
 eln-cache/
 elpa/
