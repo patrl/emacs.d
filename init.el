@@ -573,16 +573,16 @@
   :config
   ;; org-roam-buffer
   (add-to-list 'display-buffer-alist
-	       '("\\*org-roam\\*"
-		 (display-buffer-in-direction)
-		 (direction . right)
-		 (window-width . 0.33)
-		 (window-height . fit-window-to-buffer)))
+               '("\\*org-roam\\*"
+                 (display-buffer-in-direction)
+                 (direction . right)
+                 (window-width . 0.33)
+                 (window-height . fit-window-to-buffer)))
   ;; get tags to show up in 'org-roam-node-find':
   (setq org-roam-node-display-template
-	(concat "${title:*} "
-		(propertize "${tags:10}" 'face 'org-tag)))
-  (setq org-roam-completion-everywhere nil) ;; roam completion anywhere
+        (concat "${title:*} "
+                (propertize "${tags:10}" 'face 'org-tag)))
+  (setq org-roam-completion-everywhere t) ;; roam completion anywhere
   (setq org-roam-directory patrl/notes-path)
   (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
   (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
@@ -590,10 +590,10 @@
   ;; dailies config
   (setq org-roam-dailies-directory "daily/")
   (setq org-roam-dailies-capture-templates
-	'(("d" "default" entry
-	   "* %?"
-	   :target (file+head "%<%Y-%m-%d>.org"
-			      "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
+        '(("d" "default" entry
+           "* %?"
+           :target (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 
 (use-package citeproc
   :after org)
@@ -697,10 +697,10 @@
   :after all-the-icons
   :init
   (defun citar-setup-capf ()
-    (add-hook 'completion-at-point-functions #'citar-capf))
+    (add-to-list 'completion-at-point-functions 'citar-capf))
   :hook
   (LaTeX-mode . citar-setup-capf)
-  (org-mode . citar-setup-capf) ;; FIXME seems to be broken
+  (org-mode . citar-setup-capf)
   :config
   ;; icon support via all-the-icons
   (setq citar-symbols
