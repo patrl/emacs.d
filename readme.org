@@ -1603,20 +1603,21 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
       (notmuch-tree-add-tag +notmuch-delete-tags)
       (notmuch-tree-next-message))
     (setq-default notmuch-search-oldest-first nil)
-    ;; sending mail
+    ;; sending mail using lieer
     (setq message-kill-buffer-on-exit t)
-    (setq message-send-mail-function #'smtpmail-send-it)
-    (setq smtpmail-stream-type 'starttls)
+    (setq sendmail-program "gmi")
+    (setq message-sendmail-extra-arguments '("send" "--quiet" "-t" "-C" "~/.mail/personal"))
+    (setq notmuch-fcc-dirs nil) ;; let gmail take care of sent mail
     :general
     (patrl/leader-keys
       "on" '(notmuch :wk "notmuch")) 
     ;; single key deletion.
     (:keymaps 'notmuch-search-mode-map
-              :states 'normal
-              "D" '+notmuch/search-delete)
+	      :states 'normal
+	      "D" '+notmuch/search-delete)
     (:keymaps 'notmuch-tree-mode-map
-              :states 'normal
-              "D" '+notmuch/tree-delete))
+	      :states 'normal
+	      "D" '+notmuch/tree-delete))
 #+end_src
 
 *** consult-notmuch
