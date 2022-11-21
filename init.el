@@ -317,8 +317,8 @@
   (set-fontset-font t nil "Twitter Color Emoji"))
 
 (defun patrl/setup-font-vivacia ()
-  (set-face-attribute 'default nil :font (font-spec :family "IBM Plex Mono" :size 11 :weight 'medium))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "IBM Plex Mono" :size 11 :weight 'medium)))
+  (set-face-attribute 'default nil :font (font-spec :family "IBM Plex Mono" :size 15 :weight 'medium))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "IBM Plex Mono" :size 15 :weight 'medium)))
 
 (when (string= (system-name) "wolfe")
   (add-hook 'after-init-hook 'patrl/setup-font-wolfe)
