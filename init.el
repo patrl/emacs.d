@@ -309,17 +309,24 @@
 (use-package mood-line
   :config (mood-line-mode))
 
-(defun patrl/setup-font-faces ()
+(defun patrl/setup-font-wolfe ()
   (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
   (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
   (set-fontset-font t nil "Twitter Color Emoji"))
 
-;; run this hook after we have initialized the first time
-(add-hook 'after-init-hook 'patrl/setup-font-faces)
-;; re-run this hook if we create a new frame from daemonized Emacs
-(add-hook 'server-after-make-frame-hook 'patrl/setup-font-faces)
+(defun patrl/setup-font-vivacia ()
+  (set-face-attribute 'default nil :font (font-spec :family "IBM Plex Mono" :size 11 :weight 'medium))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "IBM Plex Mono" :size 11 :weight 'medium)))
+
+(when (string= (system-name) "wolfe")
+  (add-hook 'after-init-hook 'patrl/setup-font-wolfe)
+  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-wolfe))
+
+(when (string= (system-name) "vivacia")
+  (add-hook 'after-init-hook patrl/setup-font-vivacia)
+  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
 
 (use-package solaire-mode
   :config
@@ -973,6 +980,12 @@
     ;; add accent snippets
     :cond #'laas-object-on-left-condition
     "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
+
+(use-package yasnippet
+  :config
+  (yas-reload-all)
+  (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
+  (yas-global-mode 1))
 
 (use-package tempel
   :general
