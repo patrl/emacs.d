@@ -486,17 +486,24 @@ Minimal mode line.
 ** Fonts
 
 #+begin_src emacs-lisp :tangle init.el
-  (defun patrl/setup-font-faces ()
+  (defun patrl/setup-font-wolfe ()
     (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
     (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
     (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
     (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
     (set-fontset-font t nil "Twitter Color Emoji"))
 
-  ;; run this hook after we have initialized the first time
-  (add-hook 'after-init-hook 'patrl/setup-font-faces)
-  ;; re-run this hook if we create a new frame from daemonized Emacs
-  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-faces)
+  (defun patrl/setup-font-vivacia ()
+    (set-face-attribute 'default nil :font (font-spec :family "IBM Plex Mono" :size 11 :weight 'medium))
+    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "IBM Plex Mono" :size 11 :weight 'medium)))
+
+  (when (string= (system-name) "wolfe")
+    (add-hook 'after-init-hook 'patrl/setup-font-wolfe)
+    (add-hook 'server-after-make-frame-hook 'patrl/setup-font-wolfe))
+
+  (when (string= (system-name) "vivacia")
+    (add-hook 'after-init-hook patrl/setup-font-vivacia)
+    (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
 #+end_src
 
 ** Themes
@@ -1415,6 +1422,18 @@ Not sure if laas mode is properly activating in latex mode.
       "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 #+end_src
 
+*** TODO yasnippet
+
+Deprecate in favour of tempel.
+
+#+begin_src emacs-lisp :tangle init.el 
+    (use-package yasnippet
+      :config
+      (yas-reload-all)
+      (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
+      (yas-global-mode 1))
+#+end_src
+
 *** TODO Tempel
 
 Templates can be found in [[file:templates]].
@@ -1606,6 +1625,7 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
     ;; sending mail using lieer
     (setq message-kill-buffer-on-exit t)
     (setq sendmail-program "gmi")
+    (setq send-mail-function 'sendmail-send-it)
     (setq message-sendmail-extra-arguments '("send" "--quiet" "-t" "-C" "~/.mail/personal"))
     (setq notmuch-fcc-dirs nil) ;; let gmail take care of sent mail
     :general
@@ -1613,11 +1633,11 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
       "on" '(notmuch :wk "notmuch")) 
     ;; single key deletion.
     (:keymaps 'notmuch-search-mode-map
-	      :states 'normal
-	      "D" '+notmuch/search-delete)
+              :states 'normal
+              "D" '+notmuch/search-delete)
     (:keymaps 'notmuch-tree-mode-map
-	      :states 'normal
-	      "D" '+notmuch/tree-delete))
+              :states 'normal
+              "D" '+notmuch/tree-delete))
 #+end_src
 
 *** consult-notmuch
@@ -1626,7 +1646,11 @@ Search emails interactively using ~consult~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package consult-notmuch
-    :commands consult-notmuch
+    :general
+    (patrl/leader-keys
+      "nmm" '(consult-notmuch t :wk "consult notmuch")
+      "nmt" '(consult-notmuch-tree t :wk "consult notmuch tree")
+      "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
     :after notmuch)
 #+end_src
 

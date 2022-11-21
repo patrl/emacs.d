@@ -1098,10 +1098,12 @@
     (notmuch-tree-add-tag +notmuch-delete-tags)
     (notmuch-tree-next-message))
   (setq-default notmuch-search-oldest-first nil)
-  ;; sending mail
+  ;; sending mail using lieer
   (setq message-kill-buffer-on-exit t)
-  (setq message-send-mail-function #'smtpmail-send-it)
-  (setq smtpmail-stream-type 'starttls)
+  (setq sendmail-program "gmi")
+  (setq send-mail-function 'sendmail-send-it)
+  (setq message-sendmail-extra-arguments '("send" "--quiet" "-t" "-C" "~/.mail/personal"))
+  (setq notmuch-fcc-dirs nil) ;; let gmail take care of sent mail
   :general
   (patrl/leader-keys
     "on" '(notmuch :wk "notmuch")) 
@@ -1114,7 +1116,11 @@
             "D" '+notmuch/tree-delete))
 
 (use-package consult-notmuch
-  :commands consult-notmuch
+  :general
+  (patrl/leader-keys
+    "nmm" '(consult-notmuch t :wk "consult notmuch")
+    "nmt" '(consult-notmuch-tree t :wk "consult notmuch tree")
+    "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
   :after notmuch)
 
 (use-package burly
