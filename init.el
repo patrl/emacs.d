@@ -1138,6 +1138,8 @@
     "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
   :after notmuch)
 
+(use-package rainbow-mode)
+
 (use-package burly
   :init
   (burly-tabs-mode +1)
