@@ -1658,6 +1658,12 @@ Search emails interactively using ~consult~.
 
 * Staging grounds
 
+** Rainbow mode
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package rainbow-mode)
+#+end_src
+
 ** Burly
 
 #+begin_src emacs-lisp :tangle init.el
