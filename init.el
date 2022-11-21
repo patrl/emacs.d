@@ -325,7 +325,7 @@
   (add-hook 'server-after-make-frame-hook 'patrl/setup-font-wolfe))
 
 (when (string= (system-name) "vivacia")
-  (add-hook 'after-init-hook patrl/setup-font-vivacia)
+  (add-hook 'after-init-hook 'patrl/setup-font-vivacia)
   (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
 
 (use-package solaire-mode
