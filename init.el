@@ -126,6 +126,9 @@
     "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
     "TAB" '(:keymap tab-prefix-map :wk "tab")) ;; remap tab bindings
 
+  (patrl/leader-keys
+    "c" '(:ignore t :wk "code"))
+
   ;; help
   ;; namespace mostly used by 'helpful'
   (patrl/leader-keys
@@ -175,12 +178,14 @@
   ;; search
   ;; see 'consult'
   (patrl/leader-keys
-    "s" '(:ignore t :wk "search")))
+    "s" '(:ignore t :wk "search"))
 
-  ;; capture
-  ;; (patrl/leader-keys
+  ;; templating
+  ;; see 'tempel'
+  (patrl/leader-keys
+    "t" '(:ignore t :wk "template")))
 
-    ;; "c" '(org-capture :wk "capture")))
+;; "c" '(org-capture :wk "capture")))
 
 (use-package evil
   :general
@@ -317,9 +322,9 @@
   (set-fontset-font t nil "Twitter Color Emoji"))
 
 (defun patrl/setup-font-vivacia ()
-  (set-face-attribute 'default nil :font (font-spec :family "Input Mono" :size 18 :weight 'medium))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Input Mono" :size 18 :weight 'medium))
-  (set-face-attribute 'variable-pitch nil :font (font-spec :family "Input Sans" :size 18 :weight 'medium))
+  (set-face-attribute 'default nil :font (font-spec :family "Hack" :size 18 :weight 'medium))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Hack" :size 18 :weight 'medium))
+  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 18 :weight 'medium))
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono"))
 
 (when (string= (system-name) "wolfe")
@@ -991,8 +996,9 @@
 
 (use-package tempel
   :general
-  ("M-+" 'tempel-complete
-   "M-*" 'tempel-insert)
+  ("M-p +" 'tempel-complete) ;; M-p completion prefix; see `cape'
+  (patrl/leader-keys
+    "ti" '(tempel-insert :wk "tempel insert"))
   (:keymaps 'tempel-map
             "TAB" 'tempel-next) ;; progress through fields via `TAB'
   :init
