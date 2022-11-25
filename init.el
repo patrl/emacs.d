@@ -322,9 +322,9 @@
   (set-fontset-font t nil "Twitter Color Emoji"))
 
 (defun patrl/setup-font-vivacia ()
-  (set-face-attribute 'default nil :font (font-spec :family "Hack" :size 18 :weight 'medium))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Hack" :size 18 :weight 'medium))
-  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 18 :weight 'medium))
+  (set-face-attribute 'default nil :font (font-spec :family "Input Mono Narrow" :size 18 :weight 'medium))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Input Mono Narrow" :size 18 :weight 'medium))
+  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iMWritingDuospace Nerd Font" :size 18 :weight 'medium))
   (set-fontset-font t 'unicode "DeJa Vu Sans Mono"))
 
 (when (string= (system-name) "wolfe")
@@ -461,34 +461,34 @@
   :init
   ;; edit settings
   (setq org-auto-align-tags nil
-	org-tags-column 0
-	org-catch-invisible-edits 'show-and-error
-	org-special-ctrl-a/e t
-	org-insert-heading-respect-content t)
+        org-tags-column 0
+        org-catch-invisible-edits 'show-and-error
+        org-special-ctrl-a/e t
+        org-insert-heading-respect-content t)
 
   ;; styling, hide markup, etc.
   (setq org-hide-emphasis-markers t
-	org-src-fontify-natively t
-	org-highlight-latex-and-related '(native)
-	org-pretty-entities t
-	org-ellipsis "…")
+        org-src-fontify-natively t
+        org-highlight-latex-and-related '(native)
+        org-pretty-entities t
+        org-ellipsis "…")
 
   ;; agenda styling
   (setq org-agenda-tags-column 0
-	org-agenda-block-separator ?─
-	org-agenda-time-grid
-	'((daily today require-timed)
-	  (800 1000 1200 1400 1600 1800 2000)
-	  " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-	org-agenda-current-time-string
-	"⭠ now ─────────────────────────────────────────────────")
+        org-agenda-block-separator ?─
+        org-agenda-time-grid
+        '((daily today require-timed)
+          (800 1000 1200 1400 1600 1800 2000)
+          " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+        org-agenda-current-time-string
+        "⭠ now ─────────────────────────────────────────────────")
 
   ;; todo setup
   (setq org-todo-keywords
-	;; it's extremely useful to distinguish between short-term goals and long-term projects
-	'((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-	  (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-	  (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+        ;; it's extremely useful to distinguish between short-term goals and long-term projects
+        '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+          (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+          (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
 
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -518,12 +518,12 @@
     ">" '(org-demote-subtree :wk "demote subtree")
     "<" '(org-promote-subtree :wk "demote subtree"))
   (:keymaps 'org-agenda-mode-map
-	    "j" '(org-agenda-next-line)
-	    "h" '(org-agenda-previous-line))
+            "j" '(org-agenda-next-line)
+            "h" '(org-agenda-previous-line))
 
   :hook
   (org-mode . olivetti-mode)
-  (org-mode . variable-pitch-mode)
+  ;; (org-mode . variable-pitch-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 
   :config
@@ -745,8 +745,8 @@
 
 (use-package markdown-mode
   :hook ((markdown-mode . visual-line-mode)
-         (markdown-mode . olivetti-mode)
-         (markdown-mode . variable-pitch-mode))
+         (markdown-mode . olivetti-mode))
+         ;; (markdown-mode . variable-pitch-mode)
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
@@ -870,6 +870,14 @@
   :init
   (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+
+(use-package company-reftex
+  :after cape
+  :init
+  (defun reftex-setup-capf ()
+    (add-to-list 'completion-at-point-functions (cape-company-to-capf #'company-reftex-labels)))
+  :hook
+  (LaTeX-mode . reftex-setup-capf))
 
 (use-package flymake
   :straight (:type built-in)
@@ -1168,6 +1176,18 @@
   :general
   (patrl/leader-keys
     "ob" '(ebib :wk "ebib")))
+
+(use-package biblio)
+
+  (use-package ebib-biblio
+    :after (ebib biblio)
+    :straight ebib
+    :general
+    (:keymap 'ebib-index-mode-map
+	     "B" 'ebib-biblio-import-doi)
+    ;; (:keymap 'biblio-selection-mode-map
+    ;;          "e" 'ebib-biblio-selection-import)
+)
 
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
