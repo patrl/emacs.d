@@ -55,6 +55,7 @@ Disable GUI elements before we have a chance to peek.
 ;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
 #+end_src
 
+
 ** ~straight.el~
 
 - [[https://github.com/raxod502/straight.el][GitHub - raxod502/straight.el: 🍀 Next-generation, purely functional package m...]]
@@ -497,11 +498,11 @@ Minimal mode line.
     (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
     (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
     (set-fontset-font t nil "Twitter Color Emoji"))
-
+  
   (defun patrl/setup-font-vivacia ()
-    (set-face-attribute 'default nil :font (font-spec :family "Hack" :size 18 :weight 'medium))
-    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Hack" :size 18 :weight 'medium))
-    (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 18 :weight 'medium))
+    (set-face-attribute 'default nil :font (font-spec :family "Input Mono Narrow" :size 18 :weight 'medium))
+    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Input Mono Narrow" :size 18 :weight 'medium))
+    (set-face-attribute 'variable-pitch nil :font (font-spec :family "iMWritingDuospace Nerd Font" :size 18 :weight 'medium))
     (set-fontset-font t 'unicode "DeJa Vu Sans Mono"))
 
   (when (string= (system-name) "wolfe")
@@ -715,34 +716,34 @@ Resources:
       :init
       ;; edit settings
       (setq org-auto-align-tags nil
-	    org-tags-column 0
-	    org-catch-invisible-edits 'show-and-error
-	    org-special-ctrl-a/e t
-	    org-insert-heading-respect-content t)
+            org-tags-column 0
+            org-catch-invisible-edits 'show-and-error
+            org-special-ctrl-a/e t
+            org-insert-heading-respect-content t)
 
       ;; styling, hide markup, etc.
       (setq org-hide-emphasis-markers t
-	    org-src-fontify-natively t
-	    org-highlight-latex-and-related '(native)
-	    org-pretty-entities t
-	    org-ellipsis "…")
+            org-src-fontify-natively t
+            org-highlight-latex-and-related '(native)
+            org-pretty-entities t
+            org-ellipsis "…")
 
       ;; agenda styling
       (setq org-agenda-tags-column 0
-	    org-agenda-block-separator ?─
-	    org-agenda-time-grid
-	    '((daily today require-timed)
-	      (800 1000 1200 1400 1600 1800 2000)
-	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-	    org-agenda-current-time-string
-	    "⭠ now ─────────────────────────────────────────────────")
+            org-agenda-block-separator ?─
+            org-agenda-time-grid
+            '((daily today require-timed)
+              (800 1000 1200 1400 1600 1800 2000)
+              " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+            org-agenda-current-time-string
+            "⭠ now ─────────────────────────────────────────────────")
 
       ;; todo setup
       (setq org-todo-keywords
-	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
-	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+            ;; it's extremely useful to distinguish between short-term goals and long-term projects
+            '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+              (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+              (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
 
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -752,32 +753,32 @@ Resources:
       (org-cite-global-bibliography '("~/repos/bibliography/master.bib"))
       :general
       (patrl/local-leader-keys
-	:keymaps 'org-mode-map
-	"a" '(org-archive-subtree :wk "archive")
-	"l" '(:ignore t :wk "link")
-	"ll" '(org-insert-link t :wk "link")
-	"lp" '(org-latex-preview t :wk "prev latex")
-	"h" '(consult-org-heading :wk "consult heading")
-	"d" '(org-cut-special :wk "org cut special")
-	"y" '(org-copy-special :wk "org copy special")
-	"p" '(org-paste-special :wk "org paste special")
-	"b" '(:keymap org-babel-map :wk "babel")
-	"t" '(org-todo :wk "todo")
-	"s" '(org-insert-structure-template :wk "template")
-	"e" '(org-edit-special :wk "edit")
-	"i" '(:ignore t :wk "insert")
-	"ih" '(org-insert-heading :wk "insert heading")
-	"is" '(org-insert-subheading :wk "insert heading")
-	"f" '(org-footnote-action :wk "footnote action")
-	">" '(org-demote-subtree :wk "demote subtree")
-	"<" '(org-promote-subtree :wk "demote subtree"))
+        :keymaps 'org-mode-map
+        "a" '(org-archive-subtree :wk "archive")
+        "l" '(:ignore t :wk "link")
+        "ll" '(org-insert-link t :wk "link")
+        "lp" '(org-latex-preview t :wk "prev latex")
+        "h" '(consult-org-heading :wk "consult heading")
+        "d" '(org-cut-special :wk "org cut special")
+        "y" '(org-copy-special :wk "org copy special")
+        "p" '(org-paste-special :wk "org paste special")
+        "b" '(:keymap org-babel-map :wk "babel")
+        "t" '(org-todo :wk "todo")
+        "s" '(org-insert-structure-template :wk "template")
+        "e" '(org-edit-special :wk "edit")
+        "i" '(:ignore t :wk "insert")
+        "ih" '(org-insert-heading :wk "insert heading")
+        "is" '(org-insert-subheading :wk "insert heading")
+        "f" '(org-footnote-action :wk "footnote action")
+        ">" '(org-demote-subtree :wk "demote subtree")
+        "<" '(org-promote-subtree :wk "demote subtree"))
       (:keymaps 'org-agenda-mode-map
-		"j" '(org-agenda-next-line)
-		"h" '(org-agenda-previous-line))
+                "j" '(org-agenda-next-line)
+                "h" '(org-agenda-previous-line))
 
       :hook
       (org-mode . olivetti-mode)
-      (org-mode . variable-pitch-mode)
+      ;; (org-mode . variable-pitch-mode)
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 
       :config
@@ -785,8 +786,8 @@ Resources:
       (org-babel-do-load-languages
        'org-babel-load-languages
        '((js . t)
-	 (emacs-lisp . t)
-	 (awk . t)))
+         (emacs-lisp . t)
+         (awk . t)))
       ;; set up org paths
       (setq org-directory "~/Dropbox (MIT)/org/agenda")
       (setq org-default-notes-file (concat org-directory "/notes.org")))
@@ -1120,8 +1121,8 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
 #+begin_src emacs-lisp :tangle init.el
   (use-package markdown-mode
     :hook ((markdown-mode . visual-line-mode)
-           (markdown-mode . olivetti-mode)
-           (markdown-mode . variable-pitch-mode))
+           (markdown-mode . olivetti-mode))
+           ;; (markdown-mode . variable-pitch-mode)
     :commands (markdown-mode gfm-mode)
     :mode (("README\\.md\\'" . gfm-mode)
            ("\\.md\\'" . markdown-mode)
@@ -1273,6 +1274,18 @@ A minimal ui for ~completion-in-region~.
     :init
     (add-to-list 'completion-at-point-functions #'cape-file)
     (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+#+end_src
+
+Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate in in ~LaTeX-mode~:
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package company-reftex
+    :after cape
+    :init
+    (defun reftex-setup-capf ()
+      (add-to-list 'completion-at-point-functions (cape-company-to-capf #'company-reftex-labels)))
+    :hook
+    (LaTeX-mode . reftex-setup-capf))
 #+end_src
 
 * Checkers
@@ -1705,6 +1718,8 @@ Search emails interactively using ~consult~.
     (patrl/leader-keys
       "ob" '(ebib :wk "ebib")))
 #+end_src
+
+*** TODO add biblio support
 
 ** Tree-sitter
 
