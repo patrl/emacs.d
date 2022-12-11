@@ -43,6 +43,14 @@ latex-mode
 
 (lingex "\\begin{exe}" > n> "\\ex " r> n "\\end{exe}")
 
+(lingtree "\\begin{forest}"
+	  >
+	  n "[{" p "}"
+	  n> "[{" p "}]"
+	  n> "[{" p "}]"
+	  n "]"
+	  n "\\end{forest}")
+
 emacs-lisp-mode
 
 (lambda "(lambda (" p ")" n> r> ")")
