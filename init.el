@@ -315,25 +315,32 @@
   :config (mood-line-mode))
 
 (defun patrl/setup-font-wolfe ()
-  (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
-  (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-  (set-fontset-font t nil "Twitter Color Emoji"))
+    (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+    (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
+    (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+    (set-fontset-font t nil "Twitter Color Emoji"))
 
-(defun patrl/setup-font-vivacia ()
-  (set-face-attribute 'default nil :font (font-spec :family "Input Mono Narrow" :size 18 :weight 'medium))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Input Mono Narrow" :size 18 :weight 'medium))
-  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iMWritingDuospace Nerd Font" :size 18 :weight 'medium))
-  (set-fontset-font t 'unicode "DeJa Vu Sans Mono"))
+  (defun patrl/setup-font-vivacia ()
+    (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
+    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
+    (set-face-attribute 'variable-pitch nil :font (font-spec :family "Iosevka Etoile" :size 10.0 :weight 'medium))
+    (set-fontset-font t 'unicode "JuliaMono"))
 
-(when (string= (system-name) "wolfe")
-  (add-hook 'after-init-hook 'patrl/setup-font-wolfe)
-  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-wolfe))
+;; (defun patrl/setup-font-vivacia ()
+;;     (set-face-attribute 'default nil :font (font-spec :family "Cozette" :size 10.0 :weight 'regular))
+;;     (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Cozette" :size 10.0 :weight 'regular))
+;;     (set-face-attribute 'variable-pitch nil :font (font-spec :family "Cozette" :size 10.0 :weight 'medium))
+;;     (set-fontset-font t 'unicode "Cozette"))
 
-(when (string= (system-name) "vivacia")
-  (add-hook 'after-init-hook 'patrl/setup-font-vivacia)
-  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
+
+  (when (string= (system-name) "wolfe")
+    (add-hook 'after-init-hook 'patrl/setup-font-wolfe)
+    (add-hook 'server-after-make-frame-hook 'patrl/setup-font-wolfe))
+
+  (when (string= (system-name) "vivacia")
+    (add-hook 'after-init-hook 'patrl/setup-font-vivacia)
+    (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
 
 (use-package solaire-mode
   :config
@@ -523,7 +530,7 @@
 
   :hook
   (org-mode . olivetti-mode)
-  ;; (org-mode . variable-pitch-mode)
+  (org-mode . variable-pitch-mode)
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 
   :config
@@ -660,10 +667,10 @@
   :mode ("\\.tex\\'" . LaTeX-mode)
   :init
   (setq TeX-parse-self t ; parse on load
-        reftex-plug-into-AUCTeX t
-        TeX-auto-save t  ; parse on save
-        TeX-source-correlate-mode t
-        TeX-source-correlate-method 'synctex
+	reftex-plug-into-AUCTeX t
+	TeX-auto-save t  ; parse on save
+	TeX-source-correlate-mode t
+	TeX-source-correlate-method 'synctex
       TeX-source-correlate-start-server nil
       TeX-electric-sub-and-superscript t
       TeX-engine 'luatex ;; use lualatex by default
@@ -686,7 +693,7 @@
     "c" '(TeX-command-run-all :wk "compile"))
   :init
   (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
-  (setq preview-scale-function 1.5)
+  ;; (setq preview-scale-function 1.5) ;; too big on vivacia
   :config
   ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
   (add-hook 'TeX-mode-hook #'reftex-mode)
@@ -694,7 +701,7 @@
   (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
   (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
   (add-hook 'TeX-after-compilation-finished-functions
-              #'TeX-revert-document-buffer)
+	      #'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   (add-hook 'TeX-mode-hook #'outline-minor-mode)
   ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
@@ -746,7 +753,7 @@
 (use-package markdown-mode
   :hook ((markdown-mode . visual-line-mode)
          (markdown-mode . olivetti-mode))
-         ;; (markdown-mode . variable-pitch-mode)
+         (markdown-mode . variable-pitch-mode)
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
@@ -1176,18 +1183,6 @@
   :general
   (patrl/leader-keys
     "ob" '(ebib :wk "ebib")))
-
-(use-package biblio)
-
-  (use-package ebib-biblio
-    :after (ebib biblio)
-    :straight ebib
-    :general
-    (:keymap 'ebib-index-mode-map
-	     "B" 'ebib-biblio-import-doi)
-    ;; (:keymap 'biblio-selection-mode-map
-    ;;          "e" 'ebib-biblio-selection-import)
-)
 
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
