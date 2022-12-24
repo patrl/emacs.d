@@ -965,6 +965,20 @@ Enable org-modern mode globally.
     (use-package haskell-mode)
   #+end_src
 
+~dante~ (which leads on ~ghcid~) can be useful when ~haskell-language-server~ isn't available in the local environment for whatever reason.
+
+Note that the following uses [[*Cape]] to convert dante's company backend to to a capf. 
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package dante
+    :after haskell-mode cape
+    :init
+    (defun dante-setup-capf ()
+      (add-to-list 'completion-at-point-functions (cape-company-to-capf #'dante-company)))
+    :commands 'dante-mode
+    :config (dante-setup-capf))
+#+end_src
+
 ** racket
 
 #+begin_src emacs-lisp :tangle init.el
