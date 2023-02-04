@@ -315,32 +315,25 @@
   :config (mood-line-mode))
 
 (defun patrl/setup-font-wolfe ()
-    (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-    (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
-    (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-    (set-fontset-font t nil "Twitter Color Emoji"))
+  (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
+  (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+  (set-fontset-font t nil "Twitter Color Emoji"))
 
-  (defun patrl/setup-font-vivacia ()
-    (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
-    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
-    (set-face-attribute 'variable-pitch nil :font (font-spec :family "Iosevka Etoile" :size 10.0 :weight 'medium))
-    (set-fontset-font t 'unicode "JuliaMono"))
+(defun patrl/setup-font-vivacia ()
+  (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
+  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
+  (set-face-attribute 'variable-pitch nil :font (font-spec :family "Iosevka Etoile" :size 10.0 :weight 'medium))
+  (set-fontset-font t 'unicode "JuliaMono"))
 
-;; (defun patrl/setup-font-vivacia ()
-;;     (set-face-attribute 'default nil :font (font-spec :family "Cozette" :size 10.0 :weight 'regular))
-;;     (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Cozette" :size 10.0 :weight 'regular))
-;;     (set-face-attribute 'variable-pitch nil :font (font-spec :family "Cozette" :size 10.0 :weight 'medium))
-;;     (set-fontset-font t 'unicode "Cozette"))
+(when (string= (system-name) "wolfe")
+  (add-hook 'after-init-hook 'patrl/setup-font-wolfe)
+  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-wolfe))
 
-
-  (when (string= (system-name) "wolfe")
-    (add-hook 'after-init-hook 'patrl/setup-font-wolfe)
-    (add-hook 'server-after-make-frame-hook 'patrl/setup-font-wolfe))
-
-  (when (string= (system-name) "vivacia")
-    (add-hook 'after-init-hook 'patrl/setup-font-vivacia)
-    (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
+(when (string= (system-name) "vivacia")
+  (add-hook 'after-init-hook 'patrl/setup-font-vivacia)
+  (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
 
 (use-package solaire-mode
   :config
@@ -648,6 +641,14 @@
 
 (use-package haskell-mode)
 
+(use-package dante
+  :after haskell-mode cape
+  :init
+  (defun dante-setup-capf ()
+    (add-to-list 'completion-at-point-functions (cape-company-to-capf #'dante-company)))
+  :commands 'dante-mode
+  :config (dante-setup-capf))
+
 (use-package racket-mode
   :hook (racket-mode . racket-xp-mode) ;; n.b. this requires Dr. Racket to be installed as a backend
   :general
@@ -815,6 +816,19 @@
         (lambda ()
           (when-let (project (project-current))
             (car (project-roots project))))))
+
+(use-package affe
+  :after orderless
+  :general
+  (patrl/leader-keys
+    "sa" '(affe-grep :wk "affe grep")
+    "sd" '(affe-find :wk "affe find"))
+  :init
+  (defun affe-orderless-regexp-compiler (input _type _ignorecase)
+    (setq input (orderless-pattern-compiler input))
+    (cons input (lambda (str) (orderless--highlight input str))))
+  :config
+  (setq affe-regexp-compiler #'affe-orderless-regexp-compiler))
 
 (use-package embark
   :general
