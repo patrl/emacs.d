@@ -91,7 +91,15 @@ Quick how-to for straight:
 	(eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
 
-  (straight-use-package 'use-package) ;; install use-package via straight
+  
+#+end_src
+
+#+begin_src emacs-lisp
+(straight-use-package 'org)
+#+end_src
+
+#+begin_src emacs-lisp
+(straight-use-package 'use-package) ;; install use-package via straight
 #+end_src
 
 *** TODO consider replacing with ~elpaca~

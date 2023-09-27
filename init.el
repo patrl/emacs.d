@@ -16,6 +16,8 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(straight-use-package 'org)
+
 (straight-use-package 'use-package) ;; install use-package via straight
 
 (defvar patrl/library-path "~/Dropbox (MIT)/library/"
