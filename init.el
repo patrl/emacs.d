@@ -3,6 +3,8 @@
 
 (setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
 
+(setq straight-repository-branch "develop")
+
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -436,21 +438,26 @@
 (use-package lua-mode
   :mode "\\.lua\\'")
 
+(use-package fennel-mode
+ :mode "\\.fnl\\'")
+
 ;; FIXME - compatibility with corfu
 (use-package sly)
 
 (use-package lispy
   :general
   (:keymaps 'lispy-mode-map 
-            "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
-  :hook (emacs-lisp-mode . lispy-mode)
-  (racket-mode . lispy-mode))
+	    "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+  :hook
+  (emacs-lisp-mode . lispy-mode)
+  (racket-mode . lispy-mode)
+  (fennel-mode . lispy-mode))
 
 (use-package lispyville
   :hook (lispy-mode . lispyville-mode)
   :general
   (:keymaps 'lispyville-mode-map
-            "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+	    "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
   ;; the following is necessary to retain tab completion in lispy mode 
   :config
   ;; TODO play around with keythemes 
@@ -461,34 +468,34 @@
   :init
   ;; edit settings
   (setq org-auto-align-tags nil
-        org-tags-column 0
-        org-catch-invisible-edits 'show-and-error
-        org-special-ctrl-a/e t
-        org-insert-heading-respect-content t)
+	org-tags-column 0
+	org-catch-invisible-edits 'show-and-error
+	org-special-ctrl-a/e t ;; special navigation behaviour in headlines
+	org-insert-heading-respect-content t)
 
   ;; styling, hide markup, etc.
   (setq org-hide-emphasis-markers t
-        org-src-fontify-natively t
-        org-highlight-latex-and-related '(native)
-        org-pretty-entities t
-        org-ellipsis "…")
+	org-src-fontify-natively t ;; fontify source blocks natively
+	org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
+	org-pretty-entities t
+	org-ellipsis "…")
 
   ;; agenda styling
   (setq org-agenda-tags-column 0
-        org-agenda-block-separator ?─
-        org-agenda-time-grid
-        '((daily today require-timed)
-          (800 1000 1200 1400 1600 1800 2000)
-          " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-        org-agenda-current-time-string
-        "⭠ now ─────────────────────────────────────────────────")
+	org-agenda-block-separator ?─
+	org-agenda-time-grid
+	'((daily today require-timed)
+	  (800 1000 1200 1400 1600 1800 2000)
+	  " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+	org-agenda-current-time-string
+	"⭠ now ─────────────────────────────────────────────────")
 
   ;; todo setup
   (setq org-todo-keywords
-        ;; it's extremely useful to distinguish between short-term goals and long-term projects
-        '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-          (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-          (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+	;; it's extremely useful to distinguish between short-term goals and long-term projects
+	'((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+	  (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+	  (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
 
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -518,8 +525,8 @@
     ">" '(org-demote-subtree :wk "demote subtree")
     "<" '(org-promote-subtree :wk "demote subtree"))
   (:keymaps 'org-agenda-mode-map
-            "j" '(org-agenda-next-line)
-            "h" '(org-agenda-previous-line))
+	    "j" '(org-agenda-next-line)
+	    "h" '(org-agenda-previous-line))
 
   :hook
   (org-mode . olivetti-mode)
@@ -639,6 +646,10 @@
 
 (use-package js2-mode)
 
+(use-package rustic
+  :mode ("\\.rs\\'" . rustic-mode)
+  :config (setq rustic-lsp-client 'eglot))
+
 (use-package haskell-mode)
 
 (use-package dante
@@ -704,9 +715,9 @@
   (add-hook 'TeX-after-compilation-finished-functions
 	      #'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
-  (add-hook 'TeX-mode-hook #'outline-minor-mode)
+  (add-hook 'TeX-mode-hook #'outline-minor-mode))
   ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
-  (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
+  ;; (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
 
 (use-package pdf-tools
   :config
@@ -741,6 +752,8 @@
 (use-package citar-embark
   :after citar embark
   :config (citar-embark-mode))
+
+(use-package engrave-faces)
 
 ;; FIXME
 (use-package auctex-latexmk
@@ -963,26 +976,26 @@
   ;; disables accent snippets - things like 'l (which expands to \textsl{}) end up being very disruptive in practice.
   :init (setq laas-accent-snippets nil)
   :hook ((LaTeX-mode . laas-mode)
-         (org-mode . laas-mode))
+	 (org-mode . laas-mode))
   :config
   (aas-set-snippets 'laas-mode
     ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
-    "*b" (lambda () (interactive)
-           (yas-expand-snippet "\\textbf{$1}$0"))
-    "*i" (lambda () (interactive)
-           (yas-expand-snippet "\\textit{$1}$0"))
+    ;; "*b" (lambda () (interactive)
+    ;;        (yas-expand-snippet "\\textbf{$1}$0"))
+    ;; "*i" (lambda () (interactive)
+    ;; 	   (yas-expand-snippet "\\textit{$1}$0"))
     "mx" (lambda () (interactive)
-            (yas-expand-snippet "\\\\($1\\\\)$0"))
+	    (yas-expand-snippet "\\\\($1\\\\)$0"))
     "mq" (lambda () (interactive)
-            (yas-expand-snippet "\\[$1\\]$0"))
-    "*I" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
-    "*e" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
-    "*f" (lambda () (interactive)
-            (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
+	    (yas-expand-snippet "\\[$1\\]$0"))
+    ;; "*I" (lambda () (interactive)
+    ;; 	    (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
+    ;; "*e" (lambda () (interactive)
+    ;; 	    (yas-expand-snippet "\\begin{exe}\n$>\\ex $0\n\\end{exe}"))
+    ;; "*f" (lambda () (interactive)
+    ;; 	    (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
     "*\"" (lambda () (interactive)
-            (yas-expand-snippet "\\enquote{$1}$0"))
+	    (yas-expand-snippet "\\enquote{$1}$0"))
     :cond #'texmathp ; expand only while in math 
     "Olon" "O(n \\log n)"
     ";:" "\\coloneq"
@@ -997,19 +1010,19 @@
     ";;b" "\\Box" 
     ;; bind to functions!
     "sum" (lambda () (interactive)
-            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+	    (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
     "grandu" (lambda () (interactive)
-            (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
+	    (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
     "Span" (lambda () (interactive)
-             (yas-expand-snippet "\\Span($1)$0"))
+	     (yas-expand-snippet "\\Span($1)$0"))
     "lam" (lambda () (interactive)
-            (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+	    (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
     ;; "set" (lambda () (interactive)
     ;;           (yas-expand-snippet "\\set{ $1 | $2} $0"))
     "txt" (lambda () (interactive)
-              (yas-expand-snippet "\\text{$1} $0"))
+	      (yas-expand-snippet "\\text{$1} $0"))
     ";;o" (lambda () (interactive)
-              (yas-expand-snippet "\\oplus"))
+	      (yas-expand-snippet "\\oplus"))
     ;; "ev" (lambda () (interactive)
     ;;             (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
     ;; clash with event type sigs
@@ -1084,17 +1097,6 @@
 (use-package direnv
   :config
   (direnv-mode))
-
-(use-package 0x0
-  :general
-  (patrl/leader-keys
-    "x" '(:ignore t :wk "web")
-    "x;" '(0x0-dwim t :wk "0x0 dwim")
-    "xt" '(0x0-upload-text :wk "0x0 upload text")
-    "xf" '(0x0-upload-file :wk "0x0 upload file")
-    "xk" '(0x0-upload-kill-ring :wk "0x0 upload kill ring")
-    "xp" '(0x0-popup :wk "0x0 popup")
-    "xs" '(0x0-shorten-uri :wk "0x0 shorten url")))
 
 (use-package kbd-mode 
   :straight (:type git :host github :repo
@@ -1184,11 +1186,6 @@
     "Bw" '(burly-bookmark-windows t :wk "bookmark windows")
     "Bo" '(burly-open-bookmark t :wk "open bookmark")
     "Bl" '(burly-open-last-bookmark t :wk "open last bookmark")))
-
-(use-package mastodon
-  :config
-  (setq mastodon-instance-url "https://types.pl"
-	mastodon-active-user "patrl"))
 
 (use-package ebib
   :config
