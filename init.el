@@ -3,8 +3,6 @@
 
 (setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
 
-(setq straight-repository-branch "develop")
-
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -317,11 +315,17 @@
   :config (mood-line-mode))
 
 (defun patrl/setup-font-wolfe ()
-  (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-  (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-  (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
-  (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-  (set-fontset-font t nil "Twitter Color Emoji"))
+    (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
+    (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
+    (set-face-attribute 'variable-pitch nil :font (font-spec :family "Iosevka Etoile" :size 10.0 :weight 'medium))
+    (set-fontset-font t 'unicode "JuliaMono"))
+
+;; (defun patrl/setup-font-wolfe ()
+;;   (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+;;   (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
+;;   (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
+;;   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
+;;   (set-fontset-font t nil "Twitter Color Emoji"))
 
 (defun patrl/setup-font-vivacia ()
   (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
