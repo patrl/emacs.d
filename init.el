@@ -5,15 +5,15 @@
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	 'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'org)
@@ -49,16 +49,16 @@
 
   ;; keep backup and save files in a dedicated directory
   (setq backup-directory-alist
-	`((".*" . ,(concat user-emacs-directory "backups")))
-	auto-save-file-name-transforms
-	`((".*" ,(concat user-emacs-directory "backups") t)))
+	  `((".*" . ,(concat user-emacs-directory "backups")))
+	  auto-save-file-name-transforms
+	  `((".*" ,(concat user-emacs-directory "backups") t)))
 
   (setq create-lockfiles nil) ;; no need to create lockfiles
 
   (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
   (setq locale-coding-system 'utf-8
-	coding-system-for-read 'utf-8
-	coding-system-for-write 'utf-8)
+	  coding-system-for-read 'utf-8
+	  coding-system-for-write 'utf-8)
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (set-selection-coding-system 'utf-8)
@@ -453,7 +453,7 @@
 (use-package lispy
   :general
   (:keymaps 'lispy-mode-map 
-	    "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
   :hook
   (emacs-lisp-mode . lispy-mode)
   (racket-mode . lispy-mode)
@@ -463,7 +463,7 @@
   :hook (lispy-mode . lispyville-mode)
   :general
   (:keymaps 'lispyville-mode-map
-	    "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
   ;; the following is necessary to retain tab completion in lispy mode 
   :config
   ;; TODO play around with keythemes 
@@ -474,34 +474,34 @@
   :init
   ;; edit settings
   (setq org-auto-align-tags nil
-	org-tags-column 0
-	org-catch-invisible-edits 'show-and-error
-	org-special-ctrl-a/e t ;; special navigation behaviour in headlines
-	org-insert-heading-respect-content t)
+	    org-tags-column 0
+	    org-catch-invisible-edits 'show-and-error
+	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
+	    org-insert-heading-respect-content t)
 
   ;; styling, hide markup, etc.
   (setq org-hide-emphasis-markers t
-	org-src-fontify-natively t ;; fontify source blocks natively
-	org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
-	org-pretty-entities t
-	org-ellipsis "…")
+	    org-src-fontify-natively t ;; fontify source blocks natively
+	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
+	    org-pretty-entities t
+	    org-ellipsis "…")
 
   ;; agenda styling
   (setq org-agenda-tags-column 0
-	org-agenda-block-separator ?─
-	org-agenda-time-grid
-	'((daily today require-timed)
-	  (800 1000 1200 1400 1600 1800 2000)
-	  " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-	org-agenda-current-time-string
-	"⭠ now ─────────────────────────────────────────────────")
+	    org-agenda-block-separator ?─
+	    org-agenda-time-grid
+	    '((daily today require-timed)
+	      (800 1000 1200 1400 1600 1800 2000)
+	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+	    org-agenda-current-time-string
+	    "⭠ now ─────────────────────────────────────────────────")
 
   ;; todo setup
   (setq org-todo-keywords
-	;; it's extremely useful to distinguish between short-term goals and long-term projects
-	'((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-	  (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-	  (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
+	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
 
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -511,28 +511,28 @@
   (org-cite-global-bibliography '("~/repos/bibliography/master.bib"))
   :general
   (patrl/local-leader-keys
-    :keymaps 'org-mode-map
-    "a" '(org-archive-subtree :wk "archive")
-    "l" '(:ignore t :wk "link")
-    "ll" '(org-insert-link t :wk "link")
-    "lp" '(org-latex-preview t :wk "prev latex")
-    "h" '(consult-org-heading :wk "consult heading")
-    "d" '(org-cut-special :wk "org cut special")
-    "y" '(org-copy-special :wk "org copy special")
-    "p" '(org-paste-special :wk "org paste special")
-    "b" '(:keymap org-babel-map :wk "babel")
-    "t" '(org-todo :wk "todo")
-    "s" '(org-insert-structure-template :wk "template")
-    "e" '(org-edit-special :wk "edit")
-    "i" '(:ignore t :wk "insert")
-    "ih" '(org-insert-heading :wk "insert heading")
-    "is" '(org-insert-subheading :wk "insert heading")
-    "f" '(org-footnote-action :wk "footnote action")
-    ">" '(org-demote-subtree :wk "demote subtree")
-    "<" '(org-promote-subtree :wk "demote subtree"))
+	:keymaps 'org-mode-map
+	"a" '(org-archive-subtree :wk "archive")
+	"l" '(:ignore t :wk "link")
+	"ll" '(org-insert-link t :wk "link")
+	"lp" '(org-latex-preview t :wk "prev latex")
+	"h" '(consult-org-heading :wk "consult heading")
+	"d" '(org-cut-special :wk "org cut special")
+	"y" '(org-copy-special :wk "org copy special")
+	"p" '(org-paste-special :wk "org paste special")
+	"b" '(:keymap org-babel-map :wk "babel")
+	"t" '(org-todo :wk "todo")
+	"s" '(org-insert-structure-template :wk "template")
+	"e" '(org-edit-special :wk "edit")
+	"i" '(:ignore t :wk "insert")
+	"ih" '(org-insert-heading :wk "insert heading")
+	"is" '(org-insert-subheading :wk "insert heading")
+	"f" '(org-footnote-action :wk "footnote action")
+	">" '(org-demote-subtree :wk "demote subtree")
+	"<" '(org-promote-subtree :wk "demote subtree"))
   (:keymaps 'org-agenda-mode-map
-	    "j" '(org-agenda-next-line)
-	    "h" '(org-agenda-previous-line))
+		"j" '(org-agenda-next-line)
+		"h" '(org-agenda-previous-line))
 
   :hook
   (org-mode . olivetti-mode)
@@ -544,8 +544,8 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((js . t)
-     (emacs-lisp . t)
-     (awk . t)))
+	 (emacs-lisp . t)
+	 (awk . t)))
   ;; set up org paths
   (setq org-directory "~/Dropbox (MIT)/org/agenda")
   (setq org-default-notes-file (concat org-directory "/notes.org")))
@@ -685,14 +685,14 @@
   :mode ("\\.tex\\'" . LaTeX-mode)
   :init
   (setq TeX-parse-self t ; parse on load
-	reftex-plug-into-AUCTeX t
-	TeX-auto-save t  ; parse on save
-	TeX-source-correlate-mode t
-	TeX-source-correlate-method 'synctex
-      TeX-source-correlate-start-server nil
-      TeX-electric-sub-and-superscript t
-      TeX-engine 'luatex ;; use lualatex by default
-      TeX-save-query nil))
+	  reftex-plug-into-AUCTeX t
+	  TeX-auto-save t  ; parse on save
+	  TeX-source-correlate-mode t
+	  TeX-source-correlate-method 'synctex
+	TeX-source-correlate-start-server nil
+	TeX-electric-sub-and-superscript t
+	TeX-engine 'luatex ;; use lualatex by default
+	TeX-save-query nil))
 
 (use-package latex
   :straight auctex
@@ -719,15 +719,11 @@
   (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
   (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
   (add-hook 'TeX-after-compilation-finished-functions
-	      #'TeX-revert-document-buffer)
+		#'TeX-revert-document-buffer)
   (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
   (add-hook 'TeX-mode-hook #'outline-minor-mode))
   ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
   ;; (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
-
-(use-package pdf-tools
-  :config
-  (pdf-tools-install))
 
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
@@ -841,7 +837,7 @@
   :general
   (patrl/leader-keys
     "sa" '(affe-grep :wk "affe grep")
-    "sd" '(affe-find :wk "affe find"))
+    "sw" '(affe-find :wk "affe find"))
   :init
   (defun affe-orderless-regexp-compiler (input _type _ignorecase)
     (setq input (orderless-pattern-compiler input))
@@ -935,15 +931,14 @@
   (general-nmap "] !" 'flymake-goto-next-error)
   (general-nmap "[ !" 'flymake-goto-prev-error))
 
-(use-package flymake-aspell
-  :after flymake)
-
-(use-package ispell
+(use-package pdf-tools
   :straight (:type built-in)
-  :init
-  (setq ispell-dictionary "en_US")
-  (setq ispell-program-name "aspell")
-  (setq ispell-silently-savep t))
+  :mode ("\\.pdf\\'" . pdf-view-mode)
+)
+
+(use-package jinx
+  :straight (:type built-in)
+  :hook (emacs-startup . global-jinx-mode))
 
 (use-package helpful
   :general
@@ -982,7 +977,7 @@
   ;; disables accent snippets - things like 'l (which expands to \textsl{}) end up being very disruptive in practice.
   :init (setq laas-accent-snippets nil)
   :hook ((LaTeX-mode . laas-mode)
-	 (org-mode . laas-mode))
+	   (org-mode . laas-mode))
   :config
   (aas-set-snippets 'laas-mode
     ;; I need to make sure not to accidentally trigger the following, so I should only use impossible (or extremely rare) bigrams/trigrams.
@@ -991,9 +986,9 @@
     ;; "*i" (lambda () (interactive)
     ;; 	   (yas-expand-snippet "\\textit{$1}$0"))
     "mx" (lambda () (interactive)
-	    (yas-expand-snippet "\\\\($1\\\\)$0"))
+	      (yas-expand-snippet "\\\\($1\\\\)$0"))
     "mq" (lambda () (interactive)
-	    (yas-expand-snippet "\\[$1\\]$0"))
+	      (yas-expand-snippet "\\[$1\\]$0"))
     ;; "*I" (lambda () (interactive)
     ;; 	    (yas-expand-snippet "\\begin{enumerate}\n$>\\item $0\n\\end{enumerate}"))
     ;; "*e" (lambda () (interactive)
@@ -1001,7 +996,7 @@
     ;; "*f" (lambda () (interactive)
     ;; 	    (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
     "*\"" (lambda () (interactive)
-	    (yas-expand-snippet "\\enquote{$1}$0"))
+	      (yas-expand-snippet "\\enquote{$1}$0"))
     :cond #'texmathp ; expand only while in math 
     "Olon" "O(n \\log n)"
     ";:" "\\coloneq"
@@ -1016,19 +1011,19 @@
     ";;b" "\\Box" 
     ;; bind to functions!
     "sum" (lambda () (interactive)
-	    (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+	      (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
     "grandu" (lambda () (interactive)
-	    (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
+	      (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
     "Span" (lambda () (interactive)
-	     (yas-expand-snippet "\\Span($1)$0"))
+	       (yas-expand-snippet "\\Span($1)$0"))
     "lam" (lambda () (interactive)
-	    (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
+	      (yas-expand-snippet "\\lambda $1_{$2}\\,.\\,$0"))
     ;; "set" (lambda () (interactive)
     ;;           (yas-expand-snippet "\\set{ $1 | $2} $0"))
     "txt" (lambda () (interactive)
-	      (yas-expand-snippet "\\text{$1} $0"))
+		(yas-expand-snippet "\\text{$1} $0"))
     ";;o" (lambda () (interactive)
-	      (yas-expand-snippet "\\oplus"))
+		(yas-expand-snippet "\\oplus"))
     ;; "ev" (lambda () (interactive)
     ;;             (yas-expand-snippet "\\left\\llbracket$3\\right\\rrbracket^$1_$2 $3"))
     ;; clash with event type sigs
