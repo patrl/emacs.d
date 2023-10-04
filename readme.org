@@ -15,6 +15,7 @@ Currently tailored for GNU Emacs 28.1.
 - [[https://tecosaur.github.io/emacs-config/config.html][Tecoaur's Doom Emacs Configuration]]
 
 * Early init file
+
 :PROPERTIES:
 :header-args: :tangle early-init.el
 :END:
@@ -93,6 +94,8 @@ Quick how-to for straight:
 
   
 #+end_src
+
+Load org ASAP.
 
 #+begin_src emacs-lisp
 (straight-use-package 'org)
@@ -1098,12 +1101,6 @@ Auto-activating snippets:
     ;; (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
 #+end_src
 
-#+begin_src emacs-lisp :tangle init.el
-    (use-package pdf-tools
-      :config
-      (pdf-tools-install))
-#+end_src
-
 ~evil-tex~ is a crucial component in my workflow. ~evil-surround~ integration makes things a breeze. Some examples:
 
 - Italicize word from point in normal mode: ~ysw;i~.
@@ -1261,7 +1258,7 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     :general
     (patrl/leader-keys
       "sa" '(affe-grep :wk "affe grep")
-      "sd" '(affe-find :wk "affe find"))
+      "sw" '(affe-find :wk "affe find"))
     :init
     (defun affe-orderless-regexp-compiler (input _type _ignorecase)
       (setq input (orderless-pattern-compiler input))
@@ -1364,7 +1361,7 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
 
 - Use ~flymake~ over ~flycheck~.
 
-** FIXME Flymake
+** Flymake
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package flymake
@@ -1384,23 +1381,26 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
     (general-nmap "[ !" 'flymake-goto-prev-error))
 #+end_src
    
-** Spell check  
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package flymake-aspell
-    :after flymake)
-#+end_src
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package ispell
-    :straight (:type built-in)
-    :init
-    (setq ispell-dictionary "en_US")
-    (setq ispell-program-name "aspell")
-    (setq ispell-silently-savep t))
-#+end_src
-
 * Tools   
+
+IMPORTANT: because this uses natively-compiled code, I install this alongside emacs via nix. 
+
+#+begin_src emacs-lisp :tangle init.el
+    (use-package pdf-tools
+      :straight (:type built-in)
+      :mode ("\\.pdf\\'" . pdf-view-mode)
+    )
+#+end_src
+
+** Jinx
+
+IMPORTANT: because this uses natively-compiled code, I install this alongside emacs via nix, rather than in the usual way (hence the ~build-in~ straight keyword).
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package jinx
+    :straight (:type built-in)
+    :hook (emacs-startup . global-jinx-mode))
+#+end_src
 
 ** Helpful
 
@@ -1731,6 +1731,7 @@ Search emails interactively using ~consult~.
     :after notmuch)
 #+end_src
 
+
 * Staging grounds
 
 ** Rainbow mode
@@ -1780,6 +1781,25 @@ Search emails interactively using ~consult~.
 * Graveyard
 
 Packages i've tried out which, for whatever reason, haven't suited me.
+
+** Flymake-aspell 
+
+Superseded by [[Jinx]].
+
+#+begin_src emacs-lisp
+  (use-package flymake-aspell
+    :after flymake)
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package ispell
+    :straight (:type built-in)
+    :init
+    (setq ispell-dictionary "en_US")
+    (setq ispell-program-name "aspell")
+    (setq ispell-silently-savep t))
+#+end_src
+
 
 ** Mastodon
 
