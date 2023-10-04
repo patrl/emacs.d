@@ -4,7 +4,7 @@
 #+EXPORT_FILE_NAME: ./docs/index.html
 #+SETUPFILE: theme-readtheorg.setup
 
-Currently tailored for GNU Emacs 28.1.
+Currently tailored for GNU Emacs 29.1.
 
 * Useful resources
 
