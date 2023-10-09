@@ -708,8 +708,9 @@ Use built-in ~dired~.
   (use-package lispy
     :general
     (:keymaps 'lispy-mode-map 
-	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+  	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
     :hook
+    (reb-lisp-mode . lispy-mode)
     (emacs-lisp-mode . lispy-mode)
     (racket-mode . lispy-mode)
     (fennel-mode . lispy-mode))
@@ -718,7 +719,7 @@ Use built-in ~dired~.
     :hook (lispy-mode . lispyville-mode)
     :general
     (:keymaps 'lispyville-mode-map
-	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
+  	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
     ;; the following is necessary to retain tab completion in lispy mode 
     :config
     ;; TODO play around with keythemes 
@@ -1383,6 +1384,20 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
    
 * Tools   
 
+** Regular expressions
+
+Use ~rx~ notation (S-expressions) as the default for constructing regular expressions in regex builder.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package re-builder
+    :straight (:type built-in)
+    :general (patrl/leader-keys
+  	     "se" '(regexp-builder :wk "regex builder"))
+    :config (setq reb-re-syntax 'rx))
+#+end_src
+
+** PDF tools
+
 IMPORTANT: because this uses natively-compiled code, I install this alongside emacs via nix. 
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1401,6 +1416,8 @@ IMPORTANT: because this uses natively-compiled code, I install this alongside em
     :straight (:type built-in)
     :hook (emacs-startup . global-jinx-mode))
 #+end_src
+
+*** TODO currently jinx somehow isn't finding the dictionary on NixOS 
 
 ** Helpful
 
