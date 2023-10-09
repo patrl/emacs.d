@@ -455,6 +455,7 @@
   (:keymaps 'lispy-mode-map 
 	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
   :hook
+  (reb-lisp-mode . lispy-mode)
   (emacs-lisp-mode . lispy-mode)
   (racket-mode . lispy-mode)
   (fennel-mode . lispy-mode))
@@ -930,6 +931,12 @@
   :general
   (general-nmap "] !" 'flymake-goto-next-error)
   (general-nmap "[ !" 'flymake-goto-prev-error))
+
+(use-package re-builder
+  :straight (:type built-in)
+  :general (patrl/leader-keys
+	     "se" '(regexp-builder :wk "regex builder"))
+  :config (setq reb-re-syntax 'rx))
 
 (use-package pdf-tools
   :straight (:type built-in)
