@@ -1417,8 +1417,6 @@ IMPORTANT: because this uses natively-compiled code, I install this alongside em
     :hook (emacs-startup . global-jinx-mode))
 #+end_src
 
-*** TODO currently jinx somehow isn't finding the dictionary on NixOS 
-
 ** Helpful
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1733,6 +1731,8 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
               :states 'normal
               "D" '+notmuch/tree-delete))
 #+end_src
+
+*** TODO figure out why sent mail is saved to the home folder
 
 *** consult-notmuch
 
