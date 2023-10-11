@@ -9,7 +9,7 @@ Currently tailored for GNU Emacs 29.1.
 * Useful resources
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
-- [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]]   
+- [[https://github.com/alphapapa/ap.el][GitHub - alphapapa/ap.el: A simple, Emacs Lisp-focused Emacs config]]
 - [[https://github.com/abo-abo/oremacs][GitHub - abo-abo/oremacs: My Emacs config]]
 - [[https://github.com/jwiegley/dot-emacs][GitHub - jwiegley/dot-emacs: My .emacs.el file and other personal Emacs goodies]]
 - [[https://tecosaur.github.io/emacs-config/config.html][Tecoaur's Doom Emacs Configuration]]
@@ -138,6 +138,15 @@ Load org ASAP.
 #+begin_src emacs-lisp
   (use-package emacs
     :init
+
+    (setq backup-by-copying t)
+    
+    (setq sentence-end-double-space nil)
+
+    (setq frame-inhibit-implied-resize t) ;; useless for a tiling window manager
+
+    (setq show-trailing-whitespace t) 
+
     (setq user-full-name "Patrick D. Elliott") ;; my details
     (setq user-mail-address "patrick.d.elliott@gmail.com")
 
@@ -145,21 +154,18 @@ Load org ASAP.
 
     (setq indent-tabs-mode nil) ;; no tabs
 
-    (setq make-backup-files nil) ;; keep everything under vc 
-    (setq auto-save-default nil)
-
     ;; keep backup and save files in a dedicated directory
     (setq backup-directory-alist
-	  `((".*" . ,(concat user-emacs-directory "backups")))
-	  auto-save-file-name-transforms
-	  `((".*" ,(concat user-emacs-directory "backups") t)))
+  	  `((".*" . ,(concat user-emacs-directory "backups")))
+  	  auto-save-file-name-transforms
+  	  `((".*" ,(concat user-emacs-directory "backups") t)))
 
     (setq create-lockfiles nil) ;; no need to create lockfiles
 
     (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
     (setq locale-coding-system 'utf-8
-	  coding-system-for-read 'utf-8
-	  coding-system-for-write 'utf-8)
+  	  coding-system-for-read 'utf-8
+  	  coding-system-for-write 'utf-8)
     (set-terminal-coding-system 'utf-8)
     (set-keyboard-coding-system 'utf-8)
     (set-selection-coding-system 'utf-8)
@@ -167,6 +173,7 @@ Load org ASAP.
     (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 
     (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; escape quits everything
+
 
     ;; Don't persist a custom file
     (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
@@ -184,10 +191,12 @@ Load org ASAP.
     ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
     (show-paren-mode t)
-
+    
     ;; Hide commands in M-x which don't work in the current mode
     (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+end_src
+
+** TODO pixel scroll precision mode
 
 **  Electric 
 
@@ -1621,12 +1630,11 @@ Note I still need to set keybindings
 
 *** Eglot
 
-Note that ~eglot~ will be in emacs 29.
-
 - Integrating corfu with eglot: [[https://github.com/minad/corfu/wiki][Home · minad/corfu Wiki · GitHub]]
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package eglot
+    :straight (:type built-in) ;; requires emacs 29
     :init (setq completion-category-overrides '((eglot (styles orderless))))
     :commands eglot
     :config
