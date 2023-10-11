@@ -37,15 +37,21 @@
 
 (use-package emacs
   :init
+
+  (setq backup-by-copying t)
+  
+  (setq sentence-end-double-space nil)
+
+  (setq frame-inhibit-implied-resize t) ;; useless for a tiling window manager
+
+  (setq show-trailing-whitespace t) 
+
   (setq user-full-name "Patrick D. Elliott") ;; my details
   (setq user-mail-address "patrick.d.elliott@gmail.com")
 
   (defalias 'yes-or-no-p 'y-or-n-p) ;; life is too short
 
   (setq indent-tabs-mode nil) ;; no tabs
-
-  (setq make-backup-files nil) ;; keep everything under vc 
-  (setq auto-save-default nil)
 
   ;; keep backup and save files in a dedicated directory
   (setq backup-directory-alist
@@ -67,6 +73,7 @@
 
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit) ;; escape quits everything
 
+
   ;; Don't persist a custom file
   (setq custom-file (make-temp-file "")) ; use a temp file as a placeholder
   (setq custom-safe-themes t)            ; mark all themes as safe, since we can't persist now
@@ -83,9 +90,13 @@
   ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
   (show-paren-mode t)
-
+  
   ;; Hide commands in M-x which don't work in the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
+
+(use-package pixel-scroll
+  :straight (:type built-in)
+  :init (pixel-scroll-precision-mode t))
 
 (use-package electric
   :straight (:type built-in)
@@ -1097,6 +1108,7 @@
   )
 
 (use-package eglot
+  :straight (:type built-in) ;; requires emacs 29
   :init (setq completion-category-overrides '((eglot (styles orderless))))
   :commands eglot
   :config
