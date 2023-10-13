@@ -6,6 +6,10 @@
 
 Currently tailored for GNU Emacs 29.1.
 
+* todo-list
+
+** TODO get smooth scrolling working
+
 * Useful resources
 
 - [[https://www.lucacambiaghi.com/vanilla-emacs/readme.html][Luca's literate Emacs config]]
