@@ -10,7 +10,7 @@ Currently tailored for GNU Emacs 29.1.
 
 ** TODO get smooth scrolling working
 ** TODO get search working with [[PDF tools]]
-See the following issue, which is probably related: [[https://github.com/politza/pdf-tools/issues/528][politza/pdf-tools#528 What would be the correct `use-package` declaration?]] 
+See the following issue, which is probably related: [[https://github.com/politza/pdf-tools/issues/528][politza/pdf-tools#528 What would be the correct `use-package` declaration?]]
 ** SOMEDAY explore additional key themes for lispyville (see [[lispy]])
 
 * Useful resources
@@ -73,7 +73,7 @@ Some rules/conventions:
 - When packages don't require installation, use ~:straight (:type built-in)~.
 - Prefer multiple ~setq~ expressions to one.
 - Prefer ~:init~ to ~:custom~.
-  
+
 Quick how-to for straight:
 
 - The lockfile is under version control at [[file:straight/versions/default.el][default.el]].
@@ -99,7 +99,7 @@ Quick how-to for straight:
 	(eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage))
 
-  
+
 #+end_src
 
 Load org ASAP.
@@ -143,12 +143,12 @@ Load org ASAP.
     :init
 
     (setq backup-by-copying t)
-    
+
     (setq sentence-end-double-space nil)
 
     (setq frame-inhibit-implied-resize t) ;; useless for a tiling window manager
 
-    (setq show-trailing-whitespace t) 
+    (setq show-trailing-whitespace t)
 
     (setq user-full-name "Patrick D. Elliott") ;; my details
     (setq user-mail-address "patrick.d.elliott@gmail.com")
@@ -194,18 +194,18 @@ Load org ASAP.
     ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
     (show-paren-mode t)
-    
+
     ;; Hide commands in M-x which don't work in the current mode
     (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+end_src
 
-**  Electric 
+**  Electric
 
 #+begin_src emacs-lisp
   (use-package electric
     :straight (:type built-in)
     :init
-    (electric-pair-mode +1) ;; automatically insert closing parens 
+    (electric-pair-mode +1) ;; automatically insert closing parens
     (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
 #+end_src
 
@@ -270,7 +270,7 @@ The local leader ~,~ is used for mode-specific bindings.
         "ff" '(find-file :wk "find file") ;; gets overridden by consult
         "fs" '(save-buffer :wk "save file"))
 
-      ;; buffer 
+      ;; buffer
       ;; see 'bufler' and 'popper'
       (patrl/leader-keys
         "b" '(:ignore t :wk "buffer")
@@ -348,7 +348,7 @@ The local leader ~,~ is used for mode-specific bindings.
     ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
     (evil-set-initial-state 'eshell-mode 'insert)
     (evil-set-initial-state 'magit-diff-mode 'insert))
-#+end_src 
+#+end_src
 
 *** Evil collection
 
@@ -411,7 +411,7 @@ Show visual hints for evil motions.
 
 Super-charged navigaton.
 
-Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate. 
+Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 
 #+begin_src emacs-lisp
     (use-package avy
@@ -463,7 +463,7 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 #+end_src
 
 ** Which key
-   
+
 Display key bindings.
 
 #+begin_src emacs-lisp
@@ -473,7 +473,7 @@ Display key bindings.
     :config
     (which-key-setup-minibuffer))
 #+end_src
-      
+
 * Appearance
 
 ** Icons
@@ -487,7 +487,7 @@ Display key bindings.
     :hook
     (dired-mode . all-the-icons-dired-mode))
 #+end_src
- 
+
 **  Olivetti
 
 Add some margins (useful for writing prose).
@@ -503,13 +503,13 @@ Add some margins (useful for writing prose).
 
 ** Mode line
 
-Minimal mode line.   
+Minimal mode line.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package mood-line
     :config (mood-line-mode))
 #+end_src
-  
+
 ** Fonts
 
 #+begin_src emacs-lisp :tangle init.el
@@ -580,15 +580,15 @@ Some nice themes:
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
 #+end_src
-   
-Visually highlight todo.   
+
+Visually highlight todo.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package hl-todo
     :init
     (global-hl-todo-mode))
 #+end_src
-  
+
 * Organization
 
 ** Buffer management
@@ -640,7 +640,7 @@ This has been quite nice so far.
     :general
     (patrl/leader-keys
       "bB" '(bufler :wk "bufler") ;; overrides consult
-      "bf" '(bufler-workspace-frame-set :wk "bufler workspace frame set") 
+      "bf" '(bufler-workspace-frame-set :wk "bufler workspace frame set")
       "bl" '(bufler-list :wk "bufler list"))
     (:keymaps 'bufler-list-mode-map
               :states 'normal
@@ -653,8 +653,8 @@ This has been quite nice so far.
 **** Projects
 
 Use built in ~project.el~.
-  
-#+begin_src emacs-lisp :tangle init.el 
+
+#+begin_src emacs-lisp :tangle init.el
   (use-package project
     :general
     ;; assign built-in project.el bindings a new prefix
@@ -686,7 +686,7 @@ Use built-in ~dired~.
   ;; makes dired a much more pleasant file manager
   (use-package dired-subtree)
 #+end_src
-  
+
 * Languages
 
 ** Lua
@@ -717,7 +717,7 @@ Use built-in ~dired~.
 #+begin_src emacs-lisp :tangle init.el
   (use-package lispy
     :general
-    (:keymaps 'lispy-mode-map 
+    (:keymaps 'lispy-mode-map
   	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
     :hook
     (reb-lisp-mode . lispy-mode)
@@ -730,13 +730,13 @@ Use built-in ~dired~.
     :general
     (:keymaps 'lispyville-mode-map
   	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
-    ;; the following is necessary to retain tab completion in lispy mode 
+    ;; the following is necessary to retain tab completion in lispy mode
     :config
-    ;; TODO play around with keythemes 
+    ;; TODO play around with keythemes
     (lispyville-set-key-theme '(operators c-w additional)))
 #+end_src
 
-** Org 
+** Org
 
 *** Org mode
 
@@ -827,7 +827,7 @@ Resources:
       (setq org-directory "~/Dropbox (MIT)/org/agenda")
       (setq org-default-notes-file (concat org-directory "/notes.org")))
   #+end_src
-  
+
 *** Evil integration
 
 #+begin_src emacs-lisp :tangle init.el
@@ -841,11 +841,11 @@ Resources:
 
 *** Org-auctex
 
-Provides faster latex previews for ~org-mode~. 
+Provides faster latex previews for ~org-mode~.
 
 - [[https://github.com/karthink/org-auctex][GitHub - karthink/org-auctex: Better latex previews for org-mode]]
 - See https://karthinks.com/software/fast-latex-previews-in-org-mode/
-  
+
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-auctex
     :straight (:type git :host github :repo
@@ -940,7 +940,7 @@ Enable org-modern mode globally.
                                 "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 #+end_src
 
-*** Export 
+*** Export
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citeproc
@@ -966,7 +966,7 @@ Enable org-modern mode globally.
 
 *** Org-noter
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp :tangle init.el
     (use-package org-noter
       :commands
       org-noter
@@ -1008,7 +1008,7 @@ We'll use ~rust-analyzer~ by using ~rustic~ with eglot.
 
 ~dante~ (which leads on ~ghcid~) can be useful when ~haskell-language-server~ isn't available in the local environment for whatever reason.
 
-Note that the following uses [[*Cape]] to convert dante's company backend to to a capf. 
+Note that the following uses [[*Cape]] to convert dante's company backend to to a capf.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package dante
@@ -1033,10 +1033,10 @@ Note that the following uses [[*Cape]] to convert dante's company backend to to 
       :keymaps 'racket-xp-mode-map
       "xr" '(racket-xp-rename :wk "rename")))
 #+end_src
-   
+
 ** nix
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp :tangle init.el
   (use-package nix-mode
     ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
     :mode "\\.nix\\'")
@@ -1053,9 +1053,9 @@ Configuring ~auctex~ is a little like dealing with a teetering stack of plates.
 Bindings:
 
 - ~n b~: insert citation via citar (normal mode).
-- ~, p~: preview at point. 
+- ~, p~: preview at point.
 - ~, c~: compile.
-  
+
 Auto-activating snippets:
 
 - ~mx~: insert in-line equation.
@@ -1169,7 +1169,7 @@ Uses emacs' font lock to highlight source code blocks in latex.
   ;; FIXME
   (use-package auctex-latexmk
     :disabled
-    :after latex 
+    :after latex
     :init
     (setq auctex-latexmk-inherit-TeX-PDF-mode t)
     :config
@@ -1180,7 +1180,7 @@ Uses emacs' font lock to highlight source code blocks in latex.
 **** TODO pdf buffer isn't reverted in preview continuously mode.
 I think probably I just need to use zathura as the pdf viewer, which has its own smart revert functionality.
 
-** markdown  
+** markdown
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package markdown-mode
@@ -1195,8 +1195,8 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (setq markdown-command "pandoc")
     (setq markdown-header-scaling t))
 #+end_src
-   
-#+begin_src emacs-lisp :tangle init.el 
+
+#+begin_src emacs-lisp :tangle init.el
   (use-package pandoc-mode
     :after markdown-mode
     :hook (markdown-mode . pandoc-mode))
@@ -1237,7 +1237,7 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (marginalia-mode))
 #+end_src
 
-** Consult 
+** Consult
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package consult
@@ -1307,12 +1307,12 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
 
 A minimal ui for ~completion-in-region~.
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp :tangle init.el
   (use-package corfu
     :hook
     (eval-expression-minibuffer-setup . corfu-mode)
     :init
-    (global-corfu-mode) 
+    (global-corfu-mode)
     :custom
     (corfu-cycle t) ;; allows cycling through candidates
     (corfu-auto nil) ;; disables auto-completion
@@ -1333,7 +1333,7 @@ A minimal ui for ~completion-in-region~.
 *** Cape
 
 - [[https://kristofferbalintona.me/posts/202203130102/][Cape | Kristoffer Balintona]]
-  
+
 #+begin_src emacs-lisp :tangle init.el
   (use-package cape
     ;; bindings for dedicated completion commands
@@ -1392,8 +1392,8 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
     (general-nmap "] !" 'flymake-goto-next-error)
     (general-nmap "[ !" 'flymake-goto-prev-error))
 #+end_src
-   
-* Tools   
+
+* Tools
 
 ** Regular expressions
 
@@ -1409,7 +1409,7 @@ Use ~rx~ notation (S-expressions) as the default for constructing regular expres
 
 ** PDF tools
 
-IMPORTANT: because this uses natively-compiled code, I install this alongside emacs via nix. 
+IMPORTANT: because this uses natively-compiled code, I install this alongside emacs via nix.
 
 #+begin_src emacs-lisp :tangle init.el
     (use-package pdf-tools
@@ -1477,7 +1477,7 @@ The best search package.
       ":wow" "😮"))
 #+end_src
 
-Not sure if laas mode is properly activating in latex mode. 
+Not sure if laas mode is properly activating in latex mode.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package laas
@@ -1504,7 +1504,7 @@ Not sure if laas mode is properly activating in latex mode.
       ;; 	    (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
       "*\"" (lambda () (interactive)
 	      (yas-expand-snippet "\\enquote{$1}$0"))
-      :cond #'texmathp ; expand only while in math 
+      :cond #'texmathp ; expand only while in math
       "Olon" "O(n \\log n)"
       ";:" "\\coloneq"
       ";;N" "\\mathbb{N}"
@@ -1515,7 +1515,7 @@ Not sure if laas mode is properly activating in latex mode.
       ";;u" "\\cup"
       ";;{" "\\subseteq"
       ";D" "\\Diamond"
-      ";;b" "\\Box" 
+      ";;b" "\\Box"
       ;; bind to functions!
       "sum" (lambda () (interactive)
 	      (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -1543,7 +1543,7 @@ Not sure if laas mode is properly activating in latex mode.
 
 Deprecate in favour of tempel.
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp :tangle init.el
     (use-package yasnippet
       :config
       (yas-reload-all)
@@ -1589,7 +1589,7 @@ Templates can be found in [[file:templates]].
 
 ** Eshell
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp :tangle init.el
   (use-package eshell
     :straight (:type built-in)
     :general
@@ -1599,7 +1599,7 @@ Templates can be found in [[file:templates]].
 
 ** Language servers
 
-*** LSP mode 
+*** LSP mode
 
 Note I still need to set keybindings
 
@@ -1657,7 +1657,7 @@ Essential, since I'm on NixOS.
 ** Kmonad
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package kbd-mode 
+    (use-package kbd-mode
       :straight (:type git :host github :repo
                        "kmonad/kbd-mode"))
 #+end_src
@@ -1732,7 +1732,7 @@ A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
     (setq notmuch-fcc-dirs nil) ;; let gmail take care of sent mail
     :general
     (patrl/leader-keys
-      "on" '(notmuch :wk "notmuch")) 
+      "on" '(notmuch :wk "notmuch"))
     ;; single key deletion.
     (:keymaps 'notmuch-search-mode-map
               :states 'normal
@@ -1809,7 +1809,7 @@ Search emails interactively using ~consult~.
 
 Packages i've tried out which, for whatever reason, haven't suited me.
 
-** Flymake-aspell 
+** Flymake-aspell
 
 Superseded by [[Jinx]].
 
@@ -1858,7 +1858,7 @@ Superseded by [[Jinx]].
   (use-package org-re-reveal)
 #+end_src
 
-** Org-present 
+** Org-present
 
 #+begin_src emacs-lisp
   (use-package org-present)
@@ -1871,7 +1871,7 @@ Superseded by [[Jinx]].
     :after org
     :straight (:type git :host github :repo "alphapapa/org-sidebar"))
 #+end_src
-   
+
 ** company
 
 #+begin_src emacs-lisp
@@ -1891,14 +1891,13 @@ Superseded by [[Jinx]].
         (:around (orig-fun &rest args) set-completion-styles)
       (let ((completion-styles '(basic partial-completion)))
         (apply orig-fun args))))
-#+end_src 
+#+end_src
 
- 
+
 * File local variables                                             :noexport:
 
-;; Local Variables: 
-;; eval: (add-hook 'after-save-hook (lambda nil (if (y-or-n-p "Export?") (org-html-export-to-html))) nil t) 
-;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t) 
-;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t) 
+;; Local Variables:
+;; eval: (add-hook 'after-save-hook (lambda nil (if (y-or-n-p "Export?") (org-html-export-to-html))) nil t)
+;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Reload?")(load-file user-init-file))) nil t)
+;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t)
 ;; End:
-
