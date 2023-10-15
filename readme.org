@@ -9,6 +9,9 @@ Currently tailored for GNU Emacs 29.1.
 * todo-list
 
 ** TODO get smooth scrolling working
+** TODO get search working with [[PDF tools]]
+See the following issue, which is probably related: [[https://github.com/politza/pdf-tools/issues/528][politza/pdf-tools#528 What would be the correct `use-package` declaration?]] 
+** SOMEDAY explore additional key themes for lispyville (see [[lispy]])
 
 * Useful resources
 
@@ -109,10 +112,6 @@ Load org ASAP.
 (straight-use-package 'use-package) ;; install use-package via straight
 #+end_src
 
-*** TODO consider replacing with ~elpaca~
-
-- [[https://github.com/progfolio/elpaca][GitHub - progfolio/elpaca: An elisp package manager]]
-
 * Emacs
 :PROPERTIES:
 :header-args: :tangle init.el
@@ -199,8 +198,6 @@ Load org ASAP.
     ;; Hide commands in M-x which don't work in the current mode
     (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+end_src
-
-** TODO pixel scroll precision mode
 
 **  Electric 
 
@@ -739,8 +736,6 @@ Use built-in ~dired~.
     (lispyville-set-key-theme '(operators c-w additional)))
 #+end_src
 
-**** TODO add additional key themes for lispyville
-
 ** Org 
 
 *** Org mode
@@ -931,7 +926,9 @@ Enable org-modern mode globally.
     (setq org-roam-completion-everywhere t) ;; roam completion anywhere
     (setq org-roam-directory patrl/notes-path)
     (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
+    (setq org-roam-database-connector 'sqlite-builtin) ;; depends on emacs version 29
     (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
+
 
     ;; dailies config
     (setq org-roam-dailies-directory "daily/")
