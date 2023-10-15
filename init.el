@@ -39,12 +39,12 @@
   :init
 
   (setq backup-by-copying t)
-  
+
   (setq sentence-end-double-space nil)
 
   (setq frame-inhibit-implied-resize t) ;; useless for a tiling window manager
 
-  (setq show-trailing-whitespace t) 
+  (setq show-trailing-whitespace t)
 
   (setq user-full-name "Patrick D. Elliott") ;; my details
   (setq user-mail-address "patrick.d.elliott@gmail.com")
@@ -90,14 +90,14 @@
   ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
   (show-paren-mode t)
-  
+
   ;; Hide commands in M-x which don't work in the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (use-package electric
   :straight (:type built-in)
   :init
-  (electric-pair-mode +1) ;; automatically insert closing parens 
+  (electric-pair-mode +1) ;; automatically insert closing parens
   (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
 
 (use-package general
@@ -149,7 +149,7 @@
     "ff" '(find-file :wk "find file") ;; gets overridden by consult
     "fs" '(save-buffer :wk "save file"))
 
-  ;; buffer 
+  ;; buffer
   ;; see 'bufler' and 'popper'
   (patrl/leader-keys
     "b" '(:ignore t :wk "buffer")
@@ -414,7 +414,7 @@
   :general
   (patrl/leader-keys
     "bB" '(bufler :wk "bufler") ;; overrides consult
-    "bf" '(bufler-workspace-frame-set :wk "bufler workspace frame set") 
+    "bf" '(bufler-workspace-frame-set :wk "bufler workspace frame set")
     "bl" '(bufler-list :wk "bufler list"))
   (:keymaps 'bufler-list-mode-map
             :states 'normal
@@ -459,7 +459,7 @@
 
 (use-package lispy
   :general
-  (:keymaps 'lispy-mode-map 
+  (:keymaps 'lispy-mode-map
 	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
   :hook
   (reb-lisp-mode . lispy-mode)
@@ -472,9 +472,9 @@
   :general
   (:keymaps 'lispyville-mode-map
 	      "TAB" 'indent-for-tab-command) ;; necessary for 'corfu'
-  ;; the following is necessary to retain tab completion in lispy mode 
+  ;; the following is necessary to retain tab completion in lispy mode
   :config
-  ;; TODO play around with keythemes 
+  ;; TODO play around with keythemes
   (lispyville-set-key-theme '(operators c-w additional)))
 
 (use-package org
@@ -585,7 +585,7 @@
   :after org
   :general
   (patrl/local-leader-keys
-    :keymaps 'org-mode-map 
+    :keymaps 'org-mode-map
     "lc" '(org-cliplink :wk "cliplink")))
 
 (use-package org-modern
@@ -771,7 +771,7 @@
 ;; FIXME
 (use-package auctex-latexmk
   :disabled
-  :after latex 
+  :after latex
   :init
   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
   :config
@@ -880,7 +880,7 @@
   :hook
   (eval-expression-minibuffer-setup . corfu-mode)
   :init
-  (global-corfu-mode) 
+  (global-corfu-mode)
   :custom
   (corfu-cycle t) ;; allows cycling through candidates
   (corfu-auto nil) ;; disables auto-completion
@@ -1014,7 +1014,7 @@
     ;; 	    (yas-expand-snippet "\\begin{forest}\n[{$1}\n[{$2}]\n[{$0}]\n]\n\\end{forest}"))
     "*\"" (lambda () (interactive)
 	      (yas-expand-snippet "\\enquote{$1}$0"))
-    :cond #'texmathp ; expand only while in math 
+    :cond #'texmathp ; expand only while in math
     "Olon" "O(n \\log n)"
     ";:" "\\coloneq"
     ";;N" "\\mathbb{N}"
@@ -1025,7 +1025,7 @@
     ";;u" "\\cup"
     ";;{" "\\subseteq"
     ";D" "\\Diamond"
-    ";;b" "\\Box" 
+    ";;b" "\\Box"
     ;; bind to functions!
     "sum" (lambda () (interactive)
 	      (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
@@ -1117,7 +1117,7 @@
   :config
   (direnv-mode))
 
-(use-package kbd-mode 
+(use-package kbd-mode
   :straight (:type git :host github :repo
                    "kmonad/kbd-mode"))
 
@@ -1177,7 +1177,7 @@
   (setq notmuch-fcc-dirs nil) ;; let gmail take care of sent mail
   :general
   (patrl/leader-keys
-    "on" '(notmuch :wk "notmuch")) 
+    "on" '(notmuch :wk "notmuch"))
   ;; single key deletion.
   (:keymaps 'notmuch-search-mode-map
             :states 'normal
