@@ -874,18 +874,18 @@ Reveals hidden elements interactively.
     :hook (org-mode . org-appear-mode))
 #+end_src
 
-***  Cliplink 
+***  Cliplink
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-cliplink
     :after org
     :general
     (patrl/local-leader-keys
-      :keymaps 'org-mode-map 
+      :keymaps 'org-mode-map
       "lc" '(org-cliplink :wk "cliplink")))
 #+end_src
-   
-*** Org modern 
+
+*** Org modern
 
 Enable org-modern mode globally.
 
@@ -894,7 +894,7 @@ Enable org-modern mode globally.
     :after org
     :config (global-org-modern-mode))
 #+end_src
-   
+
 *** Org roam
 
 #+begin_src emacs-lisp :tangle init.el
@@ -926,7 +926,8 @@ Enable org-modern mode globally.
     (setq org-roam-completion-everywhere t) ;; roam completion anywhere
     (setq org-roam-directory patrl/notes-path)
     (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
-    (setq org-roam-database-connector 'sqlite-builtin) ;; depends on emacs version 29
+    (unless (< emacs-major-version 29)
+      (setq org-roam-database-connector 'sqlite-builtin))
     (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
 
 
