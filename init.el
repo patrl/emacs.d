@@ -94,10 +94,6 @@
   ;; Hide commands in M-x which don't work in the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
-(use-package pixel-scroll
-  :straight (:type built-in)
-  :init (pixel-scroll-precision-mode t))
-
 (use-package electric
   :straight (:type built-in)
   :init
@@ -624,7 +620,10 @@
   (setq org-roam-completion-everywhere t) ;; roam completion anywhere
   (setq org-roam-directory patrl/notes-path)
   (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
+  (unless (< emacs-major-version 29)
+    (setq org-roam-database-connector 'sqlite-builtin))
   (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
+
 
   ;; dailies config
   (setq org-roam-dailies-directory "daily/")
