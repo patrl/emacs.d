@@ -38,6 +38,8 @@
 (use-package emacs
   :init
 
+  (setq enable-recursive-minibuffers t)
+
   (setq backup-by-copying t)
 
   (setq sentence-end-double-space nil)
@@ -424,12 +426,13 @@
             "d" 'bufler-list-buffer-kill))
 
 (use-package project
+  :straight (:type built-in)
   :general
   ;; assign built-in project.el bindings a new prefix
-  (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project"))
-  :straight (:type built-in))
+  (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 
 (use-package dired
+  :straight (:type built-in)
   :general
   (patrl/leader-keys
     "fd" '(dired :wk "dired") ;; open dired (in a directory)
@@ -441,8 +444,7 @@
             "q" 'kill-current-buffer
             "l" 'dired-find-file)
   :hook
-  (dired-mode . dired-hide-details-mode) ;; make dired prettier
-  :straight (:type built-in))
+  (dired-mode . dired-hide-details-mode))
 
 ;; toggle subtree visibility with 'TAB'
 ;; makes dired a much more pleasant file manager
