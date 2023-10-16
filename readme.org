@@ -22,7 +22,6 @@ See the following issue, which is probably related: [[https://github.com/politza
 - [[https://tecosaur.github.io/emacs-config/config.html][Tecoaur's Doom Emacs Configuration]]
 
 * Early init file
-
 :PROPERTIES:
 :header-args: :tangle early-init.el
 :END:
@@ -144,6 +143,8 @@ Load org ASAP.
   (use-package emacs
     :init
 
+    (setq enable-recursive-minibuffers t)
+
     (setq backup-by-copying t)
 
     (setq sentence-end-double-space nil)
@@ -221,6 +222,8 @@ Mnemonic keybindings with ~SPC~ as the leader key, inspired by spacemacs and doo
 The local leader ~,~ is used for mode-specific bindings.
 
 ** General
+
+- [[https://github.com/noctuid/general.el][GitHub - noctuid/general.el: More convenient key definitions in emacs]]
 
   #+begin_src emacs-lisp
     (use-package general
@@ -322,6 +325,8 @@ The local leader ~,~ is used for mode-specific bindings.
 
 ** Evil
 
+- [[https://github.com/emacs-evil/evil][GitHub - emacs-evil/evil: The extensible vi layer for Emacs.]]
+
 #+begin_src emacs-lisp
   (use-package evil
     :general
@@ -369,6 +374,8 @@ The local leader ~,~ is used for mode-specific bindings.
 
 *** Evil commentary
 
+- [[https://github.com/emacs-evil/evil-collection][GitHub - emacs-evil/evil-collection: A set of keybindings for evil-mode]]
+
 Port of Tim Pope's commentary package
 
 #+begin_src emacs-lisp
@@ -379,6 +386,8 @@ Port of Tim Pope's commentary package
 #+end_src
 
 *** Evil surround
+
+- [[https://github.com/emacs-evil/evil-surround][GitHub - emacs-evil/evil-surround: you will be surrounded (surround.vim for e...]]
 
 Port of Tim Pope's surround package
 
@@ -392,6 +401,8 @@ Port of Tim Pope's surround package
 #+end_src
 
 *** Evil goggles
+
+- [[https://github.com/edkolev/evil-goggles][GitHub - edkolev/evil-goggles: Display visual hint on evil edit operations]]
 
 Show visual hints for evil motions.
 
@@ -409,6 +420,7 @@ Show visual hints for evil motions.
 
 ** Avy
 
+- [[https://github.com/abo-abo/avy][GitHub - abo-abo/avy: Jump to things in Emacs tree-style]]
 - [[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything | Karthinks]]
 
 Super-charged navigaton.
@@ -466,6 +478,8 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 
 ** Which key
 
+- [[https://github.com/justbur/emacs-which-key][GitHub - justbur/emacs-which-key: Emacs package that displays available keybi...]]
+
 Display key bindings.
 
 #+begin_src emacs-lisp
@@ -479,6 +493,9 @@ Display key bindings.
 * Appearance
 
 ** Icons
+
+- [[https://github.com/domtronn/all-the-icons.el][GitHub - domtronn/all-the-icons.el: A utility package to collect various Icon...]]
+- [[https://github.com/jtbm37/all-the-icons-dired][GitHub - jtbm37/all-the-icons-dired: Adds dired support to all-the-icons]]
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package all-the-icons)
@@ -504,6 +521,8 @@ Add some margins (useful for writing prose).
 #+end_src
 
 ** Mode line
+
+- [[https://gitlab.com/jessieh/mood-line][Jessie Hildebrandt / mood-line · GitLab]]
 
 Minimal mode line.
 
@@ -597,6 +616,8 @@ Visually highlight todo.
 
 *** ~Popper~
 
+- [[https://github.com/karthink/popper][GitHub - karthink/popper: Emacs minor-mode to summon and dismiss buffers easily.]]
+
 Classify certain buffer types as popups.
 
 Not sure if I want to keep this around.
@@ -632,6 +653,8 @@ Not sure if I want to keep this around.
 
 **** ~bufler~
 
+- [[https://github.com/alphapapa/bufler.el][GitHub - alphapapa/bufler.el: A butler for your buffers. Group buffers into w...]]
+
 This has been quite nice so far.
 
 #+begin_src emacs-lisp :tangle init.el
@@ -658,10 +681,10 @@ Use built in ~project.el~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package project
+    :straight (:type built-in)
     :general
     ;; assign built-in project.el bindings a new prefix
-    (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project"))
-    :straight (:type built-in))
+    (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 #+end_src
 
 **** File management
@@ -670,6 +693,7 @@ Use built-in ~dired~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package dired
+    :straight (:type built-in)
     :general
     (patrl/leader-keys
       "fd" '(dired :wk "dired") ;; open dired (in a directory)
@@ -681,8 +705,7 @@ Use built-in ~dired~.
               "q" 'kill-current-buffer
               "l" 'dired-find-file)
     :hook
-    (dired-mode . dired-hide-details-mode) ;; make dired prettier
-    :straight (:type built-in))
+    (dired-mode . dired-hide-details-mode))
 
   ;; toggle subtree visibility with 'TAB'
   ;; makes dired a much more pleasant file manager
@@ -692,6 +715,8 @@ Use built-in ~dired~.
 * Languages
 
 ** Lua
+
+- [[http://immerrr.github.io/lua-mode/][Lua-mode]]
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package lua-mode
@@ -715,6 +740,9 @@ Use built-in ~dired~.
 #+end_src
 
 *** lispy
+
+- [[https://github.com/abo-abo/lispy][GitHub - abo-abo/lispy: Short and sweet LISP editing]]
+- [[https://github.com/noctuid/lispyville][GitHub - noctuid/lispyville: lispy + evil = lispyville]]
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package lispy
@@ -868,6 +896,8 @@ Provides faster latex previews for ~org-mode~.
 #+end_src
 
 *** Appear
+
+- [[https://github.com/awth13/org-appear][GitHub - awth13/org-appear: Toggle visibility of hidden Org mode element part...]]
 
 Reveals hidden elements interactively.
 
@@ -1413,6 +1443,16 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
 
 * Tools
 
+** Recursion indicator
+
+- [[https://github.com/minad/recursion-indicator][GitHub - minad/recursion-indicator: Recursion indicator for the mode-line]]
+
+#+begin_src emacs-lisp
+  (use-package recursion-indicator
+    :config
+    (recursion-indicator-mode))
+#+end_src
+
 ** Regular expressions
 
 Use ~rx~ notation (S-expressions) as the default for constructing regular expressions in regex builder.
@@ -1438,6 +1478,8 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 
 ** Jinx
 
+- [[https://github.com/minad/jinx][GitHub - minad/jinx: 🪄 Enchanted Spell Checker]]
+
 Because this uses natively-compiled code, I install this alongside emacs via nix, rather than in the usual way (hence the ~build-in~ straight keyword).
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1461,6 +1503,8 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 #+end_src
 
 ** Deadgrep
+
+- [[https://github.com/Wilfred/deadgrep][GitHub - Wilfred/deadgrep: fast, friendly searching with ripgrep and Emacs]]
 
 The best search package.
 
