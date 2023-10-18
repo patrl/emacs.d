@@ -308,6 +308,9 @@
   :config
   (which-key-setup-minibuffer))
 
+(use-package mood-line
+  :config (mood-line-mode))
+
 (use-package all-the-icons)
 
 
@@ -1215,6 +1218,3 @@
 
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
-
-(use-package mood-line
-  :config (mood-line-mode))
