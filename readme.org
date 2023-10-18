@@ -1470,10 +1470,20 @@ Use ~rx~ notation (S-expressions) as the default for constructing regular expres
 Because this uses natively-compiled code, I install this alongside emacs via nix.
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package pdf-tools
-      :straight (:type built-in)
-      :mode ("\\.pdf\\'" . pdf-view-mode)
-    )
+  (use-package pdf-tools
+    :straight (:type built-in)
+    :mode ("\\.pdf\\'" . pdf-view-mode)
+    :config
+    (require 'pdf-tools)
+    (require 'pdf-view)
+    (require 'pdf-misc)
+    (require 'pdf-occur)
+    (require 'pdf-util)
+    (require 'pdf-annot)
+    (require 'pdf-info)
+    (require 'pdf-isearch)
+    (require 'pdf-history)
+    (require 'pdf-links))
 #+end_src
 
 ** Jinx
