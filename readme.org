@@ -492,6 +492,17 @@ Display key bindings.
 
 * Appearance
 
+** Mode line
+
+- [[https://gitlab.com/jessieh/mood-line][Jessie Hildebrandt / mood-line · GitLab]]
+
+Minimal mode line.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package mood-line
+    :config (mood-line-mode))
+#+end_src
+
 ** Icons
 
 - [[https://github.com/domtronn/all-the-icons.el][GitHub - domtronn/all-the-icons.el: A utility package to collect various Icon...]]
@@ -1861,17 +1872,6 @@ Search emails interactively using ~consult~.
 * Graveyard
 
 Packages I've tried out which, for whatever reason, haven't suited me.
-
-** Mode line
-
-- [[https://gitlab.com/jessieh/mood-line][Jessie Hildebrandt / mood-line · GitLab]]
-
-Minimal mode line.
-
-#+begin_src emacs-lisp
-  (use-package mood-line
-    :config (mood-line-mode))
-#+end_src
 
 ** Mastodon
 
