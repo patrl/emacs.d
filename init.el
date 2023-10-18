@@ -322,9 +322,6 @@
   (setq olivetti-style 'fancy)
   (setq olivetti-minimum-body-width 50))
 
-(use-package mood-line
-  :config (mood-line-mode))
-
 (defun patrl/setup-font-wolfe ()
     (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
     (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
@@ -1218,3 +1215,6 @@
 
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
+
+(use-package mood-line
+  :config (mood-line-mode))
