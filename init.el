@@ -319,6 +319,11 @@
   :hook
   (dired-mode . all-the-icons-dired-mode))
 
+(use-package all-the-icons-completion
+  :after (marginalia all-the-icons)
+  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :init (all-the-icons-completion-mode))
+
 (use-package olivetti
   :init
   (setq olivetti-body-width 80)
@@ -746,16 +751,56 @@
   :init
   (defun citar-setup-capf ()
     (add-to-list 'completion-at-point-functions 'citar-capf))
+
+  (defvar citar-indicator-files-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-faicon
+	      "file-o"
+	      :face 'all-the-icons-green
+	      :v-adjust -0.1)
+     :function #'citar-has-files
+     :padding "  " ; need this because the default padding is too low for these icons
+     :tag "has:files"))
+
+  (defvar citar-indicator-links-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-octicon
+              "link"
+              :face 'all-the-icons-orange
+              :v-adjust 0.01)
+     :function #'citar-has-links
+     :padding "  "
+     :tag "has:links"))
+
+  (defvar citar-indicator-notes-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-material
+              "speaker_notes"
+              :face 'all-the-icons-blue
+              :v-adjust -0.3)
+     :function #'citar-has-notes
+     :padding "  "
+     :tag "has:notes"))
+
+  (defvar citar-indicator-cited-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-faicon
+              "circle-o"
+              :face 'all-the-icon-green)
+     :function #'citar-is-cited
+     :padding "  "
+     :tag "is:cited"))
   :hook
+  ;; set up citation completion for latex, org-mode, and markdown
   (LaTeX-mode . citar-setup-capf)
   (org-mode . citar-setup-capf)
+  (markdown-mode . citar-setup-capf)
   :config
-  ;; icon support via all-the-icons
-  (setq citar-symbols
-        `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-          (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
-  (setq citar-symbol-separator "  ")
+  (setq citar-indicators
+	(list citar-indicator-files-icons
+	      citar-indicator-links-icons
+	      citar-indicator-notes-icons
+	      citar-indicator-cited-icons))
   :general
   (patrl/leader-keys
     "nb" '(citar-open :wk "citar"))
@@ -796,14 +841,24 @@
   :hook (markdown-mode . pandoc-mode))
 
 (use-package vertico
-  :init (vertico-mode)
+  :init
+  (vertico-mode)
+  (vertico-multiform-mode)
+  (setq vertico-multiform-categories
+	'((file grid)
+	  (jinx grid (vertico-grid-annotate . 20))
+	  (citar buffer)))
   (setq vertico-cycle t) ;; enable cycling for 'vertico-next' and 'vertico-prev'
   :general
   (:keymaps 'vertico-map
             ;; keybindings to cycle through vertico results.
             "C-j" 'vertico-next
             "C-k" 'vertico-previous
-            "C-f" 'vertico-exit)
+            "C-f" 'vertico-exit
+	    "<backspace>" 'vertico-directory-delete-char
+	    "C-<backspace>" 'vertico-directory-delete-word
+	    "C-w" 'vertico-directory-delete-word
+	    "RET" 'vertico-directory-enter)
   (:keymaps 'minibuffer-local-map
             "M-h" 'backward-kill-word))
 
