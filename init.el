@@ -953,7 +953,17 @@
 (use-package pdf-tools
   :straight (:type built-in)
   :mode ("\\.pdf\\'" . pdf-view-mode)
-)
+  :config
+  (require 'pdf-tools)
+  (require 'pdf-view)
+  (require 'pdf-misc)
+  (require 'pdf-occur)
+  (require 'pdf-util)
+  (require 'pdf-annot)
+  (require 'pdf-info)
+  (require 'pdf-isearch)
+  (require 'pdf-history)
+  (require 'pdf-links))
 
 (use-package jinx
   :straight (:type built-in)
