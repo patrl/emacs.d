@@ -1165,6 +1165,10 @@ Auto-activating snippets:
     :hook (LaTeX-mode . evil-tex-mode))
 #+end_src
 
+Set up icon support using the following instructions:
+
+- [[https://github.com/emacs-citar/citar/wiki/Indicators][Indicators · emacs-citar/citar Wiki · GitHub]] 
+
 #+begin_src emacs-lisp :tangle init.el
   (use-package citar
     :after all-the-icons
@@ -1312,7 +1316,11 @@ The completion framework I adopt exploits packages primarily developed by [[http
               ;; keybindings to cycle through vertico results.
               "C-j" 'vertico-next
               "C-k" 'vertico-previous
-              "C-f" 'vertico-exit)
+              "C-f" 'vertico-exit
+  	    "<backspace>" 'vertico-directory-delete-char
+  	    "C-<backspace>" 'vertico-directory-delete-word
+  	    "C-w" 'vertico-directory-delete-word
+  	    "RET" 'vertico-directory-enter)
     (:keymaps 'minibuffer-local-map
               "M-h" 'backward-kill-word))
 
