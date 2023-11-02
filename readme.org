@@ -12,6 +12,7 @@ Currently tailored for GNU Emacs 29.1.
 ** TODO get search working with [[PDF tools]]
 See the following issue, which is probably related: [[https://github.com/politza/pdf-tools/issues/528][politza/pdf-tools#528 What would be the correct `use-package` declaration?]]
 ** SOMEDAY explore additional key themes for lispyville (see [[lispy]])
+** TODO get drag-and-drop working with dired
 
 * Useful resources
 
