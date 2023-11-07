@@ -1533,7 +1533,9 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package pdf-tools
+    :demand t
     :straight (:type built-in)
+    :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
     :mode ("\\.pdf\\'" . pdf-view-mode)
     :config
     (require 'pdf-tools)
@@ -1545,7 +1547,8 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
     (require 'pdf-info)
     (require 'pdf-isearch)
     (require 'pdf-history)
-    (require 'pdf-links))
+    (require 'pdf-links)
+    (pdf-tools-install :no-query))
 #+end_src
 
 ** Jinx

@@ -1006,7 +1006,9 @@
   :config (setq reb-re-syntax 'rx))
 
 (use-package pdf-tools
+  :demand t
   :straight (:type built-in)
+  :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :config
   (require 'pdf-tools)
@@ -1018,7 +1020,8 @@
   (require 'pdf-info)
   (require 'pdf-isearch)
   (require 'pdf-history)
-  (require 'pdf-links))
+  (require 'pdf-links)
+  (pdf-tools-install :no-query))
 
 (use-package jinx
   :straight (:type built-in)
