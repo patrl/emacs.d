@@ -20,7 +20,7 @@
 
 (straight-use-package 'use-package) ;; install use-package via straight
 
-(defvar patrl/library-path "~/Dropbox (MIT)/library/"
+(defvar patrl/library-path "~/MEGA/library/"
   "Directory .pdf collection lives.")
 
 (defvar patrl/notes-path "~/notes/"
@@ -32,7 +32,7 @@
 (defvar patrl/global-bib-file "~/repos/bibliography/master.bib"
   "Bibliography.")
 
-(defvar patrl/org-path "~/Dropbox (MIT)/org/"
+(defvar patrl/org-path "~/MEGA/org/"
   "Org path.")
 
 (use-package emacs
@@ -562,7 +562,7 @@
 	 (emacs-lisp . t)
 	 (awk . t)))
   ;; set up org paths
-  (setq org-directory "~/Dropbox (MIT)/org/agenda")
+  (setq org-directory "~/MEGA/org/agenda")
   (setq org-default-notes-file (concat org-directory "/notes.org")))
 
 (use-package evil-org
@@ -1021,6 +1021,7 @@
   (require 'pdf-isearch)
   (require 'pdf-history)
   (require 'pdf-links)
+  (require 'pdf-outline)
   (pdf-tools-install :no-query))
 
 (use-package jinx
@@ -1216,7 +1217,7 @@
 
 (use-package elfeed-org
   :init
- (setq rmh-elfeed-org-files (list "~/Dropbox (MIT)/org/elfeed.org"))
+ (setq rmh-elfeed-org-files (list "~/MEGA/org/elfeed.org"))
   :config
   (elfeed-org))
 
