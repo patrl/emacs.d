@@ -29,7 +29,7 @@
 (defvar patrl/journal-path (concat patrl/notes-path "daily/")
   "Journal entries.")
 
-(defvar patrl/global-bib-file "~/repos/bibliography/master.bib"
+(defvar patrl/global-bib-file "~/texmf/bibtex/bib/master.bib"
   "Bibliography.")
 
 (defvar patrl/org-path "~/MEGA/org/"
@@ -523,7 +523,7 @@
 
   :custom
   (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
-  (org-cite-global-bibliography '("~/repos/bibliography/master.bib"))
+  (org-cite-global-bibliography (list patrl/global-bib-file))
   :general
   (patrl/local-leader-keys
 	:keymaps 'org-mode-map
