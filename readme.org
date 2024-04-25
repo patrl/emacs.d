@@ -863,25 +863,21 @@ Auto-activating snippets:
 - ~*i~: insert italicized environment.
 - ~*b~: insert bold environment.
 
-
 #+begin_src emacs-lisp :tangle init.el
   (use-package auctex
-    :no-require t
     :mode ("\\.tex\\'" . LaTeX-mode)
     :init
     (setq TeX-parse-self t ; parse on load
-	  reftex-plug-into-AUCTeX t
-	  TeX-auto-save t  ; parse on save
-	  TeX-source-correlate-mode t
-	  TeX-source-correlate-method 'synctex
-	TeX-source-correlate-start-server nil
-	TeX-electric-sub-and-superscript t
-	TeX-engine 'luatex ;; use lualatex by default
-	TeX-save-query nil))
-
-  (use-package latex
-    :straight auctex
-    :general
+  	reftex-plug-into-AUCTeX t
+  	TeX-auto-save t  ; parse on save
+  	TeX-source-correlate-mode t
+  	TeX-source-correlate-method 'synctex
+  	TeX-source-correlate-start-server nil
+  	TeX-electric-sub-and-superscript t
+  	TeX-engine 'luatex ;; use lualatex by default
+  	TeX-save-query nil
+  	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+    :general 
     (patrl/local-leader-keys
       :keymaps 'LaTeX-mode-map
       ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
@@ -894,21 +890,16 @@ Auto-activating snippets:
       "p" '(preview-at-point :wk "preview at point")
       "f" '(TeX-font :wk "font")
       "c" '(TeX-command-run-all :wk "compile"))
-    :init
-    (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
-    ;; (setq preview-scale-function 1.5) ;; too big on vivacia
     :config
-    ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
+  ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
     (add-hook 'TeX-mode-hook #'reftex-mode)
     (add-hook 'TeX-mode-hook #'olivetti-mode)
     (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
     (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
     (add-hook 'TeX-after-compilation-finished-functions
-		#'TeX-revert-document-buffer)
+  		#'TeX-revert-document-buffer)
     (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
     (add-hook 'TeX-mode-hook #'outline-minor-mode))
-    ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
-    ;; (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
 #+end_src
 
 ~evil-tex~ is a crucial component in my workflow. ~evil-surround~ integration makes things a breeze. Some examples:
