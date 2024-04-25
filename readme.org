@@ -120,7 +120,7 @@ Load org ASAP.
 ** Variables
 
 #+begin_src emacs-lisp
-  (defvar patrl/library-path "~/Dropbox (MIT)/library/"
+  (defvar patrl/library-path "~/MEGA/library/"
     "Directory .pdf collection lives.")
 
   (defvar patrl/notes-path "~/notes/"
@@ -132,7 +132,7 @@ Load org ASAP.
   (defvar patrl/global-bib-file "~/repos/bibliography/master.bib"
     "Bibliography.")
 
-  (defvar patrl/org-path "~/Dropbox (MIT)/org/"
+  (defvar patrl/org-path "~/MEGA/org/"
     "Org path.")
 #+end_src
 
@@ -860,7 +860,7 @@ Resources:
 	 (emacs-lisp . t)
 	 (awk . t)))
       ;; set up org paths
-      (setq org-directory "~/Dropbox (MIT)/org/agenda")
+      (setq org-directory "~/MEGA/org/agenda")
       (setq org-default-notes-file (concat org-directory "/notes.org")))
   #+end_src
 
@@ -1548,6 +1548,7 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
     (require 'pdf-isearch)
     (require 'pdf-history)
     (require 'pdf-links)
+    (require 'pdf-outline)
     (pdf-tools-install :no-query))
 #+end_src
 
@@ -1834,7 +1835,7 @@ Resources:
 
   (use-package elfeed-org
     :init
-   (setq rmh-elfeed-org-files (list "~/Dropbox (MIT)/org/elfeed.org"))
+   (setq rmh-elfeed-org-files (list "~/MEGA/org/elfeed.org"))
     :config
     (elfeed-org))
 #+end_src
