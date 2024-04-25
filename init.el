@@ -45,7 +45,6 @@
   ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
 (setq use-package-always-ensure t)
-(elpaca-wait)
 
 (defvar patrl/library-path "~/MEGA/library/"
   "Directory .pdf collection lives.")
@@ -63,6 +62,7 @@
   "Org path.")
 
 (use-package emacs
+  :demand t
   :ensure nil
   :init
 
@@ -120,7 +120,6 @@
 
   ;; Hide commands in M-x which don't work in the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
-(elpaca-wait)
 
 (use-package electric
   :demand t
@@ -128,7 +127,6 @@
   :init
   (electric-pair-mode +1) ;; automatically insert closing parens
   (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
-(elpaca-wait)
 
 (use-package evil
   :demand t
@@ -155,7 +153,6 @@
   ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
   (evil-set-initial-state 'eshell-mode 'insert)
   (evil-set-initial-state 'magit-diff-mode 'insert))
-(elpaca-wait)
 
 (use-package evil-collection ;; evilifies a bunch of things
   :after evil
@@ -191,107 +188,108 @@
   (evil-goggles-use-diff-faces))
 
 (use-package general
-      :demand t
-      :config
-      (general-evil-setup)
-      ;; integrate general with evil
+  :ensure (:wait t)
+  :demand t
+  :config
+  (general-evil-setup)
+  ;; integrate general with evil
 
-      ;; set up 'SPC' as the global leader key
-      (general-create-definer patrl/leader-keys
-        :states '(normal insert visual emacs)
-        :keymaps 'override
-        :prefix "SPC" ;; set leader
-        :global-prefix "M-SPC") ;; access leader in insert mode
+  ;; set up 'SPC' as the global leader key
+  (general-create-definer patrl/leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC" ;; set leader
+    :global-prefix "M-SPC") ;; access leader in insert mode
 
-      ;; set up ',' as the local leader key
-      (general-create-definer patrl/local-leader-keys
-        :states '(normal insert visual emacs)
-        :keymaps 'override
-        :prefix "," ;; set local leader
-        :global-prefix "M-,") ;; access local leader in insert mode
+  ;; set up ',' as the local leader key
+  (general-create-definer patrl/local-leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "," ;; set local leader
+    :global-prefix "M-,") ;; access local leader in insert mode
 
-      (general-define-key
-       :states 'insert
-       "C-g" 'evil-normal-state) ;; don't stretch for ESC
+  (general-define-key
+   :states 'insert
+   "C-g" 'evil-normal-state) ;; don't stretch for ESC
 
-      ;; unbind some annoying default bindings
-      (general-unbind
-        "C-x C-r"	;; unbind find file read only
-        "C-x C-z"	;; unbind suspend frame
-        "C-x C-d"	;; unbind list directory
-        "<mouse-2>") ;; pasting with mouse wheel click
+  ;; unbind some annoying default bindings
+  (general-unbind
+    "C-x C-r"	;; unbind find file read only
+    "C-x C-z"	;; unbind suspend frame
+    "C-x C-d"	;; unbind list directory
+    "<mouse-2>") ;; pasting with mouse wheel click
 
 
-      (patrl/leader-keys
-        "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
-        "TAB" '(:keymap tab-prefix-map :wk "tab")) ;; remap tab bindings
+  (patrl/leader-keys
+    "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
+    "TAB" '(:keymap tab-prefix-map :wk "tab")) ;; remap tab bindings
 
-      (patrl/leader-keys
-      "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
+  (patrl/leader-keys
+  "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
 
-      (patrl/leader-keys
-        "c" '(:ignore t :wk "code"))
+  (patrl/leader-keys
+    "c" '(:ignore t :wk "code"))
 
-      ;; help
-      ;; namespace mostly used by 'helpful'
-      (patrl/leader-keys
-        "h" '(:ignore t :wk "help"))
+  ;; help
+  ;; namespace mostly used by 'helpful'
+  (patrl/leader-keys
+    "h" '(:ignore t :wk "help"))
 
-      ;; file
-      (patrl/leader-keys
-        "f" '(:ignore t :wk "file")
-        "ff" '(find-file :wk "find file") ;; gets overridden by consult
-        "fs" '(save-buffer :wk "save file"))
+  ;; file
+  (patrl/leader-keys
+    "f" '(:ignore t :wk "file")
+    "ff" '(find-file :wk "find file") ;; gets overridden by consult
+    "fs" '(save-buffer :wk "save file"))
 
-      ;; buffer
-      ;; see 'bufler' and 'popper'
-      (patrl/leader-keys
-        "b" '(:ignore t :wk "buffer")
-        "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
-        "bk" '(kill-this-buffer :wk "kill this buffer")
-        "br" '(revert-buffer :wk "reload buffer"))
+  ;; buffer
+  ;; see 'bufler' and 'popper'
+  (patrl/leader-keys
+    "b" '(:ignore t :wk "buffer")
+    "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
+    "bk" '(kill-this-buffer :wk "kill this buffer")
+    "br" '(revert-buffer :wk "reload buffer"))
 
-      ;; bookmark
-      (patrl/leader-keys
-        "B" '(:ignore t :wk "bookmark")
-        "Bs" '(bookmark-set :wk "set bookmark")
-        "Bj" '(bookmark-jump :wk "jump to bookmark"))
+  ;; bookmark
+  (patrl/leader-keys
+    "B" '(:ignore t :wk "bookmark")
+    "Bs" '(bookmark-set :wk "set bookmark")
+    "Bj" '(bookmark-jump :wk "jump to bookmark"))
 
-      ;; universal argument
-      (patrl/leader-keys
-        "u" '(universal-argument :wk "universal prefix"))
+  ;; universal argument
+  (patrl/leader-keys
+    "u" '(universal-argument :wk "universal prefix"))
 
-      ;; notes
-      ;; see 'citar' and 'org-roam'
-      (patrl/leader-keys
-        "n" '(:ignore t :wk "notes")
-        ;; see org-roam and citar sections
-        "na" '(org-todo-list :wk "agenda todos")) ;; agenda
+  ;; notes
+  ;; see 'citar' and 'org-roam'
+  (patrl/leader-keys
+    "n" '(:ignore t :wk "notes")
+    ;; see org-roam and citar sections
+    "na" '(org-todo-list :wk "agenda todos")) ;; agenda
 
-      ;; code
-      ;; see 'flymake'
-      (patrl/leader-keys
-        "c" '(:ignore t :wk "code"))
+  ;; code
+  ;; see 'flymake'
+  (patrl/leader-keys
+    "c" '(:ignore t :wk "code"))
 
-      ;; open
-      (patrl/leader-keys
-        "o" '(:ignore t :wk "open")
-        "os" '(speedbar t :wk "speedbar")) ;; TODO this needs some love
+  ;; open
+  (patrl/leader-keys
+    "o" '(:ignore t :wk "open")
+    "os" '(speedbar t :wk "speedbar")) ;; TODO this needs some love
 
-      ;; search
-      ;; see 'consult'
-      (patrl/leader-keys
-        "s" '(:ignore t :wk "search"))
+  ;; search
+  ;; see 'consult'
+  (patrl/leader-keys
+    "s" '(:ignore t :wk "search"))
 
-      ;; templating
-      ;; see 'tempel'
-      (patrl/leader-keys
-        "t" '(:ignore t :wk "template")))
+  ;; templating
+  ;; see 'tempel'
+  (patrl/leader-keys
+    "t" '(:ignore t :wk "template")))
 
-(elpaca-wait)
-    ;; "c" '(org-capture :wk "capture")))
+;; "c" '(org-capture :wk "capture")))
 
 (use-package org
+  :ensure (:wait t)
   :demand t
   :init
   ;; edit settings
@@ -371,7 +369,6 @@
   ;; set up org paths
   (setq org-directory "~/MEGA/org/agenda")
   (setq org-default-notes-file (concat org-directory "/notes.org")))
-(elpaca-wait)
 
 (use-package avy
     :demand t
@@ -1290,6 +1287,7 @@
             "D" '+notmuch/tree-delete))
 
 (use-package consult-notmuch
+  :disabled
   :general
   (patrl/leader-keys
     "nmm" '(consult-notmuch t :wk "consult notmuch")
