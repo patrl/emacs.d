@@ -64,52 +64,62 @@ Disable GUI elements before we have a chance to peek.
 #+end_src
 
 
-** ~straight.el~
+** ~elpaca~
 
-- [[https://github.com/raxod502/straight.el][GitHub - raxod502/straight.el: 🍀 Next-generation, purely functional package m...]]
+- [[https://github.com/progfolio/elpaca][GitHub - progfolio/elpaca: An elisp package manager]] 
 
-Some rules/conventions:
-
-- When packages don't require installation, use ~:straight (:type built-in)~.
-- Prefer multiple ~setq~ expressions to one.
-- Prefer ~:init~ to ~:custom~.
-
-Quick how-to for straight:
-
-- The lockfile is under version control at [[file:straight/versions/default.el][default.el]].
-- Create a lockfile by running ~straight-freeze-versions~.
-- Whenever I want to roll back to versions pinned in the lockfile run ~straight-thaw-versions~.
-- Upgrade packages via ~straight-pull-all~.
-
-*** Bootstrap ~straight.el~
+*** Bootstrap ~elpaca~
 
 #+begin_src emacs-lisp
-  (setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
-
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	(bootstrap-version 5))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-	  (url-retrieve-synchronously
-	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	   'silent 'inhibit-cookies)
-	(goto-char (point-max))
-	(eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+  (defvar elpaca-installer-version 0.7)
+  (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+  (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+  (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                                :ref nil :depth 1
+                                :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                                :build (:not elpaca--activate-package)))
+  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+         (build (expand-file-name "elpaca/" elpaca-builds-directory))
+         (order (cdr elpaca-order))
+         (default-directory repo))
+    (add-to-list 'load-path (if (file-exists-p build) build repo))
+    (unless (file-exists-p repo)
+      (make-directory repo t)
+      (when (< emacs-major-version 28) (require 'subr-x))
+      (condition-case-unless-debug err
+          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                   ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                   ,@(when-let ((depth (plist-get order :depth)))
+                                                       (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                   ,(plist-get order :repo) ,repo))))
+                   ((zerop (call-process "git" nil buffer t "checkout"
+                                         (or (plist-get order :ref) "--"))))
+                   (emacs (concat invocation-directory invocation-name))
+                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                   ((require 'elpaca))
+                   ((elpaca-generate-autoloads "elpaca" repo)))
+              (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+            (error "%s" (with-current-buffer buffer (buffer-string))))
+        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+    (unless (require 'elpaca-autoloads nil t)
+      (require 'elpaca)
+      (elpaca-generate-autoloads "elpaca" repo)
+      (load "./elpaca-autoloads")))
+  (add-hook 'after-init-hook #'elpaca-process-queues)
+  (elpaca `(,@elpaca-order))
 
 
 #+end_src
 
-Load org ASAP.
-
 #+begin_src emacs-lisp
-(straight-use-package 'org)
-#+end_src
-
-#+begin_src emacs-lisp
-(straight-use-package 'use-package) ;; install use-package via straight
+  ;; Install use-package support
+  (elpaca elpaca-use-package
+    ;; Enable use-package :ensure support for Elpaca.
+    (elpaca-use-package-mode))
+  (setq use-package-always-ensure t)
+  (elpaca-wait)
 #+end_src
 
 * Emacs
@@ -142,6 +152,7 @@ Load org ASAP.
 
 #+begin_src emacs-lisp
   (use-package emacs
+    :ensure nil
     :init
 
     (setq enable-recursive-minibuffers t)
@@ -204,7 +215,7 @@ Load org ASAP.
 
 #+begin_src emacs-lisp
   (use-package electric
-    :straight (:type built-in)
+    :ensure nil
     :init
     (electric-pair-mode +1) ;; automatically insert closing parens
     (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
@@ -225,6 +236,8 @@ The local leader ~,~ is used for mode-specific bindings.
 
   #+begin_src emacs-lisp
     (use-package general
+      :ensure (:wait t)
+      :demand t
       :config
       (general-evil-setup)
       ;; integrate general with evil
@@ -327,6 +340,8 @@ The local leader ~,~ is used for mode-specific bindings.
 
 #+begin_src emacs-lisp
   (use-package evil
+    :ensure (:wait t)
+    :demand t
     :general
     (patrl/leader-keys
       "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
@@ -392,6 +407,7 @@ Port of Tim Pope's surround package
 #+begin_src emacs-lisp
   (use-package evil-surround
     :after evil
+    :ensure t
     :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
            (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
     :config
@@ -427,6 +443,8 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 
 #+begin_src emacs-lisp
     (use-package avy
+      :ensure (:wait t)
+      :demand t
       :init
   (defun patrl/avy-action-insert-newline (pt)
         (save-excursion
@@ -498,6 +516,8 @@ Minimal mode line.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package mood-line
+    :ensure (:wait t)
+    :demand t
     :config (mood-line-mode))
 #+end_src
 
@@ -633,7 +653,6 @@ Not sure if I want to keep this around.
             "^\\*eshell.*\\*" eshell-mode
             "\\*direnv\\*"
             "\\*elfeed-log\\*"
-            "\\*straight-process\\*"
             "\\*Async-native-compile-log\\*"
             "\\*TeX Help\\*"
             "\\*Embark Collect Live\\*"))
@@ -671,7 +690,7 @@ Use built in ~project.el~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package project
-    :straight (:type built-in)
+    :ensure nil
     :general
     ;; assign built-in project.el bindings a new prefix
     (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
@@ -683,7 +702,7 @@ Use built-in ~dired~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package dired
-    :straight (:type built-in)
+    :ensure nil
     :general
     (patrl/leader-keys
       "fd" '(dired :wk "dired") ;; open dired (in a directory)
@@ -865,6 +884,15 @@ Auto-activating snippets:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package auctex
+    :elpaca (auctex :pre-build (("./autogen.sh")
+                      ("./configure"
+                       "--without-texmf-dir"
+                       "--with-packagelispdir=./"
+                       "--with-packagedatadir=./")
+                      ("make"))
+          :build (:not elpaca--compile-info) ;; Make will take care of this step
+          :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
+          :version (lambda (_) (require 'tex-site) AUCTeX-version))
     :mode ("\\.tex\\'" . LaTeX-mode)
     :init
     (setq TeX-parse-self t ; parse on load
@@ -999,14 +1027,14 @@ Uses emacs' font lock to highlight source code blocks in latex.
 *** TODO latexmk
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; FIXME
-  (use-package auctex-latexmk
-    :disabled
-    :after latex
-    :init
-    (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-    :config
-    (auctex-latexmk-setup))
+  ;; ;; FIXME
+  ;; (use-package auctex-latexmk
+  ;;   :disabled
+  ;;   :after latex
+  ;;   :init
+  ;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+  ;;   :config
+  ;;   (auctex-latexmk-setup))
 #+end_src
 
 ** Issues
@@ -1025,38 +1053,39 @@ Resources:
 
   #+begin_src emacs-lisp :tangle init.el
     (use-package org
-      ;; :straight (:type built-in)
+      :ensure (:wait t)
+      :demand t
       :init
       ;; edit settings
       (setq org-auto-align-tags nil
-	    org-tags-column 0
-	    org-catch-invisible-edits 'show-and-error
-	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
-	    org-insert-heading-respect-content t)
+    	    org-tags-column 0
+    	    org-catch-invisible-edits 'show-and-error
+    	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
+    	    org-insert-heading-respect-content t)
 
       ;; styling, hide markup, etc.
       (setq org-hide-emphasis-markers t
-	    org-src-fontify-natively t ;; fontify source blocks natively
-	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
-	    org-pretty-entities t
-	    org-ellipsis "…")
+    	    org-src-fontify-natively t ;; fontify source blocks natively
+    	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
+    	    org-pretty-entities t
+    	    org-ellipsis "…")
 
       ;; agenda styling
       (setq org-agenda-tags-column 0
-	    org-agenda-block-separator ?─
-	    org-agenda-time-grid
-	    '((daily today require-timed)
-	      (800 1000 1200 1400 1600 1800 2000)
-	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-	    org-agenda-current-time-string
-	    "⭠ now ─────────────────────────────────────────────────")
+    	    org-agenda-block-separator ?─
+    	    org-agenda-time-grid
+    	    '((daily today require-timed)
+    	      (800 1000 1200 1400 1600 1800 2000)
+    	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+    	    org-agenda-current-time-string
+    	    "⭠ now ─────────────────────────────────────────────────")
 
       ;; todo setup
       (setq org-todo-keywords
-	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
-	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+    	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
+    	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+    	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+    	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
 
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
@@ -1066,28 +1095,28 @@ Resources:
       (org-cite-global-bibliography (list patrl/global-bib-file))
       :general
       (patrl/local-leader-keys
-	:keymaps 'org-mode-map
-	"a" '(org-archive-subtree :wk "archive")
-	"l" '(:ignore t :wk "link")
-	"ll" '(org-insert-link t :wk "link")
-	"lp" '(org-latex-preview t :wk "prev latex")
-	"h" '(consult-org-heading :wk "consult heading")
-	"d" '(org-cut-special :wk "org cut special")
-	"y" '(org-copy-special :wk "org copy special")
-	"p" '(org-paste-special :wk "org paste special")
-	"b" '(:keymap org-babel-map :wk "babel")
-	"t" '(org-todo :wk "todo")
-	"s" '(org-insert-structure-template :wk "template")
-	"e" '(org-edit-special :wk "edit")
-	"i" '(:ignore t :wk "insert")
-	"ih" '(org-insert-heading :wk "insert heading")
-	"is" '(org-insert-subheading :wk "insert heading")
-	"f" '(org-footnote-action :wk "footnote action")
-	">" '(org-demote-subtree :wk "demote subtree")
-	"<" '(org-promote-subtree :wk "demote subtree"))
+    	:keymaps 'org-mode-map
+    	"a" '(org-archive-subtree :wk "archive")
+    	"l" '(:ignore t :wk "link")
+    	"ll" '(org-insert-link t :wk "link")
+    	"lp" '(org-latex-preview t :wk "prev latex")
+    	"h" '(consult-org-heading :wk "consult heading")
+    	"d" '(org-cut-special :wk "org cut special")
+    	"y" '(org-copy-special :wk "org copy special")
+    	"p" '(org-paste-special :wk "org paste special")
+    	"b" '(:keymap org-babel-map :wk "babel")
+    	"t" '(org-todo :wk "todo")
+    	"s" '(org-insert-structure-template :wk "template")
+    	"e" '(org-edit-special :wk "edit")
+    	"i" '(:ignore t :wk "insert")
+    	"ih" '(org-insert-heading :wk "insert heading")
+    	"is" '(org-insert-subheading :wk "insert heading")
+    	"f" '(org-footnote-action :wk "footnote action")
+    	">" '(org-demote-subtree :wk "demote subtree")
+    	"<" '(org-promote-subtree :wk "demote subtree"))
       (:keymaps 'org-agenda-mode-map
-		"j" '(org-agenda-next-line)
-		"h" '(org-agenda-previous-line))
+    		"j" '(org-agenda-next-line)
+    		"h" '(org-agenda-previous-line))
 
       :hook
       (org-mode . olivetti-mode)
@@ -1099,8 +1128,8 @@ Resources:
       (org-babel-do-load-languages
        'org-babel-load-languages
        '((js . t)
-	 (emacs-lisp . t)
-	 (awk . t)))
+    	 (emacs-lisp . t)
+    	 (awk . t)))
       ;; set up org paths
       (setq org-directory "~/MEGA/org/agenda")
       (setq org-default-notes-file (concat org-directory "/notes.org")))
@@ -1117,7 +1146,7 @@ Resources:
     (evil-org-agenda-set-keys))
 #+end_src
 
-** Org-auctex
+** TODO Org-auctex
 
 Provides faster latex previews for ~org-mode~.
 
@@ -1125,10 +1154,10 @@ Provides faster latex previews for ~org-mode~.
 - See https://karthinks.com/software/fast-latex-previews-in-org-mode/
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package org-auctex
-    :straight (:type git :host github :repo
-                     "karthink/org-auctex")
-    :hook (org-mode . org-auctex-mode))
+  ;; (use-package org-auctex
+  ;;   :straight (:type git :host github :repo
+  ;;                    "karthink/org-auctex")
+  ;;   :hook (org-mode . org-auctex-mode))
 #+end_src
 
 ** Transclusion
@@ -1143,17 +1172,17 @@ Provides faster latex previews for ~org-mode~.
       "nt" '(org-transclusion-mode :wk "transclusion mode")))
 #+end_src
 
-** Appear
+** TODO Appear
 
 - [[https://github.com/awth13/org-appear][GitHub - awth13/org-appear: Toggle visibility of hidden Org mode element part...]]
 
 Reveals hidden elements interactively.
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package org-appear
-    :straight (:type git :host github :repo "awth13/org-appear")
-    :after org
-    :hook (org-mode . org-appear-mode))
+  ;; (use-package org-appear
+  ;;   :straight (:type git :host github :repo "awth13/org-appear")
+  ;;   :after org
+  ;;   :hook (org-mode . org-appear-mode))
 #+end_src
 
 **  Cliplink
@@ -1281,6 +1310,8 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package vertico
+    :ensure (:wait t)
+    :demand t
     :init
     (vertico-mode)
     (vertico-multiform-mode)
@@ -1326,6 +1357,8 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package consult
+    :ensure (:wait t)
+    :demand t
     :general
     (patrl/leader-keys
       "bb" '(consult-buffer :wk "consult buffer")
@@ -1370,6 +1403,8 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package embark
+    :ensure (:wait t)
+    :demand t
     :general
     (patrl/leader-keys
        "." 'embark-act) ;; easily accessible 'embark-act' binding.
@@ -1396,6 +1431,8 @@ A minimal ui for ~completion-in-region~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package corfu
+    :ensure (:wait t)
+    :demand t
     :hook
     (eval-expression-minibuffer-setup . corfu-mode)
     :init
@@ -1464,7 +1501,7 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package flymake
-    :straight (:type built-in)
+    :ensure nil
     :general
     (patrl/leader-keys
       :keymaps 'flymake-mode-map
@@ -1498,7 +1535,7 @@ Use ~rx~ notation (S-expressions) as the default for constructing regular expres
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package re-builder
-    :straight (:type built-in)
+    :ensure nil
     :general (patrl/leader-keys
   	     "se" '(regexp-builder :wk "regex builder"))
     :config (setq reb-re-syntax 'rx))
@@ -1511,7 +1548,7 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 #+begin_src emacs-lisp :tangle init.el
   (use-package pdf-tools
     :demand t
-    :straight (:type built-in)
+    :ensure nil
     :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
     :mode ("\\.pdf\\'" . pdf-view-mode)
     :config
@@ -1537,7 +1574,7 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package jinx
-    :straight (:type built-in)
+    :ensure nil
     :hook (emacs-startup . global-jinx-mode))
 #+end_src
 
@@ -1708,7 +1745,7 @@ Templates can be found in [[file:templates]].
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package eshell
-    :straight (:type built-in)
+    :ensure nil
     :general
     (patrl/leader-keys
       "oe" '(eshell :wk "eshell")))
@@ -1753,7 +1790,7 @@ Note I still need to set keybindings
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package eglot
-    :straight (:type built-in) ;; requires emacs 29
+    :ensure nil
     :init (setq completion-category-overrides '((eglot (styles orderless))))
     :commands eglot
     :config
@@ -1771,12 +1808,12 @@ Essential, since I'm on NixOS.
     (direnv-mode))
 #+end_src
 
-** Kmonad
+** TODO Kmonad
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package kbd-mode
-      :straight (:type git :host github :repo
-                       "kmonad/kbd-mode"))
+  ;; (use-package kbd-mode
+  ;;   :straight (:type git :host github :repo
+  ;;                    "kmonad/kbd-mode"))
 #+end_src
 
 *** TODO disable flymake mode in kbd-mode
@@ -1962,12 +1999,12 @@ Packages I've tried out which, for whatever reason, haven't suited me.
   (use-package org-present)
 #+end_src
 
-** Sidebar
+** TODO Sidebar
 
 #+begin_src emacs-lisp
-  (use-package org-sidebar
-    :after org
-    :straight (:type git :host github :repo "alphapapa/org-sidebar"))
+  ;; (use-package org-sidebar
+  ;;   :after org
+  ;;   :straight (:type git :host github :repo "alphapapa/org-sidebar"))
 #+end_src
 
 ** company
