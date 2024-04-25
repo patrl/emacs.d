@@ -1,24 +1,51 @@
 ;;; init.el --- Personal configuration file -*- lexical-binding: t; no-byte-compile: t; -*-
 ;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
 
-(setq straight-use-package-by-default t) ;; have use-package use straight.el by default.
+(defvar elpaca-installer-version 0.7)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                 ,@(when-let ((depth (plist-get order :depth)))
+                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                 ,(plist-get order :repo) ,repo))))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
 
-(defvar bootstrap-version)
-(let ((bootstrap-file
-	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	(bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-	  (url-retrieve-synchronously
-	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	   'silent 'inhibit-cookies)
-	(goto-char (point-max))
-	(eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-(straight-use-package 'org)
-
-(straight-use-package 'use-package) ;; install use-package via straight
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable use-package :ensure support for Elpaca.
+  (elpaca-use-package-mode))
+(setq use-package-always-ensure t)
+(elpaca-wait)
 
 (defvar patrl/library-path "~/MEGA/library/"
   "Directory .pdf collection lives.")
@@ -36,6 +63,7 @@
   "Org path.")
 
 (use-package emacs
+  :ensure nil
   :init
 
   (setq enable-recursive-minibuffers t)
@@ -88,21 +116,20 @@
   (setq native-comp-async-report-warnings-errors nil)
   (setq load-prefer-newer t)
 
-  ;; FIXME currently using tempel in org-mode triggers this warning
-  ;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
-
   (show-paren-mode t)
 
   ;; Hide commands in M-x which don't work in the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (use-package electric
-  :straight (:type built-in)
+  :ensure nil
   :init
   (electric-pair-mode +1) ;; automatically insert closing parens
   (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
 
 (use-package general
+  :ensure (:wait t)
+  :demand t
   :config
   (general-evil-setup)
   ;; integrate general with evil
@@ -199,6 +226,8 @@
 ;; "c" '(org-capture :wk "capture")))
 
 (use-package evil
+  :ensure (:wait t)
+  :demand t
   :general
   (patrl/leader-keys
     "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
@@ -244,6 +273,7 @@
 
 (use-package evil-surround
   :after evil
+  :ensure t
   :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
          (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
   :config
@@ -260,6 +290,8 @@
   (evil-goggles-use-diff-faces))
 
 (use-package avy
+    :ensure (:wait t)
+    :demand t
     :init
 (defun patrl/avy-action-insert-newline (pt)
       (save-excursion
@@ -309,6 +341,8 @@
   (which-key-setup-minibuffer))
 
 (use-package mood-line
+  :ensure (:wait t)
+  :demand t
   :config (mood-line-mode))
 
 (use-package all-the-icons)
@@ -336,13 +370,6 @@
     (set-face-attribute 'variable-pitch nil :font (font-spec :family "Iosevka Etoile" :size 10.0 :weight 'medium))
     (set-fontset-font t 'unicode "JuliaMono"))
 
-;; (defun patrl/setup-font-wolfe ()
-;;   (set-face-attribute 'default nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-;;   (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Blex Mono Nerd Font" :size 30 :weight 'medium))
-;;   (set-face-attribute 'variable-pitch nil :font (font-spec :family "iA Writer Duospace" :size 30 :weight 'medium))
-;;   (set-fontset-font t 'unicode "DeJa Vu Sans Mono")
-;;   (set-fontset-font t nil "Twitter Color Emoji"))
-
 (defun patrl/setup-font-vivacia ()
   (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
   (set-face-attribute 'fixed-pitch nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
@@ -360,10 +387,6 @@
 (use-package solaire-mode
   :config
   (solaire-global-mode +1))
-
-(use-package tron-legacy-theme
-  :config
-  (setq tron-legacy-theme-vivid-cursor t))
 
 (use-package catppuccin-theme
   :config
@@ -407,7 +430,6 @@
           "^\\*eshell.*\\*" eshell-mode
           "\\*direnv\\*"
           "\\*elfeed-log\\*"
-          "\\*straight-process\\*"
           "\\*Async-native-compile-log\\*"
           "\\*TeX Help\\*"
           "\\*Embark Collect Live\\*"))
@@ -431,13 +453,13 @@
             "d" 'bufler-list-buffer-kill))
 
 (use-package project
-  :straight (:type built-in)
+  :ensure nil
   :general
   ;; assign built-in project.el bindings a new prefix
   (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 
 (use-package dired
-  :straight (:type built-in)
+  :ensure nil
   :general
   (patrl/leader-keys
     "fd" '(dired :wk "dired") ;; open dired (in a directory)
@@ -484,8 +506,182 @@
   ;; TODO play around with keythemes
   (lispyville-set-key-theme '(operators c-w additional)))
 
+(use-package js2-mode)
+
+(use-package rustic
+  :mode ("\\.rs\\'" . rustic-mode)
+  :config (setq rustic-lsp-client 'eglot))
+
+(use-package haskell-mode)
+
+(use-package dante
+  :after haskell-mode cape
+  :init
+  (defun dante-setup-capf ()
+    (add-to-list 'completion-at-point-functions (cape-company-to-capf #'dante-company)))
+  :commands 'dante-mode
+  :config (dante-setup-capf))
+
+(use-package racket-mode
+  :hook (racket-mode . racket-xp-mode) ;; n.b. this requires Dr. Racket to be installed as a backend
+  :general
+  (patrl/local-leader-keys
+    :keymaps 'racket-mode-map
+    "r" '(racket-run-and-switch-to-repl :wk "run")
+    "e" '(racket-eval-last-sexp :wk "eval last sexp")
+    :keymaps 'racket-xp-mode-map
+    "xr" '(racket-xp-rename :wk "rename")))
+
+(use-package nix-mode
+  ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
+  :mode "\\.nix\\'")
+
+(use-package markdown-mode
+  :hook ((markdown-mode . visual-line-mode)
+         (markdown-mode . olivetti-mode))
+         (markdown-mode . variable-pitch-mode)
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init
+  (setq markdown-command "pandoc")
+  (setq markdown-header-scaling t))
+
+(use-package pandoc-mode
+  :after markdown-mode
+  :hook (markdown-mode . pandoc-mode))
+
+(use-package auctex
+  :elpaca (auctex :pre-build (("./autogen.sh")
+                    ("./configure"
+                     "--without-texmf-dir"
+                     "--with-packagelispdir=./"
+                     "--with-packagedatadir=./")
+                    ("make"))
+        :build (:not elpaca--compile-info) ;; Make will take care of this step
+        :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
+        :version (lambda (_) (require 'tex-site) AUCTeX-version))
+  :mode ("\\.tex\\'" . LaTeX-mode)
+  :init
+  (setq TeX-parse-self t ; parse on load
+	reftex-plug-into-AUCTeX t
+	TeX-auto-save t  ; parse on save
+	TeX-source-correlate-mode t
+	TeX-source-correlate-method 'synctex
+	TeX-source-correlate-start-server nil
+	TeX-electric-sub-and-superscript t
+	TeX-engine 'luatex ;; use lualatex by default
+	TeX-save-query nil
+	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+  :general 
+  (patrl/local-leader-keys
+    :keymaps 'LaTeX-mode-map
+    ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
+    "=" '(reftex-toc :wk "reftex toc")
+    "(" '(reftex-latex :wk "reftex label")
+    ")" '(reftex-reference :wk "reftex ref")
+    "m" '(LaTeX-macro :wk "insert macro")
+    "s" '(LaTeX-section :wk "insert section header")
+    "e" '(LaTeX-environment :wk "insert environment")
+    "p" '(preview-at-point :wk "preview at point")
+    "f" '(TeX-font :wk "font")
+    "c" '(TeX-command-run-all :wk "compile"))
+  :config
+;; (add-hook 'TeX-mode-hook #'visual-line-mode)
+  (add-hook 'TeX-mode-hook #'reftex-mode)
+  (add-hook 'TeX-mode-hook #'olivetti-mode)
+  (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
+  (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
+  (add-hook 'TeX-after-compilation-finished-functions
+		#'TeX-revert-document-buffer)
+  (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
+  (add-hook 'TeX-mode-hook #'outline-minor-mode))
+
+(use-package evil-tex
+  :hook (LaTeX-mode . evil-tex-mode))
+
+(use-package citar
+  :after all-the-icons
+  :init
+  (defun citar-setup-capf ()
+    (add-to-list 'completion-at-point-functions 'citar-capf))
+
+  (defvar citar-indicator-files-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-faicon
+	      "file-o"
+	      :face 'all-the-icons-green
+	      :v-adjust -0.1)
+     :function #'citar-has-files
+     :padding "  " ; need this because the default padding is too low for these icons
+     :tag "has:files"))
+
+  (defvar citar-indicator-links-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-octicon
+              "link"
+              :face 'all-the-icons-orange
+              :v-adjust 0.01)
+     :function #'citar-has-links
+     :padding "  "
+     :tag "has:links"))
+
+  (defvar citar-indicator-notes-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-material
+              "speaker_notes"
+              :face 'all-the-icons-blue
+              :v-adjust -0.3)
+     :function #'citar-has-notes
+     :padding "  "
+     :tag "has:notes"))
+
+  (defvar citar-indicator-cited-icons
+    (citar-indicator-create
+     :symbol (all-the-icons-faicon
+              "circle-o"
+              :face 'all-the-icon-green)
+     :function #'citar-is-cited
+     :padding "  "
+     :tag "is:cited"))
+  :hook
+  ;; set up citation completion for latex, org-mode, and markdown
+  (LaTeX-mode . citar-setup-capf)
+  (org-mode . citar-setup-capf)
+  (markdown-mode . citar-setup-capf)
+  :config
+  (setq citar-indicators
+	(list citar-indicator-files-icons
+	      citar-indicator-links-icons
+	      citar-indicator-notes-icons
+	      citar-indicator-cited-icons))
+  :general
+  (patrl/leader-keys
+    "nb" '(citar-open :wk "citar"))
+  :init
+  (setq citar-notes-paths (list patrl/notes-path))
+  (setq citar-library-paths (list patrl/library-path))
+  (setq citar-bibliography (list patrl/global-bib-file)))
+
+(use-package citar-embark
+  :after citar embark
+  :config (citar-embark-mode))
+
+(use-package engrave-faces)
+
+;; ;; FIXME
+;; (use-package auctex-latexmk
+;;   :disabled
+;;   :after latex
+;;   :init
+;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
+;;   :config
+;;   (auctex-latexmk-setup))
+
 (use-package org
-  ;; :straight (:type built-in)
+  :ensure (:wait t)
+  :demand t
   :init
   ;; edit settings
   (setq org-auto-align-tags nil
@@ -572,10 +768,10 @@
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
 
-(use-package org-auctex
-  :straight (:type git :host github :repo
-                   "karthink/org-auctex")
-  :hook (org-mode . org-auctex-mode))
+;; (use-package org-auctex
+;;   :straight (:type git :host github :repo
+;;                    "karthink/org-auctex")
+;;   :hook (org-mode . org-auctex-mode))
 
 (use-package org-transclusion
   :after org
@@ -583,10 +779,10 @@
   (patrl/leader-keys
     "nt" '(org-transclusion-mode :wk "transclusion mode")))
 
-(use-package org-appear
-  :straight (:type git :host github :repo "awth13/org-appear")
-  :after org
-  :hook (org-mode . org-appear-mode))
+;; (use-package org-appear
+;;   :straight (:type git :host github :repo "awth13/org-appear")
+;;   :after org
+;;   :hook (org-mode . org-appear-mode))
 
 (use-package org-cliplink
   :after org
@@ -668,179 +864,9 @@
   (setq org-noter-hide-other nil)
   (setq org-noter-always-create-frame nil))
 
-(use-package js2-mode)
-
-(use-package rustic
-  :mode ("\\.rs\\'" . rustic-mode)
-  :config (setq rustic-lsp-client 'eglot))
-
-(use-package haskell-mode)
-
-(use-package dante
-  :after haskell-mode cape
-  :init
-  (defun dante-setup-capf ()
-    (add-to-list 'completion-at-point-functions (cape-company-to-capf #'dante-company)))
-  :commands 'dante-mode
-  :config (dante-setup-capf))
-
-(use-package racket-mode
-  :hook (racket-mode . racket-xp-mode) ;; n.b. this requires Dr. Racket to be installed as a backend
-  :general
-  (patrl/local-leader-keys
-    :keymaps 'racket-mode-map
-    "r" '(racket-run-and-switch-to-repl :wk "run")
-    "e" '(racket-eval-last-sexp :wk "eval last sexp")
-    :keymaps 'racket-xp-mode-map
-    "xr" '(racket-xp-rename :wk "rename")))
-
-(use-package nix-mode
-  ;; There's no `nix-mode-map`, so not currently possible to set local bindings.
-  :mode "\\.nix\\'")
-
-(use-package auctex
-  :no-require t
-  :mode ("\\.tex\\'" . LaTeX-mode)
-  :init
-  (setq TeX-parse-self t ; parse on load
-	  reftex-plug-into-AUCTeX t
-	  TeX-auto-save t  ; parse on save
-	  TeX-source-correlate-mode t
-	  TeX-source-correlate-method 'synctex
-	TeX-source-correlate-start-server nil
-	TeX-electric-sub-and-superscript t
-	TeX-engine 'luatex ;; use lualatex by default
-	TeX-save-query nil))
-
-(use-package latex
-  :straight auctex
-  :general
-  (patrl/local-leader-keys
-    :keymaps 'LaTeX-mode-map
-    ;; "TAB" 'TeX-complete-symbol ;; FIXME let's 'TAB' do autocompletion (but it's kind of useless to be honest)
-    "=" '(reftex-toc :wk "reftex toc")
-    "(" '(reftex-latex :wk "reftex label")
-    ")" '(reftex-reference :wk "reftex ref")
-    "m" '(LaTeX-macro :wk "insert macro")
-    "s" '(LaTeX-section :wk "insert section header")
-    "e" '(LaTeX-environment :wk "insert environment")
-    "p" '(preview-at-point :wk "preview at point")
-    "f" '(TeX-font :wk "font")
-    "c" '(TeX-command-run-all :wk "compile"))
-  :init
-  (setq TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
-  ;; (setq preview-scale-function 1.5) ;; too big on vivacia
-  :config
-  ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
-  (add-hook 'TeX-mode-hook #'reftex-mode)
-  (add-hook 'TeX-mode-hook #'olivetti-mode)
-  (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
-  (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
-  (add-hook 'TeX-after-compilation-finished-functions
-		#'TeX-revert-document-buffer)
-  (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
-  (add-hook 'TeX-mode-hook #'outline-minor-mode))
-  ;; (add-hook 'TeX-mode-hook #'flymake-aspell-setup)
-  ;; (add-to-list 'TeX-view-program-selection '(output-pdf "Zathura")))
-
-(use-package evil-tex
-  :hook (LaTeX-mode . evil-tex-mode))
-
-(use-package citar
-  :after all-the-icons
-  :init
-  (defun citar-setup-capf ()
-    (add-to-list 'completion-at-point-functions 'citar-capf))
-
-  (defvar citar-indicator-files-icons
-    (citar-indicator-create
-     :symbol (all-the-icons-faicon
-	      "file-o"
-	      :face 'all-the-icons-green
-	      :v-adjust -0.1)
-     :function #'citar-has-files
-     :padding "  " ; need this because the default padding is too low for these icons
-     :tag "has:files"))
-
-  (defvar citar-indicator-links-icons
-    (citar-indicator-create
-     :symbol (all-the-icons-octicon
-              "link"
-              :face 'all-the-icons-orange
-              :v-adjust 0.01)
-     :function #'citar-has-links
-     :padding "  "
-     :tag "has:links"))
-
-  (defvar citar-indicator-notes-icons
-    (citar-indicator-create
-     :symbol (all-the-icons-material
-              "speaker_notes"
-              :face 'all-the-icons-blue
-              :v-adjust -0.3)
-     :function #'citar-has-notes
-     :padding "  "
-     :tag "has:notes"))
-
-  (defvar citar-indicator-cited-icons
-    (citar-indicator-create
-     :symbol (all-the-icons-faicon
-              "circle-o"
-              :face 'all-the-icon-green)
-     :function #'citar-is-cited
-     :padding "  "
-     :tag "is:cited"))
-  :hook
-  ;; set up citation completion for latex, org-mode, and markdown
-  (LaTeX-mode . citar-setup-capf)
-  (org-mode . citar-setup-capf)
-  (markdown-mode . citar-setup-capf)
-  :config
-  (setq citar-indicators
-	(list citar-indicator-files-icons
-	      citar-indicator-links-icons
-	      citar-indicator-notes-icons
-	      citar-indicator-cited-icons))
-  :general
-  (patrl/leader-keys
-    "nb" '(citar-open :wk "citar"))
-  :init
-  (setq citar-notes-paths (list patrl/notes-path))
-  (setq citar-library-paths (list patrl/library-path))
-  (setq citar-bibliography (list patrl/global-bib-file)))
-
-(use-package citar-embark
-  :after citar embark
-  :config (citar-embark-mode))
-
-(use-package engrave-faces)
-
-;; FIXME
-(use-package auctex-latexmk
-  :disabled
-  :after latex
-  :init
-  (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-  :config
-  (auctex-latexmk-setup))
-
-(use-package markdown-mode
-  :hook ((markdown-mode . visual-line-mode)
-         (markdown-mode . olivetti-mode))
-         (markdown-mode . variable-pitch-mode)
-  :commands (markdown-mode gfm-mode)
-  :mode (("README\\.md\\'" . gfm-mode)
-         ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode))
-  :init
-  (setq markdown-command "pandoc")
-  (setq markdown-header-scaling t))
-
-(use-package pandoc-mode
-  :after markdown-mode
-  :hook (markdown-mode . pandoc-mode))
-
 (use-package vertico
+  :ensure (:wait t)
+  :demand t
   :init
   (vertico-mode)
   (vertico-multiform-mode)
@@ -880,6 +906,8 @@
   (marginalia-mode))
 
 (use-package consult
+  :ensure (:wait t)
+  :demand t
   :general
   (patrl/leader-keys
     "bb" '(consult-buffer :wk "consult buffer")
@@ -914,6 +942,8 @@
   (setq affe-regexp-compiler #'affe-orderless-regexp-compiler))
 
 (use-package embark
+  :ensure (:wait t)
+  :demand t
   :general
   (patrl/leader-keys
      "." 'embark-act) ;; easily accessible 'embark-act' binding.
@@ -934,6 +964,8 @@
   (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package corfu
+  :ensure (:wait t)
+  :demand t
   :hook
   (eval-expression-minibuffer-setup . corfu-mode)
   :init
@@ -984,7 +1016,7 @@
   (LaTeX-mode . reftex-setup-capf))
 
 (use-package flymake
-  :straight (:type built-in)
+  :ensure nil
   :general
   (patrl/leader-keys
     :keymaps 'flymake-mode-map
@@ -1000,14 +1032,14 @@
   (general-nmap "[ !" 'flymake-goto-prev-error))
 
 (use-package re-builder
-  :straight (:type built-in)
+  :ensure nil
   :general (patrl/leader-keys
 	     "se" '(regexp-builder :wk "regex builder"))
   :config (setq reb-re-syntax 'rx))
 
 (use-package pdf-tools
   :demand t
-  :straight (:type built-in)
+  :ensure nil
   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :config
@@ -1025,7 +1057,7 @@
   (pdf-tools-install :no-query))
 
 (use-package jinx
-  :straight (:type built-in)
+  :ensure nil
   :hook (emacs-startup . global-jinx-mode))
 
 (use-package helpful
@@ -1148,7 +1180,7 @@
     "gg" '(magit-status :wk "status")))
 
 (use-package eshell
-  :straight (:type built-in)
+  :ensure nil
   :general
   (patrl/leader-keys
     "oe" '(eshell :wk "eshell")))
@@ -1178,7 +1210,7 @@
   )
 
 (use-package eglot
-  :straight (:type built-in) ;; requires emacs 29
+  :ensure nil
   :init (setq completion-category-overrides '((eglot (styles orderless))))
   :commands eglot
   :config
@@ -1188,9 +1220,9 @@
   :config
   (direnv-mode))
 
-(use-package kbd-mode
-  :straight (:type git :host github :repo
-                   "kmonad/kbd-mode"))
+;; (use-package kbd-mode
+;;   :straight (:type git :host github :repo
+;;                    "kmonad/kbd-mode"))
 
 ;; We write a function to determine how we want elfeed to display the buffer with the current entry.
 (defun patrl/elfeed-display-buffer (buf &optional act)
