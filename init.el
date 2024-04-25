@@ -120,117 +120,18 @@
 
   ;; Hide commands in M-x which don't work in the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
+(elpaca-wait)
 
 (use-package electric
+  :demand t
   :ensure nil
   :init
   (electric-pair-mode +1) ;; automatically insert closing parens
   (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
-
-(use-package general
-  :ensure (:wait t)
-  :demand t
-  :config
-  (general-evil-setup)
-  ;; integrate general with evil
-
-  ;; set up 'SPC' as the global leader key
-  (general-create-definer patrl/leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
-
-  ;; set up ',' as the local leader key
-  (general-create-definer patrl/local-leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "," ;; set local leader
-    :global-prefix "M-,") ;; access local leader in insert mode
-
-  (general-define-key
-   :states 'insert
-   "C-g" 'evil-normal-state) ;; don't stretch for ESC
-
-  ;; unbind some annoying default bindings
-  (general-unbind
-    "C-x C-r"	;; unbind find file read only
-    "C-x C-z"	;; unbind suspend frame
-    "C-x C-d"	;; unbind list directory
-    "<mouse-2>") ;; pasting with mouse wheel click
-
-
-  (patrl/leader-keys
-    "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
-    "TAB" '(:keymap tab-prefix-map :wk "tab")) ;; remap tab bindings
-
-  (patrl/leader-keys
-    "c" '(:ignore t :wk "code"))
-
-  ;; help
-  ;; namespace mostly used by 'helpful'
-  (patrl/leader-keys
-    "h" '(:ignore t :wk "help"))
-
-  ;; file
-  (patrl/leader-keys
-    "f" '(:ignore t :wk "file")
-    "ff" '(find-file :wk "find file") ;; gets overridden by consult
-    "fs" '(save-buffer :wk "save file"))
-
-  ;; buffer
-  ;; see 'bufler' and 'popper'
-  (patrl/leader-keys
-    "b" '(:ignore t :wk "buffer")
-    "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
-    "bk" '(kill-this-buffer :wk "kill this buffer")
-    "br" '(revert-buffer :wk "reload buffer"))
-
-  ;; bookmark
-  (patrl/leader-keys
-    "B" '(:ignore t :wk "bookmark")
-    "Bs" '(bookmark-set :wk "set bookmark")
-    "Bj" '(bookmark-jump :wk "jump to bookmark"))
-
-  ;; universal argument
-  (patrl/leader-keys
-    "u" '(universal-argument :wk "universal prefix"))
-
-  ;; notes
-  ;; see 'citar' and 'org-roam'
-  (patrl/leader-keys
-    "n" '(:ignore t :wk "notes")
-    ;; see org-roam and citar sections
-    "na" '(org-todo-list :wk "agenda todos")) ;; agenda
-
-  ;; code
-  ;; see 'flymake'
-  (patrl/leader-keys
-    "c" '(:ignore t :wk "code"))
-
-  ;; open
-  (patrl/leader-keys
-    "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar")) ;; TODO this needs some love
-
-  ;; search
-  ;; see 'consult'
-  (patrl/leader-keys
-    "s" '(:ignore t :wk "search"))
-
-  ;; templating
-  ;; see 'tempel'
-  (patrl/leader-keys
-    "t" '(:ignore t :wk "template")))
-
-;; "c" '(org-capture :wk "capture")))
+(elpaca-wait)
 
 (use-package evil
-  :ensure (:wait t)
   :demand t
-  :general
-  (patrl/leader-keys
-    "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
   :init
   (setq evil-search-module 'isearch)
 
@@ -254,6 +155,7 @@
   ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
   (evil-set-initial-state 'eshell-mode 'insert)
   (evil-set-initial-state 'magit-diff-mode 'insert))
+(elpaca-wait)
 
 (use-package evil-collection ;; evilifies a bunch of things
   :after evil
@@ -273,7 +175,6 @@
 
 (use-package evil-surround
   :after evil
-  :ensure t
   :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
          (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
   :config
@@ -289,8 +190,190 @@
   ;; other faces such as `diff-added` will be used for other actions
   (evil-goggles-use-diff-faces))
 
+(use-package general
+      :demand t
+      :config
+      (general-evil-setup)
+      ;; integrate general with evil
+
+      ;; set up 'SPC' as the global leader key
+      (general-create-definer patrl/leader-keys
+        :states '(normal insert visual emacs)
+        :keymaps 'override
+        :prefix "SPC" ;; set leader
+        :global-prefix "M-SPC") ;; access leader in insert mode
+
+      ;; set up ',' as the local leader key
+      (general-create-definer patrl/local-leader-keys
+        :states '(normal insert visual emacs)
+        :keymaps 'override
+        :prefix "," ;; set local leader
+        :global-prefix "M-,") ;; access local leader in insert mode
+
+      (general-define-key
+       :states 'insert
+       "C-g" 'evil-normal-state) ;; don't stretch for ESC
+
+      ;; unbind some annoying default bindings
+      (general-unbind
+        "C-x C-r"	;; unbind find file read only
+        "C-x C-z"	;; unbind suspend frame
+        "C-x C-d"	;; unbind list directory
+        "<mouse-2>") ;; pasting with mouse wheel click
+
+
+      (patrl/leader-keys
+        "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
+        "TAB" '(:keymap tab-prefix-map :wk "tab")) ;; remap tab bindings
+
+      (patrl/leader-keys
+      "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
+
+      (patrl/leader-keys
+        "c" '(:ignore t :wk "code"))
+
+      ;; help
+      ;; namespace mostly used by 'helpful'
+      (patrl/leader-keys
+        "h" '(:ignore t :wk "help"))
+
+      ;; file
+      (patrl/leader-keys
+        "f" '(:ignore t :wk "file")
+        "ff" '(find-file :wk "find file") ;; gets overridden by consult
+        "fs" '(save-buffer :wk "save file"))
+
+      ;; buffer
+      ;; see 'bufler' and 'popper'
+      (patrl/leader-keys
+        "b" '(:ignore t :wk "buffer")
+        "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
+        "bk" '(kill-this-buffer :wk "kill this buffer")
+        "br" '(revert-buffer :wk "reload buffer"))
+
+      ;; bookmark
+      (patrl/leader-keys
+        "B" '(:ignore t :wk "bookmark")
+        "Bs" '(bookmark-set :wk "set bookmark")
+        "Bj" '(bookmark-jump :wk "jump to bookmark"))
+
+      ;; universal argument
+      (patrl/leader-keys
+        "u" '(universal-argument :wk "universal prefix"))
+
+      ;; notes
+      ;; see 'citar' and 'org-roam'
+      (patrl/leader-keys
+        "n" '(:ignore t :wk "notes")
+        ;; see org-roam and citar sections
+        "na" '(org-todo-list :wk "agenda todos")) ;; agenda
+
+      ;; code
+      ;; see 'flymake'
+      (patrl/leader-keys
+        "c" '(:ignore t :wk "code"))
+
+      ;; open
+      (patrl/leader-keys
+        "o" '(:ignore t :wk "open")
+        "os" '(speedbar t :wk "speedbar")) ;; TODO this needs some love
+
+      ;; search
+      ;; see 'consult'
+      (patrl/leader-keys
+        "s" '(:ignore t :wk "search"))
+
+      ;; templating
+      ;; see 'tempel'
+      (patrl/leader-keys
+        "t" '(:ignore t :wk "template")))
+
+(elpaca-wait)
+    ;; "c" '(org-capture :wk "capture")))
+
+(use-package org
+  :demand t
+  :init
+  ;; edit settings
+  (setq org-auto-align-tags nil
+	    org-tags-column 0
+	    org-catch-invisible-edits 'show-and-error
+	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
+	    org-insert-heading-respect-content t)
+
+  ;; styling, hide markup, etc.
+  (setq org-hide-emphasis-markers t
+	    org-src-fontify-natively t ;; fontify source blocks natively
+	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
+	    org-pretty-entities t
+	    org-ellipsis "…")
+
+  ;; agenda styling
+  (setq org-agenda-tags-column 0
+	    org-agenda-block-separator ?─
+	    org-agenda-time-grid
+	    '((daily today require-timed)
+	      (800 1000 1200 1400 1600 1800 2000)
+	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+	    org-agenda-current-time-string
+	    "⭠ now ─────────────────────────────────────────────────")
+
+  ;; todo setup
+  (setq org-todo-keywords
+	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
+	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+
+
+  (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+
+  :custom
+  (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
+  (org-cite-global-bibliography (list patrl/global-bib-file))
+  :general
+  (patrl/local-leader-keys
+	:keymaps 'org-mode-map
+	"a" '(org-archive-subtree :wk "archive")
+	"l" '(:ignore t :wk "link")
+	"ll" '(org-insert-link t :wk "link")
+	"lp" '(org-latex-preview t :wk "prev latex")
+	"h" '(consult-org-heading :wk "consult heading")
+	"d" '(org-cut-special :wk "org cut special")
+	"y" '(org-copy-special :wk "org copy special")
+	"p" '(org-paste-special :wk "org paste special")
+	"b" '(:keymap org-babel-map :wk "babel")
+	"t" '(org-todo :wk "todo")
+	"s" '(org-insert-structure-template :wk "template")
+	"e" '(org-edit-special :wk "edit")
+	"i" '(:ignore t :wk "insert")
+	"ih" '(org-insert-heading :wk "insert heading")
+	"is" '(org-insert-subheading :wk "insert heading")
+	"f" '(org-footnote-action :wk "footnote action")
+	">" '(org-demote-subtree :wk "demote subtree")
+	"<" '(org-promote-subtree :wk "demote subtree"))
+  (:keymaps 'org-agenda-mode-map
+		"j" '(org-agenda-next-line)
+		"h" '(org-agenda-previous-line))
+
+  :hook
+  (org-mode . olivetti-mode)
+  (org-mode . variable-pitch-mode)
+  (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+
+  :config
+  (add-to-list 'org-latex-packages-alist '("" "braket" t))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((js . t)
+	 (emacs-lisp . t)
+	 (awk . t)))
+  ;; set up org paths
+  (setq org-directory "~/MEGA/org/agenda")
+  (setq org-default-notes-file (concat org-directory "/notes.org")))
+(elpaca-wait)
+
 (use-package avy
-    :ensure (:wait t)
     :demand t
     :init
 (defun patrl/avy-action-insert-newline (pt)
@@ -336,12 +419,12 @@
 
 (use-package which-key
   :after evil
+  :demand t
   :init (which-key-mode)
   :config
   (which-key-setup-minibuffer))
 
 (use-package mood-line
-  :ensure (:wait t)
   :demand t
   :config (mood-line-mode))
 
@@ -389,6 +472,7 @@
   (solaire-global-mode +1))
 
 (use-package catppuccin-theme
+  :demand t
   :config
   (setq catppuccin-height-title1 1.5)
   (load-theme 'catppuccin t))
@@ -679,88 +763,6 @@
 ;;   :config
 ;;   (auctex-latexmk-setup))
 
-(use-package org
-  :ensure (:wait t)
-  :demand t
-  :init
-  ;; edit settings
-  (setq org-auto-align-tags nil
-	    org-tags-column 0
-	    org-catch-invisible-edits 'show-and-error
-	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
-	    org-insert-heading-respect-content t)
-
-  ;; styling, hide markup, etc.
-  (setq org-hide-emphasis-markers t
-	    org-src-fontify-natively t ;; fontify source blocks natively
-	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
-	    org-pretty-entities t
-	    org-ellipsis "…")
-
-  ;; agenda styling
-  (setq org-agenda-tags-column 0
-	    org-agenda-block-separator ?─
-	    org-agenda-time-grid
-	    '((daily today require-timed)
-	      (800 1000 1200 1400 1600 1800 2000)
-	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-	    org-agenda-current-time-string
-	    "⭠ now ─────────────────────────────────────────────────")
-
-  ;; todo setup
-  (setq org-todo-keywords
-	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
-	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
-
-
-  (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
-
-  :custom
-  (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
-  (org-cite-global-bibliography (list patrl/global-bib-file))
-  :general
-  (patrl/local-leader-keys
-	:keymaps 'org-mode-map
-	"a" '(org-archive-subtree :wk "archive")
-	"l" '(:ignore t :wk "link")
-	"ll" '(org-insert-link t :wk "link")
-	"lp" '(org-latex-preview t :wk "prev latex")
-	"h" '(consult-org-heading :wk "consult heading")
-	"d" '(org-cut-special :wk "org cut special")
-	"y" '(org-copy-special :wk "org copy special")
-	"p" '(org-paste-special :wk "org paste special")
-	"b" '(:keymap org-babel-map :wk "babel")
-	"t" '(org-todo :wk "todo")
-	"s" '(org-insert-structure-template :wk "template")
-	"e" '(org-edit-special :wk "edit")
-	"i" '(:ignore t :wk "insert")
-	"ih" '(org-insert-heading :wk "insert heading")
-	"is" '(org-insert-subheading :wk "insert heading")
-	"f" '(org-footnote-action :wk "footnote action")
-	">" '(org-demote-subtree :wk "demote subtree")
-	"<" '(org-promote-subtree :wk "demote subtree"))
-  (:keymaps 'org-agenda-mode-map
-		"j" '(org-agenda-next-line)
-		"h" '(org-agenda-previous-line))
-
-  :hook
-  (org-mode . olivetti-mode)
-  (org-mode . variable-pitch-mode)
-  (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-
-  :config
-  (add-to-list 'org-latex-packages-alist '("" "braket" t))
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((js . t)
-	 (emacs-lisp . t)
-	 (awk . t)))
-  ;; set up org paths
-  (setq org-directory "~/MEGA/org/agenda")
-  (setq org-default-notes-file (concat org-directory "/notes.org")))
-
 (use-package evil-org
   :after org
   :hook (org-mode . (lambda () evil-org-mode))
@@ -865,7 +867,6 @@
   (setq org-noter-always-create-frame nil))
 
 (use-package vertico
-  :ensure (:wait t)
   :demand t
   :init
   (vertico-mode)
@@ -895,6 +896,7 @@
         completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package savehist
+  :ensure nil
   :init
   (savehist-mode))
 
@@ -906,7 +908,6 @@
   (marginalia-mode))
 
 (use-package consult
-  :ensure (:wait t)
   :demand t
   :general
   (patrl/leader-keys
@@ -942,7 +943,6 @@
   (setq affe-regexp-compiler #'affe-orderless-regexp-compiler))
 
 (use-package embark
-  :ensure (:wait t)
   :demand t
   :general
   (patrl/leader-keys
@@ -964,7 +964,6 @@
   (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package corfu
-  :ensure (:wait t)
   :demand t
   :hook
   (eval-expression-minibuffer-setup . corfu-mode)
@@ -983,6 +982,7 @@
   "C-k") ;; this was interfering with corfu completion
 
 (use-package emacs
+  :ensure nil
   :init
   (setq tab-always-indent 'complete)) ;; enable tab completion
 
