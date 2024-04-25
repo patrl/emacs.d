@@ -9,8 +9,6 @@ Currently tailored for GNU Emacs 29.1.
 * todo-list
 
 ** TODO get smooth scrolling working
-** TODO get search working with [[PDF tools]]
-See the following issue, which is probably related: [[https://github.com/politza/pdf-tools/issues/528][politza/pdf-tools#528 What would be the correct `use-package` declaration?]]
 ** SOMEDAY explore additional key themes for lispyville (see [[lispy]])
 ** TODO get drag-and-drop working with dired
 
@@ -22,12 +20,12 @@ See the following issue, which is probably related: [[https://github.com/politza
 - [[https://github.com/jwiegley/dot-emacs][GitHub - jwiegley/dot-emacs: My .emacs.el file and other personal Emacs goodies]]
 - [[https://tecosaur.github.io/emacs-config/config.html][Tecoaur's Doom Emacs Configuration]]
 
-* Early init file
+* DONE Early init file
 :PROPERTIES:
 :header-args: :tangle early-init.el
 :END:
 
-Since we're using ~straight.el~  as our package manager, we add the following to ~early-init.el~ to prevent ~package.el~ from loading packages, prior to our init file loading.
+Since we're using ~elpaca~ as our package manager, we add the following to ~early-init.el~ to prevent ~package.el~ from loading packages, prior to our init file loading.
 
 #+begin_src emacs-lisp
   ;;; early-init.el --- Early Init File -*- lexical-binding: t; no-byte-compile: t -*-
@@ -64,11 +62,11 @@ Disable GUI elements before we have a chance to peek.
 #+end_src
 
 
-** ~elpaca~
+** DONE ~elpaca~
 
 - [[https://github.com/progfolio/elpaca][GitHub - progfolio/elpaca: An elisp package manager]] 
 
-*** Bootstrap ~elpaca~
+*** DONE Bootstrap ~elpaca~
 
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.7)
@@ -209,16 +207,19 @@ Disable GUI elements before we have a chance to peek.
 
     ;; Hide commands in M-x which don't work in the current mode
     (setq read-extended-command-predicate #'command-completion-default-include-p))
+  (elpaca-wait)
 #+end_src
 
 **  Electric
 
 #+begin_src emacs-lisp
   (use-package electric
+    :demand t
     :ensure nil
     :init
     (electric-pair-mode +1) ;; automatically insert closing parens
     (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
+  (elpaca-wait)
 #+end_src
 
 * Keybindings
@@ -230,13 +231,106 @@ Mnemonic keybindings with ~SPC~ as the leader key, inspired by spacemacs and doo
 
 The local leader ~,~ is used for mode-specific bindings.
 
+** Evil
+
+- [[https://github.com/emacs-evil/evil][GitHub - emacs-evil/evil: The extensible vi layer for Emacs.]]
+
+#+begin_src emacs-lisp
+  (use-package evil
+    :demand t
+    :init
+    (setq evil-search-module 'isearch)
+
+    (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
+    (setq evil-want-C-d-scroll t) ;; allow scroll down with 'C-d'
+
+    (setq evil-want-integration t) ;; necessary for evil collection
+    (setq evil-want-keybinding nil)
+
+    (setq evil-split-window-below t)
+    (setq evil-vsplit-window-right t)
+
+    (setq evil-want-C-i-jump nil) ;; hopefully this will fix weird tab behaviour
+
+    (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
+    :config
+    (evil-mode t) ;; globally enable evil mode
+    ;; set the initial state for some kinds of buffers.
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal)
+    ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
+    (evil-set-initial-state 'eshell-mode 'insert)
+    (evil-set-initial-state 'magit-diff-mode 'insert))
+  (elpaca-wait)
+#+end_src
+
+*** Evil collection
+
+#+begin_src emacs-lisp
+  (use-package evil-collection ;; evilifies a bunch of things
+    :after evil
+    :init
+    (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
+    ;; If I want to incrementally enable evil-collection mode-by-mode, I can do something like the following:
+    ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
+    ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
+    ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
+    :config
+    (evil-collection-init))
+#+end_src
+
+*** Evil commentary
+
+- [[https://github.com/emacs-evil/evil-collection][GitHub - emacs-evil/evil-collection: A set of keybindings for evil-mode]]
+
+Port of Tim Pope's commentary package
+
+#+begin_src emacs-lisp
+  (use-package evil-commentary
+    :after evil
+    :config
+    (evil-commentary-mode)) ;; globally enable evil-commentary
+#+end_src
+
+*** Evil surround
+
+- [[https://github.com/emacs-evil/evil-surround][GitHub - emacs-evil/evil-surround: you will be surrounded (surround.vim for e...]]
+
+Port of Tim Pope's surround package
+
+#+begin_src emacs-lisp
+  (use-package evil-surround
+    :after evil
+    :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+           (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
+    :config
+    (global-evil-surround-mode 1)) ;; globally enable evil-surround
+#+end_src
+
+*** Evil goggles
+
+- [[https://github.com/edkolev/evil-goggles][GitHub - edkolev/evil-goggles: Display visual hint on evil edit operations]]
+
+Show visual hints for evil motions.
+
+#+begin_src emacs-lisp
+  (use-package evil-goggles
+    :config
+    (evil-goggles-mode)
+
+    ;; optionally use diff-mode's faces; as a result, deleted text
+    ;; will be highlighed with `diff-removed` face which is typically
+    ;; some red color (as defined by the color theme)
+    ;; other faces such as `diff-added` will be used for other actions
+    (evil-goggles-use-diff-faces))
+#+end_src
+
 ** General
 
 - [[https://github.com/noctuid/general.el][GitHub - noctuid/general.el: More convenient key definitions in emacs]]
 
   #+begin_src emacs-lisp
     (use-package general
-      :ensure (:wait t)
       :demand t
       :config
       (general-evil-setup)
@@ -271,6 +365,9 @@ The local leader ~,~ is used for mode-specific bindings.
       (patrl/leader-keys
         "SPC" '(execute-extended-command :wk "execute command") ;; an alternative to 'M-x'
         "TAB" '(:keymap tab-prefix-map :wk "tab")) ;; remap tab bindings
+
+      (patrl/leader-keys
+      "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
 
       (patrl/leader-keys
         "c" '(:ignore t :wk "code"))
@@ -331,106 +428,102 @@ The local leader ~,~ is used for mode-specific bindings.
       (patrl/leader-keys
         "t" '(:ignore t :wk "template")))
 
+(elpaca-wait)
     ;; "c" '(org-capture :wk "capture")))
   #+end_src
 
-** Evil
+** Org mode
 
-- [[https://github.com/emacs-evil/evil][GitHub - emacs-evil/evil: The extensible vi layer for Emacs.]]
+Resources:
+- [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
+- [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
+- [[https://github.com/minad/org-modern][GitHub - minad/org-modern: Modern Org Style]]
 
-#+begin_src emacs-lisp
-  (use-package evil
-    :ensure (:wait t)
-    :demand t
-    :general
-    (patrl/leader-keys
-      "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
-    :init
-    (setq evil-search-module 'isearch)
+  #+begin_src emacs-lisp :tangle init.el
+    (use-package org
+      :demand t
+      :init
+      ;; edit settings
+      (setq org-auto-align-tags nil
+    	    org-tags-column 0
+    	    org-catch-invisible-edits 'show-and-error
+    	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
+    	    org-insert-heading-respect-content t)
 
-    (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
-    (setq evil-want-C-d-scroll t) ;; allow scroll down with 'C-d'
+      ;; styling, hide markup, etc.
+      (setq org-hide-emphasis-markers t
+    	    org-src-fontify-natively t ;; fontify source blocks natively
+    	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
+    	    org-pretty-entities t
+    	    org-ellipsis "…")
 
-    (setq evil-want-integration t) ;; necessary for evil collection
-    (setq evil-want-keybinding nil)
+      ;; agenda styling
+      (setq org-agenda-tags-column 0
+    	    org-agenda-block-separator ?─
+    	    org-agenda-time-grid
+    	    '((daily today require-timed)
+    	      (800 1000 1200 1400 1600 1800 2000)
+    	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+    	    org-agenda-current-time-string
+    	    "⭠ now ─────────────────────────────────────────────────")
 
-    (setq evil-split-window-below t)
-    (setq evil-vsplit-window-right t)
+      ;; todo setup
+      (setq org-todo-keywords
+    	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
+    	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+    	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+    	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
-    (setq evil-want-C-i-jump nil) ;; hopefully this will fix weird tab behaviour
 
-    (setq evil-undo-system 'undo-redo) ;; undo via 'u', and redo the undone change via 'C-r'; only available in emacs 28+.
-    :config
-    (evil-mode t) ;; globally enable evil mode
-    ;; set the initial state for some kinds of buffers.
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal)
-    ;; buffers in which I want to immediately start typing should be in 'insert' state by default.
-    (evil-set-initial-state 'eshell-mode 'insert)
-    (evil-set-initial-state 'magit-diff-mode 'insert))
-#+end_src
+      (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
 
-*** Evil collection
+      :custom
+      (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
+      (org-cite-global-bibliography (list patrl/global-bib-file))
+      :general
+      (patrl/local-leader-keys
+    	:keymaps 'org-mode-map
+    	"a" '(org-archive-subtree :wk "archive")
+    	"l" '(:ignore t :wk "link")
+    	"ll" '(org-insert-link t :wk "link")
+    	"lp" '(org-latex-preview t :wk "prev latex")
+    	"h" '(consult-org-heading :wk "consult heading")
+    	"d" '(org-cut-special :wk "org cut special")
+    	"y" '(org-copy-special :wk "org copy special")
+    	"p" '(org-paste-special :wk "org paste special")
+    	"b" '(:keymap org-babel-map :wk "babel")
+    	"t" '(org-todo :wk "todo")
+    	"s" '(org-insert-structure-template :wk "template")
+    	"e" '(org-edit-special :wk "edit")
+    	"i" '(:ignore t :wk "insert")
+    	"ih" '(org-insert-heading :wk "insert heading")
+    	"is" '(org-insert-subheading :wk "insert heading")
+    	"f" '(org-footnote-action :wk "footnote action")
+    	">" '(org-demote-subtree :wk "demote subtree")
+    	"<" '(org-promote-subtree :wk "demote subtree"))
+      (:keymaps 'org-agenda-mode-map
+    		"j" '(org-agenda-next-line)
+    		"h" '(org-agenda-previous-line))
 
-#+begin_src emacs-lisp
-  (use-package evil-collection ;; evilifies a bunch of things
-    :after evil
-    :init
-    (setq evil-collection-outline-bind-tab-p t) ;; '<TAB>' cycles visibility in 'outline-minor-mode'
-    ;; If I want to incrementally enable evil-collection mode-by-mode, I can do something like the following:
-    ;; (setq evil-collection-mode-list nil) ;; I don't like surprises
-    ;; (add-to-list 'evil-collection-mode-list 'magit) ;; evilify magit
-    ;; (add-to-list 'evil-collection-mode-list '(pdf pdf-view)) ;; evilify pdf-view
-    :config
-    (evil-collection-init))
-#+end_src
+      :hook
+      (org-mode . olivetti-mode)
+      (org-mode . variable-pitch-mode)
+      (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 
-*** Evil commentary
+      :config
+      (add-to-list 'org-latex-packages-alist '("" "braket" t))
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((js . t)
+    	 (emacs-lisp . t)
+    	 (awk . t)))
+      ;; set up org paths
+      (setq org-directory "~/MEGA/org/agenda")
+      (setq org-default-notes-file (concat org-directory "/notes.org")))
+    (elpaca-wait)
+  #+end_src
 
-- [[https://github.com/emacs-evil/evil-collection][GitHub - emacs-evil/evil-collection: A set of keybindings for evil-mode]]
 
-Port of Tim Pope's commentary package
-
-#+begin_src emacs-lisp
-  (use-package evil-commentary
-    :after evil
-    :config
-    (evil-commentary-mode)) ;; globally enable evil-commentary
-#+end_src
-
-*** Evil surround
-
-- [[https://github.com/emacs-evil/evil-surround][GitHub - emacs-evil/evil-surround: you will be surrounded (surround.vim for e...]]
-
-Port of Tim Pope's surround package
-
-#+begin_src emacs-lisp
-  (use-package evil-surround
-    :after evil
-    :ensure t
-    :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-           (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
-    :config
-    (global-evil-surround-mode 1)) ;; globally enable evil-surround
-#+end_src
-
-*** Evil goggles
-
-- [[https://github.com/edkolev/evil-goggles][GitHub - edkolev/evil-goggles: Display visual hint on evil edit operations]]
-
-Show visual hints for evil motions.
-
-#+begin_src emacs-lisp
-  (use-package evil-goggles
-    :config
-    (evil-goggles-mode)
-
-    ;; optionally use diff-mode's faces; as a result, deleted text
-    ;; will be highlighed with `diff-removed` face which is typically
-    ;; some red color (as defined by the color theme)
-    ;; other faces such as `diff-added` will be used for other actions
-    (evil-goggles-use-diff-faces))
-#+end_src
 
 ** Avy
 
@@ -443,7 +536,6 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 
 #+begin_src emacs-lisp
     (use-package avy
-      :ensure (:wait t)
       :demand t
       :init
   (defun patrl/avy-action-insert-newline (pt)
@@ -501,6 +593,7 @@ Display key bindings.
 #+begin_src emacs-lisp
   (use-package which-key
     :after evil
+    :demand t
     :init (which-key-mode)
     :config
     (which-key-setup-minibuffer))
@@ -516,7 +609,6 @@ Minimal mode line.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package mood-line
-    :ensure (:wait t)
     :demand t
     :config (mood-line-mode))
 #+end_src
@@ -591,10 +683,11 @@ Visually distinguish between 'real' buffers and everything else.
 Some nice themes:
 
 #+begin_src emacs-lisp :tangle init.el
-    (use-package catppuccin-theme
-      :config
-      (setq catppuccin-height-title1 1.5)
-      (load-theme 'catppuccin t))
+  (use-package catppuccin-theme
+    :demand t
+    :config
+    (setq catppuccin-height-title1 1.5)
+    (load-theme 'catppuccin t))
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1044,97 +1137,6 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
 
 * Org
 
-** Org mode
-
-Resources:
-- [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
-- [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
-- [[https://github.com/minad/org-modern][GitHub - minad/org-modern: Modern Org Style]]
-
-  #+begin_src emacs-lisp :tangle init.el
-    (use-package org
-      :ensure (:wait t)
-      :demand t
-      :init
-      ;; edit settings
-      (setq org-auto-align-tags nil
-    	    org-tags-column 0
-    	    org-catch-invisible-edits 'show-and-error
-    	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
-    	    org-insert-heading-respect-content t)
-
-      ;; styling, hide markup, etc.
-      (setq org-hide-emphasis-markers t
-    	    org-src-fontify-natively t ;; fontify source blocks natively
-    	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
-    	    org-pretty-entities t
-    	    org-ellipsis "…")
-
-      ;; agenda styling
-      (setq org-agenda-tags-column 0
-    	    org-agenda-block-separator ?─
-    	    org-agenda-time-grid
-    	    '((daily today require-timed)
-    	      (800 1000 1200 1400 1600 1800 2000)
-    	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-    	    org-agenda-current-time-string
-    	    "⭠ now ─────────────────────────────────────────────────")
-
-      ;; todo setup
-      (setq org-todo-keywords
-    	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
-    	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-    	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-    	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
-
-
-      (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
-
-      :custom
-      (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
-      (org-cite-global-bibliography (list patrl/global-bib-file))
-      :general
-      (patrl/local-leader-keys
-    	:keymaps 'org-mode-map
-    	"a" '(org-archive-subtree :wk "archive")
-    	"l" '(:ignore t :wk "link")
-    	"ll" '(org-insert-link t :wk "link")
-    	"lp" '(org-latex-preview t :wk "prev latex")
-    	"h" '(consult-org-heading :wk "consult heading")
-    	"d" '(org-cut-special :wk "org cut special")
-    	"y" '(org-copy-special :wk "org copy special")
-    	"p" '(org-paste-special :wk "org paste special")
-    	"b" '(:keymap org-babel-map :wk "babel")
-    	"t" '(org-todo :wk "todo")
-    	"s" '(org-insert-structure-template :wk "template")
-    	"e" '(org-edit-special :wk "edit")
-    	"i" '(:ignore t :wk "insert")
-    	"ih" '(org-insert-heading :wk "insert heading")
-    	"is" '(org-insert-subheading :wk "insert heading")
-    	"f" '(org-footnote-action :wk "footnote action")
-    	">" '(org-demote-subtree :wk "demote subtree")
-    	"<" '(org-promote-subtree :wk "demote subtree"))
-      (:keymaps 'org-agenda-mode-map
-    		"j" '(org-agenda-next-line)
-    		"h" '(org-agenda-previous-line))
-
-      :hook
-      (org-mode . olivetti-mode)
-      (org-mode . variable-pitch-mode)
-      (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-
-      :config
-      (add-to-list 'org-latex-packages-alist '("" "braket" t))
-      (org-babel-do-load-languages
-       'org-babel-load-languages
-       '((js . t)
-    	 (emacs-lisp . t)
-    	 (awk . t)))
-      ;; set up org paths
-      (setq org-directory "~/MEGA/org/agenda")
-      (setq org-default-notes-file (concat org-directory "/notes.org")))
-  #+end_src
-
 ** Evil integration
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1310,7 +1312,6 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package vertico
-    :ensure (:wait t)
     :demand t
     :init
     (vertico-mode)
@@ -1340,6 +1341,7 @@ The completion framework I adopt exploits packages primarily developed by [[http
           completion-category-overrides '((file (styles partial-completion)))))
 
   (use-package savehist
+    :ensure nil
     :init
     (savehist-mode))
 
@@ -1357,7 +1359,6 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package consult
-    :ensure (:wait t)
     :demand t
     :general
     (patrl/leader-keys
@@ -1403,7 +1404,6 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package embark
-    :ensure (:wait t)
     :demand t
     :general
     (patrl/leader-keys
@@ -1431,7 +1431,6 @@ A minimal ui for ~completion-in-region~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package corfu
-    :ensure (:wait t)
     :demand t
     :hook
     (eval-expression-minibuffer-setup . corfu-mode)
@@ -1450,6 +1449,7 @@ A minimal ui for ~completion-in-region~.
     "C-k") ;; this was interfering with corfu completion
 
   (use-package emacs
+    :ensure nil
     :init
     (setq tab-always-indent 'complete)) ;; enable tab completion
 #+end_src
