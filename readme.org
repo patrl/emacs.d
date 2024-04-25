@@ -677,7 +677,7 @@ Use built in ~project.el~.
     (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 #+end_src
 
-*** File management
+**** File management
 
 Use built-in ~dired~.
 
@@ -756,259 +756,6 @@ Use built-in ~dired~.
     (lispyville-set-key-theme '(operators c-w additional)))
 #+end_src
 
-** Org
-
-*** Org mode
-
-Resources:
-- [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
-- [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
-- [[https://github.com/minad/org-modern][GitHub - minad/org-modern: Modern Org Style]]
-
-  #+begin_src emacs-lisp :tangle init.el
-    (use-package org
-      ;; :straight (:type built-in)
-      :init
-      ;; edit settings
-      (setq org-auto-align-tags nil
-	    org-tags-column 0
-	    org-catch-invisible-edits 'show-and-error
-	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
-	    org-insert-heading-respect-content t)
-
-      ;; styling, hide markup, etc.
-      (setq org-hide-emphasis-markers t
-	    org-src-fontify-natively t ;; fontify source blocks natively
-	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
-	    org-pretty-entities t
-	    org-ellipsis "…")
-
-      ;; agenda styling
-      (setq org-agenda-tags-column 0
-	    org-agenda-block-separator ?─
-	    org-agenda-time-grid
-	    '((daily today require-timed)
-	      (800 1000 1200 1400 1600 1800 2000)
-	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-	    org-agenda-current-time-string
-	    "⭠ now ─────────────────────────────────────────────────")
-
-      ;; todo setup
-      (setq org-todo-keywords
-	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
-	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
-	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
-
-
-      (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
-
-      :custom
-      (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
-      (org-cite-global-bibliography (list patrl/global-bib-file))
-      :general
-      (patrl/local-leader-keys
-	:keymaps 'org-mode-map
-	"a" '(org-archive-subtree :wk "archive")
-	"l" '(:ignore t :wk "link")
-	"ll" '(org-insert-link t :wk "link")
-	"lp" '(org-latex-preview t :wk "prev latex")
-	"h" '(consult-org-heading :wk "consult heading")
-	"d" '(org-cut-special :wk "org cut special")
-	"y" '(org-copy-special :wk "org copy special")
-	"p" '(org-paste-special :wk "org paste special")
-	"b" '(:keymap org-babel-map :wk "babel")
-	"t" '(org-todo :wk "todo")
-	"s" '(org-insert-structure-template :wk "template")
-	"e" '(org-edit-special :wk "edit")
-	"i" '(:ignore t :wk "insert")
-	"ih" '(org-insert-heading :wk "insert heading")
-	"is" '(org-insert-subheading :wk "insert heading")
-	"f" '(org-footnote-action :wk "footnote action")
-	">" '(org-demote-subtree :wk "demote subtree")
-	"<" '(org-promote-subtree :wk "demote subtree"))
-      (:keymaps 'org-agenda-mode-map
-		"j" '(org-agenda-next-line)
-		"h" '(org-agenda-previous-line))
-
-      :hook
-      (org-mode . olivetti-mode)
-      (org-mode . variable-pitch-mode)
-      (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
-
-      :config
-      (add-to-list 'org-latex-packages-alist '("" "braket" t))
-      (org-babel-do-load-languages
-       'org-babel-load-languages
-       '((js . t)
-	 (emacs-lisp . t)
-	 (awk . t)))
-      ;; set up org paths
-      (setq org-directory "~/MEGA/org/agenda")
-      (setq org-default-notes-file (concat org-directory "/notes.org")))
-  #+end_src
-
-*** Evil integration
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package evil-org
-    :after org
-    :hook (org-mode . (lambda () evil-org-mode))
-    :config
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys))
-#+end_src
-
-*** Org-auctex
-
-Provides faster latex previews for ~org-mode~.
-
-- [[https://github.com/karthink/org-auctex][GitHub - karthink/org-auctex: Better latex previews for org-mode]]
-- See https://karthinks.com/software/fast-latex-previews-in-org-mode/
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-auctex
-    :straight (:type git :host github :repo
-                     "karthink/org-auctex")
-    :hook (org-mode . org-auctex-mode))
-#+end_src
-
-*** Transclusion
-
-- [[https://nobiot.github.io/org-transclusion/][Org-transclusion User Manual]]
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-transclusion
-    :after org
-    :general
-    (patrl/leader-keys
-      "nt" '(org-transclusion-mode :wk "transclusion mode")))
-#+end_src
-
-*** Appear
-
-- [[https://github.com/awth13/org-appear][GitHub - awth13/org-appear: Toggle visibility of hidden Org mode element part...]]
-
-Reveals hidden elements interactively.
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-appear
-    :straight (:type git :host github :repo "awth13/org-appear")
-    :after org
-    :hook (org-mode . org-appear-mode))
-#+end_src
-
-***  Cliplink
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-cliplink
-    :after org
-    :general
-    (patrl/local-leader-keys
-      :keymaps 'org-mode-map
-      "lc" '(org-cliplink :wk "cliplink")))
-#+end_src
-
-*** Org modern
-
-- [[https://github.com/minad/org-modern][GitHub - minad/org-modern: :unicorn: Modern Org Style]]
-
-Enable org-modern mode globally.
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-modern
-    :after org
-    :config (global-org-modern-mode))
-#+end_src
-
-*** Org roam
-
-- [[https://www.orgroam.com/manual.html][Org-roam User Manual]]
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package org-roam
-    :general
-    (patrl/leader-keys
-      "nr" '(:ignore t :wk "roam")
-      "nri" '(org-roam-node-insert t :wk "insert node")
-      "nrt" '(org-roam-buffer-toggle t :wk "roam buffer toggle")
-      "nrc" '(org-roam-capture t :wk "roam capture")
-      "nrf" '(org-roam-node-find :wk "find node")
-      "nrd" '(:ignore t :wk "dailies")
-      "nrdt" '(org-roam-dailies-goto-today :wk "today")
-      "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
-      "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
-      "nrdd" '(org-roam-dailies-goto-date :wk "goto date"))
-    :config
-    ;; org-roam-buffer
-    (add-to-list 'display-buffer-alist
-                 '("\\*org-roam\\*"
-                   (display-buffer-in-direction)
-                   (direction . right)
-                   (window-width . 0.33)
-                   (window-height . fit-window-to-buffer)))
-    ;; get tags to show up in 'org-roam-node-find':
-    (setq org-roam-node-display-template
-          (concat "${title:*} "
-                  (propertize "${tags:10}" 'face 'org-tag)))
-    (setq org-roam-completion-everywhere t) ;; roam completion anywhere
-    (setq org-roam-directory patrl/notes-path)
-    (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
-    (unless (< emacs-major-version 29)
-      (setq org-roam-database-connector 'sqlite-builtin))
-    (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
-
-
-    ;; dailies config
-    (setq org-roam-dailies-directory "daily/")
-    (setq org-roam-dailies-capture-templates
-          '(("d" "default" entry
-             "* %?"
-             :target (file+head "%<%Y-%m-%d>.org"
-                                "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
-#+end_src
-
-*** Export
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package citeproc
-    :after org)
-
-  (with-eval-after-load 'ox-latex
-     (add-to-list 'org-latex-classes
-                  '("scrartcl"
-                    "\\documentclass[letterpaper]{scrartcl}"
-                    ("\\section{%s}" . "\\section*{%s}")
-                    ("\\subsection{%s}" . "\\subsection*{%s}")
-                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                    ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                    ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
-
-#+end_src
-
-*** Highlighting
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package htmlize)
-#+end_src
-
-*** Org-noter
-
-#+begin_src emacs-lisp :tangle init.el
-    (use-package org-noter
-      :commands
-      org-noter
-      :general
-      (patrl/local-leader-keys
-        :keyamps 'org-noter-doc-mode-map
-        "i" 'org-noter-insert-note)
-      :config
-      (setq org-noter-notes-search-path (list patrl/notes-path))
-      (setq org-noter-default-notes-file-names '("literature-notes.org"))
-      (setq org-noter-hide-other nil)
-      (setq org-noter-always-create-frame nil))
-#+end_src
-
 ** js
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1070,7 +817,30 @@ Note that the following uses [[*Cape]] to convert dante's company backend to to 
     :mode "\\.nix\\'")
 #+end_src
 
-** SOMEDAY latex
+** markdown
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package markdown-mode
+    :hook ((markdown-mode . visual-line-mode)
+           (markdown-mode . olivetti-mode))
+           (markdown-mode . variable-pitch-mode)
+    :commands (markdown-mode gfm-mode)
+    :mode (("README\\.md\\'" . gfm-mode)
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :init
+    (setq markdown-command "pandoc")
+    (setq markdown-header-scaling t))
+#+end_src
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package pandoc-mode
+    :after markdown-mode
+    :hook (markdown-mode . pandoc-mode))
+#+end_src
+
+
+* SOMEDAY latex
 
 Useful resources:
 
@@ -1225,9 +995,9 @@ Set up icon support using the following instructions:
     :config (citar-embark-mode))
 #+end_src
 
-**** TODO add "citep" and "citealt" to the supported list of latex citation commands.
+*** TODO add "citep" and "citealt" to the supported list of latex citation commands.
 
-**** Engrave
+*** Engrave
 
 Uses emacs' font lock to highlight source code blocks in latex.
 
@@ -1235,7 +1005,7 @@ Uses emacs' font lock to highlight source code blocks in latex.
   (use-package engrave-faces)
 #+end_src
 
-**** TODO latexmk
+*** TODO latexmk
 
 #+begin_src emacs-lisp :tangle init.el
   ;; FIXME
@@ -1248,30 +1018,262 @@ Uses emacs' font lock to highlight source code blocks in latex.
     (auctex-latexmk-setup))
 #+end_src
 
-*** Issues
-**** TODO pdf buffer isn't reverted in preview continuously mode.
+** Issues
+*** TODO pdf buffer isn't reverted in preview continuously mode.
 I think probably I just need to use zathura as the pdf viewer, which has its own smart revert functionality.
 
-** markdown
+
+* Org
+
+** Org mode
+
+Resources:
+- [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][zzamboni.org | Beautifying Org Mode in Emacs]]
+- [[https://lepisma.xyz/2017/10/28/ricing-org-mode/][Ricing up Org Mode]]
+- [[https://github.com/minad/org-modern][GitHub - minad/org-modern: Modern Org Style]]
+
+  #+begin_src emacs-lisp :tangle init.el
+    (use-package org
+      ;; :straight (:type built-in)
+      :init
+      ;; edit settings
+      (setq org-auto-align-tags nil
+	    org-tags-column 0
+	    org-catch-invisible-edits 'show-and-error
+	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
+	    org-insert-heading-respect-content t)
+
+      ;; styling, hide markup, etc.
+      (setq org-hide-emphasis-markers t
+	    org-src-fontify-natively t ;; fontify source blocks natively
+	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
+	    org-pretty-entities t
+	    org-ellipsis "…")
+
+      ;; agenda styling
+      (setq org-agenda-tags-column 0
+	    org-agenda-block-separator ?─
+	    org-agenda-time-grid
+	    '((daily today require-timed)
+	      (800 1000 1200 1400 1600 1800 2000)
+	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+	    org-agenda-current-time-string
+	    "⭠ now ─────────────────────────────────────────────────")
+
+      ;; todo setup
+      (setq org-todo-keywords
+	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
+	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
+	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
+
+
+      (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
+
+      :custom
+      (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
+      (org-cite-global-bibliography (list patrl/global-bib-file))
+      :general
+      (patrl/local-leader-keys
+	:keymaps 'org-mode-map
+	"a" '(org-archive-subtree :wk "archive")
+	"l" '(:ignore t :wk "link")
+	"ll" '(org-insert-link t :wk "link")
+	"lp" '(org-latex-preview t :wk "prev latex")
+	"h" '(consult-org-heading :wk "consult heading")
+	"d" '(org-cut-special :wk "org cut special")
+	"y" '(org-copy-special :wk "org copy special")
+	"p" '(org-paste-special :wk "org paste special")
+	"b" '(:keymap org-babel-map :wk "babel")
+	"t" '(org-todo :wk "todo")
+	"s" '(org-insert-structure-template :wk "template")
+	"e" '(org-edit-special :wk "edit")
+	"i" '(:ignore t :wk "insert")
+	"ih" '(org-insert-heading :wk "insert heading")
+	"is" '(org-insert-subheading :wk "insert heading")
+	"f" '(org-footnote-action :wk "footnote action")
+	">" '(org-demote-subtree :wk "demote subtree")
+	"<" '(org-promote-subtree :wk "demote subtree"))
+      (:keymaps 'org-agenda-mode-map
+		"j" '(org-agenda-next-line)
+		"h" '(org-agenda-previous-line))
+
+      :hook
+      (org-mode . olivetti-mode)
+      (org-mode . variable-pitch-mode)
+      (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
+
+      :config
+      (add-to-list 'org-latex-packages-alist '("" "braket" t))
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((js . t)
+	 (emacs-lisp . t)
+	 (awk . t)))
+      ;; set up org paths
+      (setq org-directory "~/MEGA/org/agenda")
+      (setq org-default-notes-file (concat org-directory "/notes.org")))
+  #+end_src
+
+** Evil integration
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package markdown-mode
-    :hook ((markdown-mode . visual-line-mode)
-           (markdown-mode . olivetti-mode))
-           (markdown-mode . variable-pitch-mode)
-    :commands (markdown-mode gfm-mode)
-    :mode (("README\\.md\\'" . gfm-mode)
-           ("\\.md\\'" . markdown-mode)
-           ("\\.markdown\\'" . markdown-mode))
-    :init
-    (setq markdown-command "pandoc")
-    (setq markdown-header-scaling t))
+  (use-package evil-org
+    :after org
+    :hook (org-mode . (lambda () evil-org-mode))
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
 #+end_src
 
+** Org-auctex
+
+Provides faster latex previews for ~org-mode~.
+
+- [[https://github.com/karthink/org-auctex][GitHub - karthink/org-auctex: Better latex previews for org-mode]]
+- See https://karthinks.com/software/fast-latex-previews-in-org-mode/
+
 #+begin_src emacs-lisp :tangle init.el
-  (use-package pandoc-mode
-    :after markdown-mode
-    :hook (markdown-mode . pandoc-mode))
+  (use-package org-auctex
+    :straight (:type git :host github :repo
+                     "karthink/org-auctex")
+    :hook (org-mode . org-auctex-mode))
+#+end_src
+
+** Transclusion
+
+- [[https://nobiot.github.io/org-transclusion/][Org-transclusion User Manual]]
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-transclusion
+    :after org
+    :general
+    (patrl/leader-keys
+      "nt" '(org-transclusion-mode :wk "transclusion mode")))
+#+end_src
+
+** Appear
+
+- [[https://github.com/awth13/org-appear][GitHub - awth13/org-appear: Toggle visibility of hidden Org mode element part...]]
+
+Reveals hidden elements interactively.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-appear
+    :straight (:type git :host github :repo "awth13/org-appear")
+    :after org
+    :hook (org-mode . org-appear-mode))
+#+end_src
+
+**  Cliplink
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-cliplink
+    :after org
+    :general
+    (patrl/local-leader-keys
+      :keymaps 'org-mode-map
+      "lc" '(org-cliplink :wk "cliplink")))
+#+end_src
+
+** Org modern
+
+- [[https://github.com/minad/org-modern][GitHub - minad/org-modern: :unicorn: Modern Org Style]]
+
+Enable org-modern mode globally.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-modern
+    :after org
+    :config (global-org-modern-mode))
+#+end_src
+
+** Org roam
+
+- [[https://www.orgroam.com/manual.html][Org-roam User Manual]]
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-roam
+    :general
+    (patrl/leader-keys
+      "nr" '(:ignore t :wk "roam")
+      "nri" '(org-roam-node-insert t :wk "insert node")
+      "nrt" '(org-roam-buffer-toggle t :wk "roam buffer toggle")
+      "nrc" '(org-roam-capture t :wk "roam capture")
+      "nrf" '(org-roam-node-find :wk "find node")
+      "nrd" '(:ignore t :wk "dailies")
+      "nrdt" '(org-roam-dailies-goto-today :wk "today")
+      "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
+      "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
+      "nrdd" '(org-roam-dailies-goto-date :wk "goto date"))
+    :config
+    ;; org-roam-buffer
+    (add-to-list 'display-buffer-alist
+                 '("\\*org-roam\\*"
+                   (display-buffer-in-direction)
+                   (direction . right)
+                   (window-width . 0.33)
+                   (window-height . fit-window-to-buffer)))
+    ;; get tags to show up in 'org-roam-node-find':
+    (setq org-roam-node-display-template
+          (concat "${title:*} "
+                  (propertize "${tags:10}" 'face 'org-tag)))
+    (setq org-roam-completion-everywhere t) ;; roam completion anywhere
+    (setq org-roam-directory patrl/notes-path)
+    (setq org-roam-db-location (concat org-roam-directory "/.database/org-roam.db"))
+    (unless (< emacs-major-version 29)
+      (setq org-roam-database-connector 'sqlite-builtin))
+    (org-roam-db-autosync-mode) ;; ensures that org-roam is available on startup
+
+
+    ;; dailies config
+    (setq org-roam-dailies-directory "daily/")
+    (setq org-roam-dailies-capture-templates
+          '(("d" "default" entry
+             "* %?"
+             :target (file+head "%<%Y-%m-%d>.org"
+                                "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
+#+end_src
+
+** Export
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package citeproc
+    :after org)
+
+  (with-eval-after-load 'ox-latex
+     (add-to-list 'org-latex-classes
+                  '("scrartcl"
+                    "\\documentclass[letterpaper]{scrartcl}"
+                    ("\\section{%s}" . "\\section*{%s}")
+                    ("\\subsection{%s}" . "\\subsection*{%s}")
+                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                    ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                    ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+
+#+end_src
+
+** Highlighting
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package htmlize)
+#+end_src
+
+** Org-noter
+
+#+begin_src emacs-lisp :tangle init.el
+    (use-package org-noter
+      :commands
+      org-noter
+      :general
+      (patrl/local-leader-keys
+        :keyamps 'org-noter-doc-mode-map
+        "i" 'org-noter-insert-note)
+      :config
+      (setq org-noter-notes-search-path (list patrl/notes-path))
+      (setq org-noter-default-notes-file-names '("literature-notes.org"))
+      (setq org-noter-hide-other nil)
+      (setq org-noter-always-create-frame nil))
 #+end_src
 
 * Completion
