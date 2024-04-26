@@ -20,7 +20,7 @@ Currently tailored for GNU Emacs 29.1.
 - [[https://github.com/jwiegley/dot-emacs][GitHub - jwiegley/dot-emacs: My .emacs.el file and other personal Emacs goodies]]
 - [[https://tecosaur.github.io/emacs-config/config.html][Tecoaur's Doom Emacs Configuration]]
 
-* DONE Early init file
+* Early init file
 :PROPERTIES:
 :header-args: :tangle early-init.el
 :END:
@@ -116,7 +116,7 @@ Disable GUI elements before we have a chance to peek.
   (elpaca elpaca-use-package
     ;; Enable use-package :ensure support for Elpaca.
     (elpaca-use-package-mode))
-  (setq use-package-always-ensure t)
+  (setq use-package-always-ensure t) ;; ensure by default
 #+end_src
 
 * Emacs
@@ -573,6 +573,7 @@ Use ~.~ after an avy command to trigger ~embark-act~ on the selected candidate.
 
 #+begin_src emacs-lisp
   (use-package link-hint
+    :demand t
     :general
     (patrl/leader-keys
       "l" '(link-hint-open-link :wk "open link"))
@@ -616,16 +617,19 @@ Minimal mode line.
 - [[https://github.com/jtbm37/all-the-icons-dired][GitHub - jtbm37/all-the-icons-dired: Adds dired support to all-the-icons]]
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package all-the-icons)
+  (use-package all-the-icons
+    :demand t)
 
 
   ;; prettify dired with icons
   (use-package all-the-icons-dired
+    :demand t
     :hook
     (dired-mode . all-the-icons-dired-mode))
 
   (use-package all-the-icons-completion
     :after (marginalia all-the-icons)
+    :demand t
     :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
     :init (all-the-icons-completion-mode))
 #+end_src
@@ -636,6 +640,7 @@ Add some margins (useful for writing prose).
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package olivetti
+    :demand t
     :init
     (setq olivetti-body-width 80)
     (setq olivetti-style 'fancy)
@@ -673,6 +678,7 @@ Visually distinguish between 'real' buffers and everything else.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package solaire-mode
+    :demand t
     :config
     (solaire-global-mode +1))
 #+end_src
@@ -706,6 +712,7 @@ Visually highlight todo.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package hl-todo
+    :demand t
     :init
     (global-hl-todo-mode))
 #+end_src
@@ -724,6 +731,7 @@ Not sure if I want to keep this around.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package popper
+    :demand t
     :general
     (patrl/leader-keys
           "bp" '(:ignore t :wk "popper")
@@ -758,6 +766,7 @@ This has been quite nice so far.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package bufler
+    :demand t
     :custom
     (bufler-workspace-mode t)
     ;; (bufler-workspace-tabs-mode t)
@@ -791,24 +800,25 @@ Use built in ~project.el~.
 Use built-in ~dired~.
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package dired
-    :ensure nil
-    :general
-    (patrl/leader-keys
-      "fd" '(dired :wk "dired") ;; open dired (in a directory)
-      "fj" '(dired-jump :wk "dired jump")) ;; open direct in the current directory
-    ;; ranger like navigation
-    (:keymaps 'dired-mode-map
-              :states 'normal
-              "h" 'dired-up-directory
-              "q" 'kill-current-buffer
-              "l" 'dired-find-file)
-    :hook
-    (dired-mode . dired-hide-details-mode))
+    (use-package dired
+      :ensure nil
+      :general
+      (patrl/leader-keys
+        "fd" '(dired :wk "dired") ;; open dired (in a directory)
+        "fj" '(dired-jump :wk "dired jump")) ;; open direct in the current directory
+      ;; ranger like navigation
+      (:keymaps 'dired-mode-map
+                :states 'normal
+                "h" 'dired-up-directory
+                "q" 'kill-current-buffer
+                "l" 'dired-find-file)
+      :hook
+      (dired-mode . dired-hide-details-mode))
 
-  ;; toggle subtree visibility with 'TAB'
-  ;; makes dired a much more pleasant file manager
-  (use-package dired-subtree)
+    ;; toggle subtree visibility with 'TAB'
+    ;; makes dired a much more pleasant file manager
+  (use-package dired-subtree
+    :demand t)
 #+end_src
 
 * Languages
@@ -949,7 +959,7 @@ Note that the following uses [[*Cape]] to convert dante's company backend to to 
 #+end_src
 
 
-* SOMEDAY latex
+* Latex
 
 Useful resources:
 
@@ -1035,6 +1045,7 @@ Set up icon support using the following instructions:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package citar
+    :demand t
     :after all-the-icons
     :init
     (defun citar-setup-capf ()
@@ -1153,10 +1164,10 @@ Provides faster latex previews for ~org-mode~.
 - See https://karthinks.com/software/fast-latex-previews-in-org-mode/
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package org-auctex
-  ;;   :straight (:type git :host github :repo
-  ;;                    "karthink/org-auctex")
-  ;;   :hook (org-mode . org-auctex-mode))
+  (use-package org-auctex
+    :elpaca (:type git :host github :repo
+                     "karthink/org-auctex")
+    :hook (org-mode . org-auctex-mode))
 #+end_src
 
 ** Transclusion
@@ -1178,10 +1189,10 @@ Provides faster latex previews for ~org-mode~.
 Reveals hidden elements interactively.
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package org-appear
-  ;;   :straight (:type git :host github :repo "awth13/org-appear")
-  ;;   :after org
-  ;;   :hook (org-mode . org-appear-mode))
+  (use-package org-appear
+    :elpaca (:type git :host github :repo "awth13/org-appear")
+    :after org
+    :hook (org-mode . org-appear-mode))
 #+end_src
 
 **  Cliplink
@@ -1213,6 +1224,7 @@ Enable org-modern mode globally.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-roam
+    :demand t
     :general
     (patrl/leader-keys
       "nr" '(:ignore t :wk "roam")
@@ -1332,6 +1344,7 @@ The completion framework I adopt exploits packages primarily developed by [[http
               "M-h" 'backward-kill-word))
 
   (use-package orderless
+    :demand t
     :init
     (setq completion-styles '(orderless)
           completion-category-defaults nil
@@ -1343,6 +1356,7 @@ The completion framework I adopt exploits packages primarily developed by [[http
     (savehist-mode))
 
   (use-package marginalia
+    :demand t
     :after vertico
     :custom
     (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
@@ -1384,6 +1398,7 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package affe
+    :demand t
     :after orderless
     :general
     (patrl/leader-keys
@@ -1457,6 +1472,7 @@ A minimal ui for ~completion-in-region~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package cape
+    :demand t
     ;; bindings for dedicated completion commands
     :general
     ("M-p p" 'completion-at-point ;; capf
@@ -1522,6 +1538,7 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
 
 #+begin_src emacs-lisp
   (use-package recursion-indicator
+    :demand t
     :config
     (recursion-indicator-mode))
 #+end_src
@@ -1571,6 +1588,7 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package jinx
+    :demand t
     :ensure nil
     :hook (emacs-startup . global-jinx-mode))
 #+end_src
@@ -1579,6 +1597,7 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package helpful
+    :demand t
     :general
     (patrl/leader-keys
       "hc" '(helpful-command :wk "helpful command")
@@ -1597,6 +1616,7 @@ The best search package.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package deadgrep
+    :demand t
     :general
     (patrl/leader-keys
       "sd" '(deadgrep :wk "deadgrep")))
@@ -1708,6 +1728,7 @@ Templates can be found in [[file:templates]].
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package tempel
+    :demand t
     :general
     ("M-p +" 'tempel-complete) ;; M-p completion prefix; see `cape'
     (patrl/leader-keys
@@ -1808,9 +1829,9 @@ Essential, since I'm on NixOS.
 ** TODO Kmonad
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package kbd-mode
-  ;;   :straight (:type git :host github :repo
-  ;;                    "kmonad/kbd-mode"))
+  (use-package kbd-mode
+    :elpaca (:type git :host github :repo
+                     "kmonad/kbd-mode"))
 #+end_src
 
 *** TODO disable flymake mode in kbd-mode
@@ -1955,8 +1976,8 @@ Search emails interactively using ~consult~.
 ** Tree-sitter
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package tree-sitter)
-  (use-package tree-sitter-langs)
+  (use-package tree-sitter :disabled)
+  (use-package tree-sitter-langs :disabled)
 #+end_src
 
 * Graveyard
