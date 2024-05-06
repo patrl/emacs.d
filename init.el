@@ -44,7 +44,7 @@
 (elpaca elpaca-use-package
   ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
-(setq use-package-always-ensure t)
+(setq use-package-always-ensure t) ;; ensure by default
 
 (defvar patrl/library-path "~/MEGA/library/"
   "Directory .pdf collection lives.")
@@ -407,6 +407,7 @@
           (alist-get ?K avy-dispatch-alist) 'patrl/avy-action-kill-whole-line)) ;; kill lines with avy
 
 (use-package link-hint
+  :demand t
   :general
   (patrl/leader-keys
     "l" '(link-hint-open-link :wk "open link"))
@@ -425,20 +426,24 @@
   :demand t
   :config (mood-line-mode))
 
-(use-package all-the-icons)
+(use-package all-the-icons
+  :demand t)
 
 
 ;; prettify dired with icons
 (use-package all-the-icons-dired
+  :demand t
   :hook
   (dired-mode . all-the-icons-dired-mode))
 
 (use-package all-the-icons-completion
   :after (marginalia all-the-icons)
+  :demand t
   :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
   :init (all-the-icons-completion-mode))
 
 (use-package olivetti
+  :demand t
   :init
   (setq olivetti-body-width 80)
   (setq olivetti-style 'fancy)
@@ -465,6 +470,7 @@
   (add-hook 'server-after-make-frame-hook 'patrl/setup-font-vivacia))
 
 (use-package solaire-mode
+  :demand t
   :config
   (solaire-global-mode +1))
 
@@ -488,10 +494,12 @@
   (doom-themes-org-config))
 
 (use-package hl-todo
+  :demand t
   :init
   (global-hl-todo-mode))
 
 (use-package popper
+  :demand t
   :general
   (patrl/leader-keys
         "bp" '(:ignore t :wk "popper")
@@ -518,6 +526,7 @@
   (popper-echo-mode +1))
 
 (use-package bufler
+  :demand t
   :custom
   (bufler-workspace-mode t)
   ;; (bufler-workspace-tabs-mode t)
@@ -540,23 +549,24 @@
   (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 
 (use-package dired
-  :ensure nil
-  :general
-  (patrl/leader-keys
-    "fd" '(dired :wk "dired") ;; open dired (in a directory)
-    "fj" '(dired-jump :wk "dired jump")) ;; open direct in the current directory
-  ;; ranger like navigation
-  (:keymaps 'dired-mode-map
-            :states 'normal
-            "h" 'dired-up-directory
-            "q" 'kill-current-buffer
-            "l" 'dired-find-file)
-  :hook
-  (dired-mode . dired-hide-details-mode))
+    :ensure nil
+    :general
+    (patrl/leader-keys
+      "fd" '(dired :wk "dired") ;; open dired (in a directory)
+      "fj" '(dired-jump :wk "dired jump")) ;; open direct in the current directory
+    ;; ranger like navigation
+    (:keymaps 'dired-mode-map
+              :states 'normal
+              "h" 'dired-up-directory
+              "q" 'kill-current-buffer
+              "l" 'dired-find-file)
+    :hook
+    (dired-mode . dired-hide-details-mode))
 
-;; toggle subtree visibility with 'TAB'
-;; makes dired a much more pleasant file manager
-(use-package dired-subtree)
+  ;; toggle subtree visibility with 'TAB'
+  ;; makes dired a much more pleasant file manager
+(use-package dired-subtree
+  :demand t)
 
 (use-package lua-mode
   :mode "\\.lua\\'")
@@ -635,26 +645,35 @@
 
 (use-package auctex
   :elpaca (auctex :pre-build (("./autogen.sh")
-                    ("./configure"
-                     "--without-texmf-dir"
-                     "--with-packagelispdir=./"
-                     "--with-packagedatadir=./")
-                    ("make"))
-        :build (:not elpaca--compile-info) ;; Make will take care of this step
-        :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
-        :version (lambda (_) (require 'tex-site) AUCTeX-version))
+			      ("./configure"
+			       "--without-texmf-dir"
+			       "--with-packagelispdir=./"
+			       "--with-packagedatadir=./")
+			      ("make"))
+		  :build (:not elpaca--compile-info) ;; Make will take care of this step
+		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
+		  :version (lambda (_) (require 'tex-site) AUCTeX-version))
   :mode ("\\.tex\\'" . LaTeX-mode)
   :init
   (setq TeX-parse-self t ; parse on load
 	reftex-plug-into-AUCTeX t
 	TeX-auto-save t  ; parse on save
+	TeX-view-program-selection '((output-pdf "PDF Tools"))
 	TeX-source-correlate-mode t
 	TeX-source-correlate-method 'synctex
-	TeX-source-correlate-start-server nil
+	TeX-source-correlate-start-server t
 	TeX-electric-sub-and-superscript t
 	TeX-engine 'luatex ;; use lualatex by default
 	TeX-save-query nil
 	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+
+  (add-hook 'TeX-mode-hook #'reftex-mode)
+  (add-hook 'TeX-mode-hook #'olivetti-mode)
+  (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
+  (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
+  (add-hook 'TeX-after-compilation-finished-functions
+	    #'TeX-revert-document-buffer)
+  (add-hook 'TeX-mode-hook #'outline-minor-mode)
   :general 
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
@@ -667,22 +686,13 @@
     "e" '(LaTeX-environment :wk "insert environment")
     "p" '(preview-at-point :wk "preview at point")
     "f" '(TeX-font :wk "font")
-    "c" '(TeX-command-run-all :wk "compile"))
-  :config
-;; (add-hook 'TeX-mode-hook #'visual-line-mode)
-  (add-hook 'TeX-mode-hook #'reftex-mode)
-  (add-hook 'TeX-mode-hook #'olivetti-mode)
-  (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
-  (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
-  (add-hook 'TeX-after-compilation-finished-functions
-		#'TeX-revert-document-buffer)
-  (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
-  (add-hook 'TeX-mode-hook #'outline-minor-mode))
+    "c" '(TeX-command-run-all :wk "compile")))
 
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
 
 (use-package citar
+  :demand t
   :after all-the-icons
   :init
   (defun citar-setup-capf ()
@@ -767,10 +777,10 @@
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
 
-;; (use-package org-auctex
-;;   :straight (:type git :host github :repo
-;;                    "karthink/org-auctex")
-;;   :hook (org-mode . org-auctex-mode))
+(use-package org-auctex
+  :elpaca (:type git :host github :repo
+                   "karthink/org-auctex")
+  :hook (org-mode . org-auctex-mode))
 
 (use-package org-transclusion
   :after org
@@ -778,10 +788,10 @@
   (patrl/leader-keys
     "nt" '(org-transclusion-mode :wk "transclusion mode")))
 
-;; (use-package org-appear
-;;   :straight (:type git :host github :repo "awth13/org-appear")
-;;   :after org
-;;   :hook (org-mode . org-appear-mode))
+(use-package org-appear
+  :elpaca (:type git :host github :repo "awth13/org-appear")
+  :after org
+  :hook (org-mode . org-appear-mode))
 
 (use-package org-cliplink
   :after org
@@ -795,6 +805,7 @@
   :config (global-org-modern-mode))
 
 (use-package org-roam
+  :demand t
   :general
   (patrl/leader-keys
     "nr" '(:ignore t :wk "roam")
@@ -887,6 +898,7 @@
             "M-h" 'backward-kill-word))
 
 (use-package orderless
+  :demand t
   :init
   (setq completion-styles '(orderless)
         completion-category-defaults nil
@@ -898,6 +910,7 @@
   (savehist-mode))
 
 (use-package marginalia
+  :demand t
   :after vertico
   :custom
   (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
@@ -927,6 +940,7 @@
             (car (project-roots project))))))
 
 (use-package affe
+  :demand t
   :after orderless
   :general
   (patrl/leader-keys
@@ -984,6 +998,7 @@
   (setq tab-always-indent 'complete)) ;; enable tab completion
 
 (use-package cape
+  :demand t
   ;; bindings for dedicated completion commands
   :general
   ("M-p p" 'completion-at-point ;; capf
@@ -1039,7 +1054,7 @@
   :ensure nil
   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
   :mode ("\\.pdf\\'" . pdf-view-mode)
-  :config
+  :config 
   (require 'pdf-tools)
   (require 'pdf-view)
   (require 'pdf-misc)
@@ -1051,13 +1066,16 @@
   (require 'pdf-history)
   (require 'pdf-links)
   (require 'pdf-outline)
+  (require 'pdf-sync)
   (pdf-tools-install :no-query))
 
 (use-package jinx
+  :demand t
   :ensure nil
   :hook (emacs-startup . global-jinx-mode))
 
 (use-package helpful
+  :demand t
   :general
   (patrl/leader-keys
     "hc" '(helpful-command :wk "helpful command")
@@ -1068,6 +1086,7 @@
     "hk" '(helpful-key :wk "helpful key")))
 
 (use-package deadgrep
+  :demand t
   :general
   (patrl/leader-keys
     "sd" '(deadgrep :wk "deadgrep")))
@@ -1155,6 +1174,7 @@
   (yas-global-mode 1))
 
 (use-package tempel
+  :demand t
   :general
   ("M-p +" 'tempel-complete) ;; M-p completion prefix; see `cape'
   (patrl/leader-keys
@@ -1217,9 +1237,9 @@
   :config
   (direnv-mode))
 
-;; (use-package kbd-mode
-;;   :straight (:type git :host github :repo
-;;                    "kmonad/kbd-mode"))
+(use-package kbd-mode
+  :elpaca (:type git :host github :repo
+                   "kmonad/kbd-mode"))
 
 ;; We write a function to determine how we want elfeed to display the buffer with the current entry.
 (defun patrl/elfeed-display-buffer (buf &optional act)
@@ -1315,5 +1335,5 @@
   (patrl/leader-keys
     "ob" '(ebib :wk "ebib")))
 
-(use-package tree-sitter)
-(use-package tree-sitter-langs)
+(use-package tree-sitter :disabled)
+(use-package tree-sitter-langs :disabled)
