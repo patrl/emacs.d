@@ -985,26 +985,35 @@ Auto-activating snippets:
 #+begin_src emacs-lisp :tangle init.el
   (use-package auctex
     :elpaca (auctex :pre-build (("./autogen.sh")
-                      ("./configure"
-                       "--without-texmf-dir"
-                       "--with-packagelispdir=./"
-                       "--with-packagedatadir=./")
-                      ("make"))
-          :build (:not elpaca--compile-info) ;; Make will take care of this step
-          :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
-          :version (lambda (_) (require 'tex-site) AUCTeX-version))
+  			      ("./configure"
+  			       "--without-texmf-dir"
+  			       "--with-packagelispdir=./"
+  			       "--with-packagedatadir=./")
+  			      ("make"))
+  		  :build (:not elpaca--compile-info) ;; Make will take care of this step
+  		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
+  		  :version (lambda (_) (require 'tex-site) AUCTeX-version))
     :mode ("\\.tex\\'" . LaTeX-mode)
     :init
     (setq TeX-parse-self t ; parse on load
   	reftex-plug-into-AUCTeX t
   	TeX-auto-save t  ; parse on save
+  	TeX-view-program-selection '((output-pdf "PDF Tools"))
   	TeX-source-correlate-mode t
   	TeX-source-correlate-method 'synctex
-  	TeX-source-correlate-start-server nil
+  	TeX-source-correlate-start-server t
   	TeX-electric-sub-and-superscript t
   	TeX-engine 'luatex ;; use lualatex by default
   	TeX-save-query nil
   	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
+
+    (add-hook 'TeX-mode-hook #'reftex-mode)
+    (add-hook 'TeX-mode-hook #'olivetti-mode)
+    (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
+    (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
+    (add-hook 'TeX-after-compilation-finished-functions
+  	    #'TeX-revert-document-buffer)
+    (add-hook 'TeX-mode-hook #'outline-minor-mode)
     :general 
     (patrl/local-leader-keys
       :keymaps 'LaTeX-mode-map
@@ -1017,17 +1026,8 @@ Auto-activating snippets:
       "e" '(LaTeX-environment :wk "insert environment")
       "p" '(preview-at-point :wk "preview at point")
       "f" '(TeX-font :wk "font")
-      "c" '(TeX-command-run-all :wk "compile"))
-    :config
-  ;; (add-hook 'TeX-mode-hook #'visual-line-mode)
-    (add-hook 'TeX-mode-hook #'reftex-mode)
-    (add-hook 'TeX-mode-hook #'olivetti-mode)
-    (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
-    (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
-    (add-hook 'TeX-after-compilation-finished-functions
-  		#'TeX-revert-document-buffer)
-    (add-to-list 'TeX-view-program-selection '(output-pdf "PDF Tools"))
-    (add-hook 'TeX-mode-hook #'outline-minor-mode))
+      "c" '(TeX-command-run-all :wk "compile")))
+
 #+end_src
 
 ~evil-tex~ is a crucial component in my workflow. ~evil-surround~ integration makes things a breeze. Some examples:
@@ -1565,7 +1565,7 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
     :ensure nil
     :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
     :mode ("\\.pdf\\'" . pdf-view-mode)
-    :config
+    :config 
     (require 'pdf-tools)
     (require 'pdf-view)
     (require 'pdf-misc)
@@ -1577,6 +1577,7 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
     (require 'pdf-history)
     (require 'pdf-links)
     (require 'pdf-outline)
+    (require 'pdf-sync)
     (pdf-tools-install :no-query))
 #+end_src
 
@@ -1645,8 +1646,6 @@ The best search package.
       ":flush" "😳"
       ":wow" "😮"))
 #+end_src
-
-Not sure if laas mode is properly activating in latex mode.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package laas
@@ -1979,76 +1978,6 @@ Search emails interactively using ~consult~.
   (use-package tree-sitter :disabled)
   (use-package tree-sitter-langs :disabled)
 #+end_src
-
-* Graveyard
-
-Packages I've tried out which, for whatever reason, haven't suited me.
-
-** Mastodon
-
-#+begin_src emacs-lisp
-  (use-package mastodon
-    :config
-    (setq mastodon-instance-url "https://types.pl"
-	  mastodon-active-user "patrl"))
-#+end_src
-
-** ~0x0~
-
-#+begin_src emacs-lisp
-  (use-package 0x0
-    :general
-    (patrl/leader-keys
-      "x" '(:ignore t :wk "web")
-      "x;" '(0x0-dwim t :wk "0x0 dwim")
-      "xt" '(0x0-upload-text :wk "0x0 upload text")
-      "xf" '(0x0-upload-file :wk "0x0 upload file")
-      "xk" '(0x0-upload-kill-ring :wk "0x0 upload kill ring")
-      "xp" '(0x0-popup :wk "0x0 popup")
-      "xs" '(0x0-shorten-uri :wk "0x0 shorten url")))
-#+end_src
-
-** Org-re-reveal
-
-#+begin_src emacs-lisp
-  (use-package org-re-reveal)
-#+end_src
-
-** Org-present
-
-#+begin_src emacs-lisp
-  (use-package org-present)
-#+end_src
-
-** TODO Sidebar
-
-#+begin_src emacs-lisp
-  ;; (use-package org-sidebar
-  ;;   :after org
-  ;;   :straight (:type git :host github :repo "alphapapa/org-sidebar"))
-#+end_src
-
-** company
-
-#+begin_src emacs-lisp
-  (use-package company
-    :custom
-    (company-idle-delay nil) ;; turn off auto-completion
-    :general
-    (:keymap 'company-mode-map
-             "C-SPC" 'company-complete) ;; keybinding to trigger company completion
-    :hook
-    (prog-mode . company-mode)
-    (LaTeX-mode . company-mode)
-    :config
-    ;; the following stops company from using the orderless completion style
-    ;; makes company much more useful
-    (define-advice company-capf
-        (:around (orig-fun &rest args) set-completion-styles)
-      (let ((completion-styles '(basic partial-completion)))
-        (apply orig-fun args))))
-#+end_src
-
 
 * File local variables                                             :noexport:
 
