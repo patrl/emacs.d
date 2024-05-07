@@ -4,13 +4,7 @@
 #+EXPORT_FILE_NAME: ./docs/index.html
 #+SETUPFILE: theme-readtheorg.setup
 
-Currently tailored for GNU Emacs 29.1.
-
-* todo-list
-
-** TODO get smooth scrolling working
-** SOMEDAY explore additional key themes for lispyville (see [[lispy]])
-** TODO get drag-and-drop working with dired
+Currently tailored for GNU Emacs 29.3.
 
 * Useful resources
 
@@ -62,11 +56,11 @@ Disable GUI elements before we have a chance to peek.
 #+end_src
 
 
-** DONE ~elpaca~
+**  ~Elpaca~
 
 - [[https://github.com/progfolio/elpaca][GitHub - progfolio/elpaca: An elisp package manager]] 
 
-*** DONE Bootstrap ~elpaca~
+*** Bootstrap ~elpaca~
 
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.7)
@@ -110,6 +104,8 @@ Disable GUI elements before we have a chance to peek.
 
 
 #+end_src
+
+*** Integration with ~use-package~
 
 #+begin_src emacs-lisp
   ;; Install use-package support
@@ -1125,24 +1121,6 @@ Uses emacs' font lock to highlight source code blocks in latex.
   (use-package engrave-faces)
 #+end_src
 
-*** TODO latexmk
-
-#+begin_src emacs-lisp :tangle init.el
-  ;; ;; FIXME
-  ;; (use-package auctex-latexmk
-  ;;   :disabled
-  ;;   :after latex
-  ;;   :init
-  ;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-  ;;   :config
-  ;;   (auctex-latexmk-setup))
-#+end_src
-
-** Issues
-*** TODO pdf buffer isn't reverted in preview continuously mode.
-I think probably I just need to use zathura as the pdf viewer, which has its own smart revert functionality.
-
-
 * Org
 
 ** Evil integration
@@ -1156,7 +1134,7 @@ I think probably I just need to use zathura as the pdf viewer, which has its own
     (evil-org-agenda-set-keys))
 #+end_src
 
-** TODO Org-auctex
+** Org-auctex
 
 Provides faster latex previews for ~org-mode~.
 
@@ -1182,7 +1160,7 @@ Provides faster latex previews for ~org-mode~.
       "nt" '(org-transclusion-mode :wk "transclusion mode")))
 #+end_src
 
-** TODO Appear
+** Appear
 
 - [[https://github.com/awth13/org-appear][GitHub - awth13/org-appear: Toggle visibility of hidden Org mode element part...]]
 
@@ -1707,9 +1685,7 @@ The best search package.
       "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 #+end_src
 
-*** TODO yasnippet
-
-Deprecate in favour of tempel.
+*** yasnippet
 
 #+begin_src emacs-lisp :tangle init.el
     (use-package yasnippet
@@ -1825,7 +1801,7 @@ Essential, since I'm on NixOS.
     (direnv-mode))
 #+end_src
 
-** TODO Kmonad
+** Kmonad
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package kbd-mode
@@ -1833,9 +1809,7 @@ Essential, since I'm on NixOS.
                      "kmonad/kbd-mode"))
 #+end_src
 
-*** TODO disable flymake mode in kbd-mode
-
-** TODO Elfeed
+** Elfeed
 
 Resources:
 - [[https://karthinks.com/software/lazy-elfeed/][Lazy Elfeed | Karthinks]]
@@ -1871,7 +1845,7 @@ Resources:
     (elfeed-org))
 #+end_src
 
-** TODO Notmuch
+** Notmuch
 
 A gmail-focused notmuch setup, with ~lieer~ as the sync backend.
 

@@ -761,15 +761,6 @@
 
 (use-package engrave-faces)
 
-;; ;; FIXME
-;; (use-package auctex-latexmk
-;;   :disabled
-;;   :after latex
-;;   :init
-;;   (setq auctex-latexmk-inherit-TeX-PDF-mode t)
-;;   :config
-;;   (auctex-latexmk-setup))
-
 (use-package evil-org
   :after org
   :hook (org-mode . (lambda () evil-org-mode))
