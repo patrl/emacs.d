@@ -1276,7 +1276,7 @@ Enable org-modern mode globally.
       org-noter
       :general
       (patrl/local-leader-keys
-        :keyamps 'org-noter-doc-mode-map
+        :keymaps 'org-noter-doc-mode-map
         "i" 'org-noter-insert-note)
       :config
       (setq org-noter-notes-search-path (list patrl/notes-path))
