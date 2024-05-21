@@ -62,6 +62,8 @@ Disable GUI elements before we have a chance to peek.
 
 *** Bootstrap ~elpaca~
 
+- [[https://github.com/progfolio/elpaca?tab=readme-ov-file#installer][Bootstrap instructions]] 
+
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.7)
   (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
@@ -101,18 +103,14 @@ Disable GUI elements before we have a chance to peek.
       (load "./elpaca-autoloads")))
   (add-hook 'after-init-hook #'elpaca-process-queues)
   (elpaca `(,@elpaca-order))
-
-
 #+end_src
 
-*** Integration with ~use-package~
+Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
 
 #+begin_src emacs-lisp
-  ;; Install use-package support
   (elpaca elpaca-use-package
-    ;; Enable use-package :ensure support for Elpaca.
     (elpaca-use-package-mode))
-  (setq use-package-always-ensure t) ;; ensure by default
+  (setq use-package-always-ensure t)
 #+end_src
 
 * Emacs
@@ -157,7 +155,7 @@ Disable GUI elements before we have a chance to peek.
 
     (setq frame-inhibit-implied-resize t) ;; useless for a tiling window manager
 
-    (setq show-trailing-whitespace t)
+    (setq show-trailing-whitespace t) ;; self-explanatory
 
     (setq user-full-name "Patrick D. Elliott") ;; my details
     (setq user-mail-address "patrick.d.elliott@gmail.com")
@@ -174,7 +172,7 @@ Disable GUI elements before we have a chance to peek.
 
     (setq create-lockfiles nil) ;; no need to create lockfiles
 
-    (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
+    (set-charset-priority 'unicode) ;; utf8 everywhere
     (setq locale-coding-system 'utf-8
   	  coding-system-for-read 'utf-8
   	  coding-system-for-write 'utf-8)
@@ -221,9 +219,8 @@ Disable GUI elements before we have a chance to peek.
 :header-args: :tangle init.el
 :END:
 
-Mnemonic keybindings with ~SPC~ as the leader key, inspired by spacemacs and doom emacs.
-
-The local leader ~,~ is used for mode-specific bindings.
+- Mnemonic keybindings with ~SPC~ as the leader key, inspired by spacemacs and doom emacs.
+- The local leader ~,~ is used for mode-specific bindings.
 
 ** Evil
 
@@ -233,7 +230,9 @@ The local leader ~,~ is used for mode-specific bindings.
   (use-package evil
     :demand t
     :init
-    (setq evil-search-module 'isearch)
+    (setq evil-respect-visual-line-mode t) ;; respect visual lines
+
+    (setq evil-search-module 'isearch) ;; use emacs' built-in search functionality.
 
     (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
     (setq evil-want-C-d-scroll t) ;; allow scroll down with 'C-d'
@@ -295,7 +294,9 @@ Port of Tim Pope's surround package
   (use-package evil-surround
     :after evil
     :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-           (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
+           (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist)))
+  	 (LaTeX-mode . (lambda () (push '(?$ . ("\\(" . "\\)"))))))
+
     :config
     (global-evil-surround-mode 1)) ;; globally enable evil-surround
 #+end_src
