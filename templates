@@ -15,6 +15,7 @@ org-mode
 (src "#+begin_src " p n> r> n> "#+end_src")
 (elisp "#+begin_src emacs-lisp" n> r> n "#+end_src")
 (lingex "#+name: " p n> "#+begin_exe" n> "\\ex " r> n> "#+end_exe")
+(rtxt "\\textcolor{red}\{" p "}")
 
 ;; awesomeblock snippets for org-mode
 (note "#+begin_noteblock" n> r> n> "#+end_noteblock")
