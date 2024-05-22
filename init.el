@@ -40,11 +40,9 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
-;; Install use-package support
 (elpaca elpaca-use-package
-  ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
-(setq use-package-always-ensure t) ;; ensure by default
+(setq use-package-always-ensure t)
 
 (defvar patrl/library-path "~/MEGA/library/"
   "Directory .pdf collection lives.")
@@ -74,7 +72,7 @@
 
   (setq frame-inhibit-implied-resize t) ;; useless for a tiling window manager
 
-  (setq show-trailing-whitespace t)
+  (setq show-trailing-whitespace t) ;; self-explanatory
 
   (setq user-full-name "Patrick D. Elliott") ;; my details
   (setq user-mail-address "patrick.d.elliott@gmail.com")
@@ -91,7 +89,7 @@
 
   (setq create-lockfiles nil) ;; no need to create lockfiles
 
-  (set-charset-priority 'unicode) ;; utf8 in every nook and cranny
+  (set-charset-priority 'unicode) ;; utf8 everywhere
   (setq locale-coding-system 'utf-8
 	  coding-system-for-read 'utf-8
 	  coding-system-for-write 'utf-8)
@@ -121,6 +119,12 @@
   ;; Hide commands in M-x which don't work in the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
+(use-package browse-url
+  :demand t
+  :ensure nil
+  :init
+  (setq browse-url-firefox-program "firefox-beta"))
+
 (use-package electric
   :demand t
   :ensure nil
@@ -131,7 +135,9 @@
 (use-package evil
   :demand t
   :init
-  (setq evil-search-module 'isearch)
+  (setq evil-respect-visual-line-mode t) ;; respect visual lines
+
+  (setq evil-search-module 'isearch) ;; use emacs' built-in search functionality.
 
   (setq evil-want-C-u-scroll t) ;; allow scroll up with 'C-u'
   (setq evil-want-C-d-scroll t) ;; allow scroll down with 'C-d'
@@ -173,7 +179,9 @@
 (use-package evil-surround
   :after evil
   :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-         (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist))))
+         (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist)))
+	 (LaTeX-mode . (lambda () (push '(?$ . ("\\(" . "\\)"))))))
+
   :config
   (global-evil-surround-mode 1)) ;; globally enable evil-surround
 
@@ -644,7 +652,7 @@
   :hook (markdown-mode . pandoc-mode))
 
 (use-package auctex
-  :elpaca (auctex :pre-build (("./autogen.sh")
+  :ensure (auctex :pre-build (("./autogen.sh")
 			      ("./configure"
 			       "--without-texmf-dir"
 			       "--with-packagelispdir=./"
@@ -769,7 +777,7 @@
   (evil-org-agenda-set-keys))
 
 (use-package org-auctex
-  :elpaca (:type git :host github :repo
+  :ensure (:type git :host github :repo
                    "karthink/org-auctex")
   :hook (org-mode . org-auctex-mode))
 
@@ -780,7 +788,7 @@
     "nt" '(org-transclusion-mode :wk "transclusion mode")))
 
 (use-package org-appear
-  :elpaca (:type git :host github :repo "awth13/org-appear")
+  :ensure (:type git :host github :repo "awth13/org-appear")
   :after org
   :hook (org-mode . org-appear-mode))
 
@@ -857,7 +865,7 @@
   org-noter
   :general
   (patrl/local-leader-keys
-    :keyamps 'org-noter-doc-mode-map
+    :keymaps 'org-noter-doc-mode-map
     "i" 'org-noter-insert-note)
   :config
   (setq org-noter-notes-search-path (list patrl/notes-path))
@@ -949,13 +957,20 @@
   :general
   (patrl/leader-keys
      "." 'embark-act) ;; easily accessible 'embark-act' binding.
-  ("C-;" 'embark-dwim)
+  ("C-." 'embark-act) ;; overlaps with evil-repeat 
+  ("C-;" 'embark-dwim) ;; overlaps with IEdit
   (:keymaps 'vertico-map
-            "C-." 'embark-act)
+            "C-." 'embark-act) ;; embark on completion candidates
   (:keymaps 'embark-heading-map
             "l" 'org-id-store-link)
   :init
-  (setq prefix-help-command #'embark-prefix-help-command))
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :config
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
 
 (use-package embark-consult
   :after (embark consult)
@@ -981,7 +996,9 @@
 
 (general-unbind
   :states '(insert)
-  "C-k") ;; this was interfering with corfu completion
+  "C-k" ;; this was interfering with corfu completion
+  :states '(normal)
+  "C-;") 
 
 (use-package emacs
   :ensure nil
@@ -1229,7 +1246,7 @@
   (direnv-mode))
 
 (use-package kbd-mode
-  :elpaca (:type git :host github :repo
+  :ensure (:type git :host github :repo
                    "kmonad/kbd-mode"))
 
 ;; We write a function to determine how we want elfeed to display the buffer with the current entry.
@@ -1305,6 +1322,13 @@
     "nmt" '(consult-notmuch-tree t :wk "consult notmuch tree")
     "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
   :after notmuch)
+
+(use-package ace-window
+  :demand t
+  :general
+  ("M-o" 'ace-window)
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 
 (use-package rainbow-mode)
 
