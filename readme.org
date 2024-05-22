@@ -203,6 +203,18 @@ Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
     (setq read-extended-command-predicate #'command-completion-default-include-p))
 #+end_src
 
+** Browse url
+
+I'm currently using ~firefox-beta~, so I need to make sure that the built-in ~browse-url~ package knows about this. 
+
+#+begin_src emacs-lisp
+  (use-package browse-url
+    :demand t
+    :ensure nil
+    :init
+    (setq browse-url-firefox-program "firefox-beta"))
+#+end_src
+
 **  Electric
 
 #+begin_src emacs-lisp
@@ -981,7 +993,7 @@ Auto-activating snippets:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package auctex
-    :elpaca (auctex :pre-build (("./autogen.sh")
+    :ensure (auctex :pre-build (("./autogen.sh")
   			      ("./configure"
   			       "--without-texmf-dir"
   			       "--with-packagelispdir=./"
@@ -1144,7 +1156,7 @@ Provides faster latex previews for ~org-mode~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-auctex
-    :elpaca (:type git :host github :repo
+    :ensure (:type git :host github :repo
                      "karthink/org-auctex")
     :hook (org-mode . org-auctex-mode))
 #+end_src
@@ -1169,7 +1181,7 @@ Reveals hidden elements interactively.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-appear
-    :elpaca (:type git :host github :repo "awth13/org-appear")
+    :ensure (:type git :host github :repo "awth13/org-appear")
     :after org
     :hook (org-mode . org-appear-mode))
 #+end_src
@@ -1399,13 +1411,20 @@ The completion framework I adopt exploits packages primarily developed by [[http
     :general
     (patrl/leader-keys
        "." 'embark-act) ;; easily accessible 'embark-act' binding.
-    ("C-;" 'embark-dwim)
+    ("C-." 'embark-act) ;; overlaps with evil-repeat 
+    ("C-;" 'embark-dwim) ;; overlaps with IEdit
     (:keymaps 'vertico-map
-              "C-." 'embark-act)
+              "C-." 'embark-act) ;; embark on completion candidates
     (:keymaps 'embark-heading-map
               "l" 'org-id-store-link)
     :init
-    (setq prefix-help-command #'embark-prefix-help-command))
+    (setq prefix-help-command #'embark-prefix-help-command)
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
 
   (use-package embark-consult
     :after (embark consult)
@@ -1437,7 +1456,9 @@ A minimal ui for ~completion-in-region~.
 
   (general-unbind
     :states '(insert)
-    "C-k") ;; this was interfering with corfu completion
+    "C-k" ;; this was interfering with corfu completion
+    :states '(normal)
+    "C-;") 
 
   (use-package emacs
     :ensure nil
@@ -1692,7 +1713,7 @@ The best search package.
     (use-package yasnippet
       :config
       (yas-reload-all)
-      (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
+      (add-to-list 'yas-snippet-dirs "~/.config/emacs/snippets")
       (yas-global-mode 1))
 #+end_src
 
@@ -1806,7 +1827,7 @@ Essential, since I'm on NixOS.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package kbd-mode
-    :elpaca (:type git :host github :repo
+    :ensure (:type git :host github :repo
                      "kmonad/kbd-mode"))
 #+end_src
 
@@ -1910,6 +1931,17 @@ Search emails interactively using ~consult~.
 
 * Staging grounds
 
+** Ace window
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package ace-window
+    :demand t
+    :general
+    ("M-o" 'ace-window) ;; global keybinding for ace-window (there's some lispy interference)
+    :config
+    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))) ;; use the homerow to jump
+#+end_src
+
 ** Rainbow mode
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1962,3 +1994,4 @@ Search emails interactively using ~consult~.
 ;; eval: (add-hook 'after-save-hook (lambda ()(if (y-or-n-p "Tangle?")(org-babel-tangle))) nil t)
 ;; jinx-local-words: "avy todo"
 ;; End:
+
