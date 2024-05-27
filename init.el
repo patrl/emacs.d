@@ -132,6 +132,11 @@
   (electric-pair-mode +1) ;; automatically insert closing parens
   (setq electric-pair-preserve-balance nil)) ;; more annoying than useful
 
+(use-package ediff
+  :demand t
+  :ensure nil
+)
+
 (use-package evil
   :demand t
   :init
@@ -282,7 +287,9 @@
   ;; open
   (patrl/leader-keys
     "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar")) ;; TODO this needs some love
+    "os" '(speedbar t :wk "speedbar")
+    "op" '(elpaca-log t :wk "elpaca"))
+
 
   ;; search
   ;; see 'consult'
@@ -1178,7 +1185,7 @@
 (use-package yasnippet
   :config
   (yas-reload-all)
-  (add-to-list 'yas-snippet-dirs "~/.config/emacs-vanilla/snippets")
+  (add-to-list 'yas-snippet-dirs "~/.config/emacs/snippets")
   (yas-global-mode 1))
 
 (use-package tempel
@@ -1326,9 +1333,9 @@
 (use-package ace-window
   :demand t
   :general
-  ("M-o" 'ace-window)
+  ("M-o" 'ace-window) ;; global keybinding for ace-window (there's some lispy interference)
   :config
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))) ;; use the homerow to jump
 
 (use-package rainbow-mode)
 
