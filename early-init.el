@@ -6,6 +6,7 @@
 (menu-bar-mode -1) ;; disables menubar
 (tool-bar-mode -1) ;; disables toolbar
 (scroll-bar-mode -1) ;; disables scrollbar
+(pixel-scroll-mode 1) ;; enable smooth scrolling
 
 (setq inhibit-splash-screen t ;; no thanks
 	use-file-dialog nil ;; don't use system file dialog
