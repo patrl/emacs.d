@@ -264,8 +264,8 @@ I'm currently using ~firefox-beta~, so I need to make sure that the built-in ~br
     (setq evil-want-integration t) ;; necessary for evil collection
     (setq evil-want-keybinding nil)
 
-    (setq evil-split-window-below t)
-    (setq evil-vsplit-window-right t)
+    (setq evil-split-window-below t) ;; split windows created below
+    (setq evil-vsplit-window-right t) ;; vertically split windows created to the right
 
     (setq evil-want-C-i-jump nil) ;; hopefully this will fix weird tab behaviour
 
@@ -630,6 +630,7 @@ Minimal mode line.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package mood-line
+    :disabled
     :demand t
     :config (mood-line-mode))
 #+end_src
@@ -1114,9 +1115,9 @@ Set up icon support using the following instructions:
        :tag "is:cited"))
     :hook
     ;; set up citation completion for latex, org-mode, and markdown
-    (LaTeX-mode . citar-setup-capf)
-    (org-mode . citar-setup-capf)
-    (markdown-mode . citar-setup-capf)
+    (LaTeX-mode . citar-capf-setup)
+    (org-mode . citar-capf-setup)
+    (markdown-mode . citar-capf-setup)
     :config
     (setq citar-indicators
   	(list citar-indicator-files-icons
@@ -1451,6 +1452,8 @@ The completion framework I adopt exploits packages primarily developed by [[http
 
 ** Corfu
 
+- [[https://github.com/minad/corfu][GitHub - minad/corfu: :desert_island: corfu.el - COmpletion in Region FUnction]]
+
 A minimal ui for ~completion-in-region~.
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1482,6 +1485,7 @@ A minimal ui for ~completion-in-region~.
 
 *** Cape
 
+- [[https://github.com/minad/cape][GitHub - minad/cape: 🦸cape.el - Completion At Point Extensions]]
 - [[https://kristofferbalintona.me/posts/202203130102/][Cape | Kristoffer Balintona]]
 
 #+begin_src emacs-lisp :tangle init.el
