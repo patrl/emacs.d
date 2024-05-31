@@ -150,8 +150,8 @@
   (setq evil-want-integration t) ;; necessary for evil collection
   (setq evil-want-keybinding nil)
 
-  (setq evil-split-window-below t)
-  (setq evil-vsplit-window-right t)
+  (setq evil-split-window-below t) ;; split windows created below
+  (setq evil-vsplit-window-right t) ;; vertically split windows created to the right
 
   (setq evil-want-C-i-jump nil) ;; hopefully this will fix weird tab behaviour
 
@@ -438,6 +438,7 @@
   (which-key-setup-minibuffer))
 
 (use-package mood-line
+  :disabled
   :demand t
   :config (mood-line-mode))
 
@@ -753,9 +754,9 @@
      :tag "is:cited"))
   :hook
   ;; set up citation completion for latex, org-mode, and markdown
-  (LaTeX-mode . citar-setup-capf)
-  (org-mode . citar-setup-capf)
-  (markdown-mode . citar-setup-capf)
+  (LaTeX-mode . citar-capf-setup)
+  (org-mode . citar-capf-setup)
+  (markdown-mode . citar-capf-setup)
   :config
   (setq citar-indicators
 	(list citar-indicator-files-icons
