@@ -1060,7 +1060,12 @@ Auto-activating snippets:
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package evil-tex
-    :hook (LaTeX-mode . evil-tex-mode))
+    :hook (LaTeX-mode . evil-tex-mode)
+    :general
+    (:keymaps 'evil-tex-mode-map
+  	    "M-]" 'evil-tex-brace-movement)
+    :config
+    (unbind-key "M-n" 'evil-tex-mode-map)) ;; interfering with jinx
 #+end_src
 
 Set up icon support using the following instructions:
@@ -1606,10 +1611,13 @@ Because this uses natively-compiled code, I install this alongside emacs via nix
 Because this uses natively-compiled code, I install this alongside emacs via nix, rather than in the usual way (hence the ~build-in~ straight keyword).
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package jinx
-    :demand t
-    :ensure nil
-    :hook (emacs-startup . global-jinx-mode))
+    (use-package jinx
+      :demand t
+      :ensure nil
+      :hook (emacs-startup . global-jinx-mode)
+      :general
+      ("M-$" 'jinx-correct
+       "C-M-$" 'jinx-languages))
 #+end_src
 
 ** Helpful
