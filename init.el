@@ -705,7 +705,12 @@
     "c" '(TeX-command-run-all :wk "compile")))
 
 (use-package evil-tex
-  :hook (LaTeX-mode . evil-tex-mode))
+  :hook (LaTeX-mode . evil-tex-mode)
+  :general
+  (:keymaps 'evil-tex-mode-map
+	    "M-]" 'evil-tex-brace-movement)
+  :config
+  (unbind-key "M-n" 'evil-tex-mode-map)) ;; interfering with jinx
 
 (use-package citar
   :demand t
@@ -1088,7 +1093,10 @@
 (use-package jinx
   :demand t
   :ensure nil
-  :hook (emacs-startup . global-jinx-mode))
+  :hook (emacs-startup . global-jinx-mode)
+  :general
+  ("M-$" 'jinx-correct
+   "C-M-$" 'jinx-languages))
 
 (use-package helpful
   :demand t
