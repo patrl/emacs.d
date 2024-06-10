@@ -1202,7 +1202,14 @@ Reveals hidden elements interactively.
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-appear
     :after org
-    :hook (org-mode . org-appear-mode))
+    :init (setq org-appear-trigger 'manual)
+    :hook (org-mode . (lambda ()
+  		      (add-hook 'evil-insert-state-entry-hook
+  				#'org-appear-manual-start
+  				nil t)
+  		      (add-hook 'evil-insert-state-exit-hook
+  				#'org-appear-manual-stop
+  				nil t))))
 #+end_src
 
 **  Cliplink
