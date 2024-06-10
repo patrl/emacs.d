@@ -307,21 +307,20 @@
   :ensure (:wait t)
   :demand t
   :init
-  ;; edit settings
+  ;; edit settings (recommended by org-modern)
   (setq org-auto-align-tags nil
 	    org-tags-column 0
 	    org-catch-invisible-edits 'show-and-error
 	    org-special-ctrl-a/e t ;; special navigation behaviour in headlines
 	    org-insert-heading-respect-content t)
 
-  ;; styling, hide markup, etc.
+  ;; styling, hide markup, etc. (recommended by org-modern)
   (setq org-hide-emphasis-markers t
 	    org-src-fontify-natively t ;; fontify source blocks natively
 	    org-highlight-latex-and-related '(native) ;; fontify latex blocks natively
-	    org-pretty-entities t
-	    org-ellipsis "…")
+	    org-pretty-entities t)
 
-  ;; agenda styling
+  ;; agenda styling (recommended by org-modern)
   (setq org-agenda-tags-column 0
 	    org-agenda-block-separator ?─
 	    org-agenda-time-grid
@@ -330,6 +329,8 @@
 	      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
 	    org-agenda-current-time-string
 	    "⭠ now ─────────────────────────────────────────────────")
+
+  (setq org-ellipsis "...")
 
   ;; todo setup
   (setq org-todo-keywords
@@ -342,12 +343,17 @@
   (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
 
   :custom
-  (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
+  (org-agenda-files '((concat patrl/notes-path "todo.org") (concat patrl/notes-path "teaching.org") (concat patrl/notes-path "projects.org")))
   (org-cite-global-bibliography (list patrl/global-bib-file))
+  ;; handle citations using citar
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
   :general
   (patrl/local-leader-keys
 	:keymaps 'org-mode-map
 	"a" '(org-archive-subtree :wk "archive")
+	"c" '(org-cite-insert :wk "insert citation")
 	"l" '(:ignore t :wk "link")
 	"ll" '(org-insert-link t :wk "link")
 	"lp" '(org-latex-preview t :wk "prev latex")
@@ -375,6 +381,7 @@
   (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 
   :config
+  (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
   (add-to-list 'org-latex-packages-alist '("" "braket" t))
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -441,6 +448,11 @@
   :disabled
   :demand t
   :config (mood-line-mode))
+
+(use-package minions
+  :demand t
+  :config
+  (minions-mode 1))
 
 (use-package all-the-icons
   :demand t)
@@ -716,9 +728,6 @@
   :demand t
   :after all-the-icons
   :init
-  (defun citar-setup-capf ()
-    (add-to-list 'completion-at-point-functions 'citar-capf))
-
   (defvar citar-indicator-files-icons
     (citar-indicator-create
      :symbol (all-the-icons-faicon
@@ -801,7 +810,6 @@
     "nt" '(org-transclusion-mode :wk "transclusion mode")))
 
 (use-package org-appear
-  :ensure (:type git :host github :repo "awth13/org-appear")
   :after org
   :hook (org-mode . org-appear-mode))
 
