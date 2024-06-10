@@ -1146,8 +1146,6 @@ Set up icon support using the following instructions:
     :config (citar-embark-mode))
 #+end_src
 
-*** TODO add "citep" and "citealt" to the supported list of latex citation commands.
-
 *** Engrave
 
 Uses emacs' font lock to highlight source code blocks in latex.
@@ -1203,7 +1201,6 @@ Reveals hidden elements interactively.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-appear
-    :ensure (:type git :host github :repo "awth13/org-appear")
     :after org
     :hook (org-mode . org-appear-mode))
 #+end_src
