@@ -501,6 +501,10 @@ Resources:
       :custom
       (org-agenda-files '("~/notes/todo.org" "~/notes/teaching.org" "~/notes/projects.org"))
       (org-cite-global-bibliography (list patrl/global-bib-file))
+      ;; handle citations using citar
+      (org-cite-insert-processor 'citar)
+      (org-cite-follow-processor 'citar)
+      (org-cite-activate-processor 'citar)
       :general
       (patrl/local-leader-keys
     	:keymaps 'org-mode-map
