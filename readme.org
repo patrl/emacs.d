@@ -488,7 +488,6 @@ Resources:
     	    "⭠ now ─────────────────────────────────────────────────")
 
       (setq org-ellipsis "...")
-      (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
 
       ;; todo setup
       (setq org-todo-keywords
@@ -539,6 +538,7 @@ Resources:
       (org-mode . (lambda () (electric-indent-local-mode -1))) ;; disable electric indentation
 
       :config
+      (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
       (add-to-list 'org-latex-packages-alist '("" "braket" t))
       (org-babel-do-load-languages
        'org-babel-load-languages
@@ -549,8 +549,6 @@ Resources:
       (setq org-directory "~/MEGA/org/agenda")
       (setq org-default-notes-file (concat org-directory "/notes.org")))
   #+end_src
-
-
 
 ** Avy
 
@@ -640,6 +638,15 @@ Minimal mode line.
     :disabled
     :demand t
     :config (mood-line-mode))
+#+end_src
+
+** Minions
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package minions
+    :demand t
+    :config
+    (minions-mode 1))
 #+end_src
 
 ** Icons
