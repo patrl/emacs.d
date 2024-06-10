@@ -509,6 +509,7 @@ Resources:
       (patrl/local-leader-keys
     	:keymaps 'org-mode-map
     	"a" '(org-archive-subtree :wk "archive")
+    	"c" '(org-cite-insert :wk "insert citation")
     	"l" '(:ignore t :wk "link")
     	"ll" '(org-insert-link t :wk "link")
     	"lp" '(org-latex-preview t :wk "prev latex")
