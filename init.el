@@ -47,7 +47,7 @@
 (defvar patrl/library-path "~/MEGA/library/"
   "Directory .pdf collection lives.")
 
-(defvar patrl/notes-path "~/notes/"
+(defvar patrl/notes-path "~/MEGA/org/roam/"
   "Notes.")
 
 (defvar patrl/journal-path (concat patrl/notes-path "daily/")
@@ -183,10 +183,6 @@
 
 (use-package evil-surround
   :after evil
-  :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
-         (org-mode . (lambda () (push '(?$ . ("\\(" . "\\)")) evil-surround-pairs-alist)))
-	 (LaTeX-mode . (lambda () (push '(?$ . ("\\(" . "\\)"))))))
-
   :config
   (global-evil-surround-mode 1)) ;; globally enable evil-surround
 
@@ -671,7 +667,7 @@
   :after markdown-mode
   :hook (markdown-mode . pandoc-mode))
 
-(use-package auctex
+(use-package tex 
   :ensure (auctex :pre-build (("./autogen.sh")
 			      ("./configure"
 			       "--without-texmf-dir"
@@ -681,7 +677,6 @@
 		  :build (:not elpaca--compile-info) ;; Make will take care of this step
 		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
 		  :version (lambda (_) (require 'tex-site) AUCTeX-version))
-  :mode ("\\.tex\\'" . LaTeX-mode)
   :init
   (setq TeX-parse-self t ; parse on load
 	reftex-plug-into-AUCTeX t
@@ -878,6 +873,15 @@
                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+
+(with-eval-after-load 'ox-latex
+  (add-to-list 'org-latex-classes
+             '("memoir"
+               "\\documentclass{memoir}"
+               ("\\chapter{%s}" . "\\chapter*{%s}")
+               ("\\section{%s}" . "\\section*{%s}")
+               ("\\subsection{%s}" . "\\subsection*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 
 (use-package htmlize)
 
