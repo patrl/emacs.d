@@ -595,9 +595,6 @@
 (use-package lua-mode
   :mode "\\.lua\\'")
 
-(use-package fennel-mode
- :mode "\\.fnl\\'")
-
 ;; FIXME - compatibility with corfu
 (use-package sly)
 
