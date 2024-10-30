@@ -868,13 +868,6 @@ Use built-in ~dired~.
 
 ** Lisp
 
-*** Fennel
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package fennel-mode
-   :mode "\\.fnl\\'")
-#+end_src
-
 *** Sly
 
 #+begin_src emacs-lisp :tangle init.el
