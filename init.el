@@ -1084,7 +1084,7 @@
   :ensure nil
   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
   :mode ("\\.pdf\\'" . pdf-view-mode)
-  :config 
+  :config
   (require 'pdf-tools)
   (require 'pdf-view)
   (require 'pdf-misc)
@@ -1350,6 +1350,43 @@
     "nmt" '(consult-notmuch-tree t :wk "consult notmuch tree")
     "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
   :after notmuch)
+
+(use-package denote
+  :general
+  (patrl/leader-keys
+    "nd" '(:ignore t :wk "denote")
+    "ndd" '(denote t :wk "denote")
+    "ndr" '(denote-rename-file t :wk "rename file")
+    "ndl" '(denote-link t :wk "link")
+    "ndb" '(denote-backlinks t :wk "backlinks")
+    "ndf" '(denote-sort-dired t :wk "sort dired"))
+  :hook
+  (text-mode . denote-fontify-links-mode-maybe)
+  (dired-mode . denote-dired-mode)
+  :config
+  (setq denote-save-buffers nil)
+  (setq denote-infer-keywords t)
+  (setq denote-sort-keywords t)
+  (setq denote-prompts '(title keywords))
+  (setq denote-excluded-directories-regexp nil)
+  (setq denote-excluded-keywords-regexp nil)
+  (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
+  (setq denote-date-prompt-use-org-read-date t)
+  (setq denote-backlinks-show-context t)
+  (setq denote-directory (expand-file-name "~/MEGA/denote/"))
+  (denote-rename-buffer-mode 1))
+
+(use-package consult-notes
+  :general
+  (patrl/leader-keys
+    "nn" '(consult-notes t :wk "consult notes"))
+  :commands (consult-notes
+	     consult-notes-search-in-all-notes)
+  :config
+(when (locate-library "denote")
+    (consult-notes-denote-mode))
+  ;; search only for text files in denote dir
+(setq consult-notes-denote-files-function (lambda () (denote-directory-files nil t t))))
 
 (use-package ace-window
   :demand t
