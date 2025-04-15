@@ -44,6 +44,8 @@ latex-mode
 
 (lingex "\\begin{exe}" > n> "\\ex " r> n "\\end{exe}")
 
+(item "\\begin{itemize}" > n> "\\item " r> n "\\end{itemize}")
+
 (lingtree "\\begin{forest}"
 	  >
 	  n "[{" p "}"

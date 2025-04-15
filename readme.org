@@ -496,7 +496,7 @@ Resources:
       (setq org-adapt-indentation nil) ;; interacts poorly with 'evil-open-below'
 
       :custom
-      (org-agenda-files '((concat patrl/notes-path "todo.org") (concat patrl/notes-path "teaching.org") (concat patrl/notes-path "projects.org")))
+      ;; (org-agenda-files '((concat patrl/notes-path "todo.org") (concat patrl/notes-path "teaching.org") (concat patrl/notes-path "projects.org")))
       (org-cite-global-bibliography (list patrl/global-bib-file))
       ;; handle citations using citar
       (org-cite-insert-processor 'citar)
