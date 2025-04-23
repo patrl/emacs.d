@@ -1085,18 +1085,8 @@
   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :config
-  (require 'pdf-tools)
-  (require 'pdf-view)
-  (require 'pdf-misc)
-  (require 'pdf-occur)
-  (require 'pdf-util)
-  (require 'pdf-annot)
-  (require 'pdf-info)
-  (require 'pdf-isearch)
-  (require 'pdf-history)
-  (require 'pdf-links)
   (require 'pdf-outline)
-  (require 'pdf-sync)
+  (require 'pdf-occur)
   (pdf-tools-install :no-query))
 
 (use-package jinx
@@ -1375,6 +1365,20 @@
   (setq denote-backlinks-show-context t)
   (setq denote-directory (expand-file-name "~/MEGA/denote/"))
   (denote-rename-buffer-mode 1))
+
+(use-package denote-journal
+  :after denote
+  :general
+  (patrl/leader-keys
+    "nj" '(:ignore t :wk "journal")
+    "njj" '(denote-journal-new-entry t :wk "new entry")
+    "nje" '(denote-journal-new-or-existing-entry t :wk "new or existing entry")
+    "njl" '(denote-journal-link-or-create-entry t :wk "link or create entry"))
+  :hook (calendar-mode . denote-journal-calendar-mode)
+  :config
+  (setq denote-journal-directory (expand-file-name "journal" denote-directory))
+  (setq denote-journal-keyword "journal")
+  (setq denote-journal-title-format 'day-date-month-year))
 
 (use-package consult-notes
   :general
