@@ -1341,6 +1341,16 @@
     "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
   :after notmuch)
 
+(use-package shell-maker
+  :ensure (:type git :host github :repo "xenodium/shell-maker"))
+
+(use-package chatgpt-shell
+  :ensure (:type git :host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell*.el"))
+  :custom
+  ((chatgpt-shell-perplexity-key
+    (lambda ()
+      (auth-source-pass-get 'secret "perplexity-key")))))
+
 (use-package denote
   :general
   (patrl/leader-keys
@@ -1365,20 +1375,6 @@
   (setq denote-backlinks-show-context t)
   (setq denote-directory (expand-file-name "~/MEGA/denote/"))
   (denote-rename-buffer-mode 1))
-
-(use-package denote-journal
-  :after denote
-  :general
-  (patrl/leader-keys
-    "nj" '(:ignore t :wk "journal")
-    "njj" '(denote-journal-new-entry t :wk "new entry")
-    "nje" '(denote-journal-new-or-existing-entry t :wk "new or existing entry")
-    "njl" '(denote-journal-link-or-create-entry t :wk "link or create entry"))
-  :hook (calendar-mode . denote-journal-calendar-mode)
-  :config
-  (setq denote-journal-directory (expand-file-name "journal" denote-directory))
-  (setq denote-journal-keyword "journal")
-  (setq denote-journal-title-format 'day-date-month-year))
 
 (use-package consult-notes
   :general
