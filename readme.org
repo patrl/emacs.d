@@ -1950,6 +1950,13 @@ Search emails interactively using ~consult~.
 
 * Staging grounds
 
+** 0x0
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package 0x0)
+
+#+end_src
+
 ** Chatgpt-shell
 
 #+begin_src emacs-lisp :tangle init.el
