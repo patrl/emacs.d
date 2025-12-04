@@ -44,20 +44,11 @@
   (elpaca-use-package-mode))
 (setq use-package-always-ensure t)
 
-(defvar patrl/library-path "~/MEGA/library/"
+(defvar patrl/library-path "~/Documents/library/"
   "Directory .pdf collection lives.")
-
-(defvar patrl/notes-path "~/MEGA/org/roam/"
-  "Notes.")
-
-(defvar patrl/journal-path (concat patrl/notes-path "daily/")
-  "Journal entries.")
 
 (defvar patrl/global-bib-file "~/texmf/bibtex/bib/master.bib"
   "Bibliography.")
-
-(defvar patrl/org-path "~/MEGA/org/"
-  "Org path.")
 
 (use-package emacs
   :demand t
@@ -385,8 +376,9 @@
 	 (emacs-lisp . t)
 	 (awk . t)))
   ;; set up org paths
-  (setq org-directory "~/MEGA/org/agenda")
-  (setq org-default-notes-file (concat org-directory "/notes.org")))
+  ;; (setq org-directory "~/MEGA/org/agenda")
+  ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
+  )
 
 (use-package avy
     :demand t
@@ -773,7 +765,7 @@
   (patrl/leader-keys
     "nb" '(citar-open :wk "citar"))
   :init
-  (setq citar-notes-paths (list patrl/notes-path))
+  ;; (setq citar-notes-paths (list patrl/notes-path))
   (setq citar-library-paths (list patrl/library-path))
   (setq citar-bibliography (list patrl/global-bib-file)))
 
@@ -817,6 +809,7 @@
   :config (global-org-modern-mode))
 
 (use-package org-roam
+  :disabled
   :demand t
   :general
   (patrl/leader-keys
@@ -1283,6 +1276,7 @@
     (unless elfeed-search-remain-on-entry (forward-line -1))))
 
 (use-package elfeed
+  :disabled
   :commands elfeed
   :general
   (patrl/leader-keys
@@ -1291,6 +1285,7 @@
   (setq elfeed-show-entry-switch #'patrl/elfeed-display-buffer))
 
 (use-package elfeed-org
+  :disabled
   :init
  (setq rmh-elfeed-org-files (list "~/MEGA/org/elfeed.org"))
   :config
@@ -1373,7 +1368,7 @@
   (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
   (setq denote-date-prompt-use-org-read-date t)
   (setq denote-backlinks-show-context t)
-  (setq denote-directory (expand-file-name "~/MEGA/denote/"))
+  (setq denote-directory (expand-file-name "~/Documents/denote/"))
   (denote-rename-buffer-mode 1))
 
 (use-package consult-notes

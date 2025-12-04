@@ -122,20 +122,11 @@ Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
 ** Variables
 
 #+begin_src emacs-lisp
-  (defvar patrl/library-path "~/MEGA/library/"
+  (defvar patrl/library-path "~/Documents/library/"
     "Directory .pdf collection lives.")
-
-  (defvar patrl/notes-path "~/MEGA/org/roam/"
-    "Notes.")
-
-  (defvar patrl/journal-path (concat patrl/notes-path "daily/")
-    "Journal entries.")
 
   (defvar patrl/global-bib-file "~/texmf/bibtex/bib/master.bib"
     "Bibliography.")
-
-  (defvar patrl/org-path "~/MEGA/org/"
-    "Org path.")
 #+end_src
 
 ** Defaults
@@ -542,8 +533,9 @@ Resources:
     	 (emacs-lisp . t)
     	 (awk . t)))
       ;; set up org paths
-      (setq org-directory "~/MEGA/org/agenda")
-      (setq org-default-notes-file (concat org-directory "/notes.org")))
+      ;; (setq org-directory "~/MEGA/org/agenda")
+      ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
+      )
   #+end_src
 
 ** Avy
@@ -1132,7 +1124,7 @@ Set up icon support using the following instructions:
     (patrl/leader-keys
       "nb" '(citar-open :wk "citar"))
     :init
-    (setq citar-notes-paths (list patrl/notes-path))
+    ;; (setq citar-notes-paths (list patrl/notes-path))
     (setq citar-library-paths (list patrl/library-path))
     (setq citar-bibliography (list patrl/global-bib-file)))
 #+end_src
@@ -1231,6 +1223,7 @@ Enable org-modern mode globally.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package org-roam
+    :disabled
     :demand t
     :general
     (patrl/leader-keys
@@ -1877,6 +1870,7 @@ Resources:
       (unless elfeed-search-remain-on-entry (forward-line -1))))
 
   (use-package elfeed
+    :disabled
     :commands elfeed
     :general
     (patrl/leader-keys
@@ -1885,6 +1879,7 @@ Resources:
     (setq elfeed-show-entry-switch #'patrl/elfeed-display-buffer))
 
   (use-package elfeed-org
+    :disabled
     :init
    (setq rmh-elfeed-org-files (list "~/MEGA/org/elfeed.org"))
     :config
@@ -1995,7 +1990,7 @@ Search emails interactively using ~consult~.
     (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
     (setq denote-date-prompt-use-org-read-date t)
     (setq denote-backlinks-show-context t)
-    (setq denote-directory (expand-file-name "~/MEGA/denote/"))
+    (setq denote-directory (expand-file-name "~/Documents/denote/"))
     (denote-rename-buffer-mode 1))
 #+end_src
 
