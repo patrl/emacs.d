@@ -642,8 +642,8 @@
 
 (use-package markdown-mode
   :hook ((markdown-mode . visual-line-mode)
-         (markdown-mode . olivetti-mode))
-         (markdown-mode . variable-pitch-mode)
+         (markdown-mode . olivetti-mode)
+         (markdown-mode . variable-pitch-mode))
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
@@ -675,7 +675,7 @@
 	TeX-source-correlate-method 'synctex
 	TeX-source-correlate-start-server t
 	TeX-electric-sub-and-superscript t
-	TeX-engine 'luatex ;; use lualatex by default
+	TeX-engine 'default ;; use lualatex by default
 	TeX-save-query nil
 	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
 
@@ -1072,15 +1072,21 @@
 	     "se" '(regexp-builder :wk "regex builder"))
   :config (setq reb-re-syntax 'rx))
 
+;; (use-package pdf-tools
+;;   :demand t
+;;   :ensure nil
+;;   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
+;;   :mode ("\\.pdf\\'" . pdf-view-mode)
+;;   :config
+;;   (require 'pdf-outline)
+;;   (require 'pdf-occur)
+;;   (pdf-tools-install :no-query))
+
 (use-package pdf-tools
   :demand t
-  :ensure nil
-  :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
-  :mode ("\\.pdf\\'" . pdf-view-mode)
-  :config
-  (require 'pdf-outline)
-  (require 'pdf-occur)
-  (pdf-tools-install :no-query))
+  :mode "\\.pdf\\'"
+  :init
+  (pdf-loader-install))
 
 (use-package jinx
   :demand t
@@ -1335,6 +1341,25 @@
     "nmt" '(consult-notmuch-tree t :wk "consult notmuch tree")
     "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
   :after notmuch)
+
+(use-package lean4-mode
+  :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
+  :files ("*.el" "data")))
+
+(use-package overleaf
+  :ensure (:type git :host github :repo
+                   "vale981/overleaf.el")
+  :custom
+  (overleaf-use-nerdfont t "Use nerfont icons for the modeline.")
+  :init
+  (setq overleaf-cookies
+        (overleaf-read-cookies-from-firefox :firefox-folder "~/.mozilla/firefox/")))
+
+(use-package atomic-chrome
+  :init
+  (setq atomic-chrome-url-major-mode-alist
+	'(("overleaf\\.com" . LaTeX-mode)))
+  (setq atomic-chrome-buffer-open-style 'frame))
 
 (use-package shell-maker
   :ensure (:type git :host github :repo "xenodium/shell-maker"))
