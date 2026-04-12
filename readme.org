@@ -1234,8 +1234,8 @@ Enable org-modern mode globally.
       "nrf" '(org-roam-node-find :wk "find node")
       "nrd" '(:ignore t :wk "dailies")
       "nrdt" '(org-roam-dailies-goto-today :wk "today")
-      "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
-      "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
+      "nrdy" '(org-roam-dailies-goto-yesterday :wk "yesterday")
+      "nrdT" '(org-roam-dailies-goto-tomorrow :wk "tomorrow")
       "nrdd" '(org-roam-dailies-goto-date :wk "goto date"))
     :config
     ;; org-roam-buffer
@@ -1992,18 +1992,11 @@ Search emails interactively using ~consult~.
     (setq atomic-chrome-buffer-open-style 'frame))
 #+end_src
 
-** Chatgpt-shell
+** Agent-shell
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package shell-maker
-    :ensure (:type git :host github :repo "xenodium/shell-maker"))
-
-  (use-package chatgpt-shell
-    :ensure (:type git :host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell*.el"))
-    :custom
-    ((chatgpt-shell-perplexity-key
-      (lambda ()
-        (auth-source-pass-get 'secret "perplexity-key")))))
+  (use-package agent-shell
+    :ensure t)
 #+end_src
 
 
