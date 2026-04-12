@@ -960,8 +960,8 @@ Note that the following uses [[*Cape]] to convert dante's company backend to to 
 #+begin_src emacs-lisp :tangle init.el
   (use-package markdown-mode
     :hook ((markdown-mode . visual-line-mode)
-           (markdown-mode . olivetti-mode))
-           (markdown-mode . variable-pitch-mode)
+           (markdown-mode . olivetti-mode)
+           (markdown-mode . variable-pitch-mode))
     :commands (markdown-mode gfm-mode)
     :mode (("README\\.md\\'" . gfm-mode)
            ("\\.md\\'" . markdown-mode)
@@ -1021,7 +1021,7 @@ Auto-activating snippets:
   	TeX-source-correlate-method 'synctex
   	TeX-source-correlate-start-server t
   	TeX-electric-sub-and-superscript t
-  	TeX-engine 'luatex ;; use lualatex by default
+  	TeX-engine 'default ;; use lualatex by default
   	TeX-save-query nil
   	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
 
@@ -1580,15 +1580,21 @@ Use ~rx~ notation (S-expressions) as the default for constructing regular expres
 Because this uses natively-compiled code, I install this alongside emacs via nix.
 
 #+begin_src emacs-lisp :tangle init.el
+  ;; (use-package pdf-tools
+  ;;   :demand t
+  ;;   :ensure nil
+  ;;   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
+  ;;   :mode ("\\.pdf\\'" . pdf-view-mode)
+  ;;   :config
+  ;;   (require 'pdf-outline)
+  ;;   (require 'pdf-occur)
+  ;;   (pdf-tools-install :no-query))
+
   (use-package pdf-tools
     :demand t
-    :ensure nil
-    :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
-    :mode ("\\.pdf\\'" . pdf-view-mode)
-    :config
-    (require 'pdf-outline)
-    (require 'pdf-occur)
-    (pdf-tools-install :no-query))
+    :mode "\\.pdf\\'"
+    :init
+    (pdf-loader-install))
 
 #+end_src
 
@@ -1955,6 +1961,35 @@ Search emails interactively using ~consult~.
 #+begin_src emacs-lisp :tangle init.el
   (use-package 0x0)
 
+** Lean
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package lean4-mode
+    :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
+    :files ("*.el" "data")))
+#+end_src
+
+** Overleaf
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package overleaf
+    :ensure (:type git :host github :repo
+                     "vale981/overleaf.el")
+    :custom
+    (overleaf-use-nerdfont t "Use nerfont icons for the modeline.")
+    :init
+    (setq overleaf-cookies
+          (overleaf-read-cookies-from-firefox :firefox-folder "~/.mozilla/firefox/")))
+#+end_src
+
+** Atomic chrome
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package atomic-chrome
+    :init
+    (setq atomic-chrome-url-major-mode-alist
+  	'(("overleaf\\.com" . LaTeX-mode)))
+    (setq atomic-chrome-buffer-open-style 'frame))
 #+end_src
 
 ** Chatgpt-shell
