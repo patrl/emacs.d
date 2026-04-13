@@ -1,15 +1,15 @@
 ;;; init.el --- Personal configuration file -*- lexical-binding: t; no-byte-compile: t; -*-
 ;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
 
-(defvar elpaca-installer-version 0.10)
+(defvar elpaca-installer-version 0.12)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
                               :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+                              :build (:not elpaca-activate)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
        (default-directory repo))
@@ -36,7 +36,7 @@
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
     (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
+    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
@@ -665,7 +665,8 @@
 			      ("make"))
 		  :build (:not elpaca--compile-info) ;; Make will take care of this step
 		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
-		  :version (lambda (_) (require 'tex-site) AUCTeX-version))
+		  ;:version (lambda (_) (require 'tex-site) AUCTeX-version)
+          )
   :init
   (setq TeX-parse-self t ; parse on load
 	reftex-plug-into-AUCTeX t
@@ -820,8 +821,8 @@
     "nrf" '(org-roam-node-find :wk "find node")
     "nrd" '(:ignore t :wk "dailies")
     "nrdt" '(org-roam-dailies-goto-today :wk "today")
-    "nrdt" '(org-roam-dailies-goto-yesterday :wk "today")
-    "nrdT" '(org-roam-dailies-goto-tomorrow :wk "today")
+    "nrdy" '(org-roam-dailies-goto-yesterday :wk "yesterday")
+    "nrdT" '(org-roam-dailies-goto-tomorrow :wk "tomorrow")
     "nrdd" '(org-roam-dailies-goto-date :wk "goto date"))
   :config
   ;; org-roam-buffer
@@ -1342,6 +1343,8 @@
     "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
   :after notmuch)
 
+(use-package 0x0)
+
 (use-package lean4-mode
   :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
   :files ("*.el" "data")))
@@ -1361,15 +1364,7 @@
 	'(("overleaf\\.com" . LaTeX-mode)))
   (setq atomic-chrome-buffer-open-style 'frame))
 
-(use-package shell-maker
-  :ensure (:type git :host github :repo "xenodium/shell-maker"))
-
-(use-package chatgpt-shell
-  :ensure (:type git :host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell*.el"))
-  :custom
-  ((chatgpt-shell-perplexity-key
-    (lambda ()
-      (auth-source-pass-get 'secret "perplexity-key")))))
+(use-package agent-shell)
 
 (use-package denote
   :general
