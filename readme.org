@@ -1960,6 +1960,7 @@ Search emails interactively using ~consult~.
 
 #+begin_src emacs-lisp :tangle init.el
   (use-package 0x0)
+#+end_src
 
 ** Lean
 
@@ -1995,8 +1996,7 @@ Search emails interactively using ~consult~.
 ** Agent-shell
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package agent-shell
-    :ensure t)
+  (use-package agent-shell)
 #+end_src
 
 
