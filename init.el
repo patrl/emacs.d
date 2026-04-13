@@ -4,12 +4,12 @@
 (defvar elpaca-installer-version 0.12)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
                               :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca-activate)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
        (default-directory repo))
@@ -36,7 +36,7 @@
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
     (elpaca-generate-autoloads "elpaca" repo)
-    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
+    (load "./elpaca-autoloads")))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
@@ -228,30 +228,30 @@
   "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
 
   (patrl/leader-keys
-    "c" '(:ignore t :wk "code"))
+    "c" '(:ignore :wk "code"))
 
   ;; help
   ;; namespace mostly used by 'helpful'
   (patrl/leader-keys
-    "h" '(:ignore t :wk "help"))
+    "h" '(:ignore :wk "help"))
 
   ;; file
   (patrl/leader-keys
-    "f" '(:ignore t :wk "file")
+    "f" '(:ignore :wk "file")
     "ff" '(find-file :wk "find file") ;; gets overridden by consult
     "fs" '(save-buffer :wk "save file"))
 
   ;; buffer
   ;; see 'bufler' and 'popper'
   (patrl/leader-keys
-    "b" '(:ignore t :wk "buffer")
+    "b" '(:ignore :wk "buffer")
     "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
     "bk" '(kill-this-buffer :wk "kill this buffer")
     "br" '(revert-buffer :wk "reload buffer"))
 
   ;; bookmark
   (patrl/leader-keys
-    "B" '(:ignore t :wk "bookmark")
+    "B" '(:ignore :wk "bookmark")
     "Bs" '(bookmark-set :wk "set bookmark")
     "Bj" '(bookmark-jump :wk "jump to bookmark"))
 
@@ -262,31 +262,31 @@
   ;; notes
   ;; see 'citar' and 'org-roam'
   (patrl/leader-keys
-    "n" '(:ignore t :wk "notes")
+    "n" '(:ignore :wk "notes")
     ;; see org-roam and citar sections
     "na" '(org-todo-list :wk "agenda todos")) ;; agenda
 
   ;; code
   ;; see 'flymake'
   (patrl/leader-keys
-    "c" '(:ignore t :wk "code"))
+    "c" '(:ignore :wk "code"))
 
   ;; open
   (patrl/leader-keys
-    "o" '(:ignore t :wk "open")
-    "os" '(speedbar t :wk "speedbar")
-    "op" '(elpaca-log t :wk "elpaca"))
+    "o" '(:ignore :wk "open")
+    "os" '(speedbar :wk "speedbar")
+    "op" '(elpaca-log :wk "elpaca"))
 
 
   ;; search
   ;; see 'consult'
   (patrl/leader-keys
-    "s" '(:ignore t :wk "search"))
+    "s" '(:ignore :wk "search"))
 
   ;; templating
   ;; see 'tempel'
   (patrl/leader-keys
-    "t" '(:ignore t :wk "template")))
+    "t" '(:ignore :wk "template")))
 
 ;; "c" '(org-capture :wk "capture")))
 
@@ -341,9 +341,9 @@
 	:keymaps 'org-mode-map
 	"a" '(org-archive-subtree :wk "archive")
 	"c" '(org-cite-insert :wk "insert citation")
-	"l" '(:ignore t :wk "link")
-	"ll" '(org-insert-link t :wk "link")
-	"lp" '(org-latex-preview t :wk "prev latex")
+	"l" '(:ignore :wk "link")
+	"ll" '(org-insert-link :wk "link")
+	"lp" '(org-latex-preview :wk "prev latex")
 	"h" '(consult-org-heading :wk "consult heading")
 	"d" '(org-cut-special :wk "org cut special")
 	"y" '(org-copy-special :wk "org copy special")
@@ -352,7 +352,7 @@
 	"t" '(org-todo :wk "todo")
 	"s" '(org-insert-structure-template :wk "template")
 	"e" '(org-edit-special :wk "edit")
-	"i" '(:ignore t :wk "insert")
+	"i" '(:ignore :wk "insert")
 	"ih" '(org-insert-heading :wk "insert heading")
 	"is" '(org-insert-subheading :wk "insert heading")
 	"f" '(org-footnote-action :wk "footnote action")
@@ -518,11 +518,11 @@
   :demand t
   :general
   (patrl/leader-keys
-        "bp" '(:ignore t :wk "popper")
-        "bpc" '(popper-cycle t :wk "cycle")
-        "bpt" '(popper-toggle-latest t :wk "toggle latest")
-        "bpb" '(popper-toggle-type t :wk "toggle type")
-        "bpk" '(popper-kill-latest-popup t :wk "kill latest"))
+        "bp" '(:ignore :wk "popper")
+        "bpc" '(popper-cycle :wk "cycle")
+        "bpt" '(popper-toggle-latest :wk "toggle latest")
+        "bpb" '(popper-toggle-type :wk "toggle type")
+        "bpk" '(popper-kill-latest-popup :wk "kill latest"))
   :init
   (setq popper-reference-buffers
         '("\\*Messages\\*"
@@ -619,12 +619,12 @@
 (use-package haskell-mode)
 
 (use-package dante
-  :after haskell-mode cape
+  :after (haskell-mode cape)
   :init
   (defun dante-setup-capf ()
     (add-to-list 'completion-at-point-functions (cape-company-to-capf #'dante-company)))
-  :commands 'dante-mode
-  :config (dante-setup-capf))
+  :commands dante-mode
+  :hook (dante-mode . dante-setup-capf))
 
 (use-package racket-mode
   :hook (racket-mode . racket-xp-mode) ;; n.b. this requires Dr. Racket to be installed as a backend
@@ -656,6 +656,10 @@
   :after markdown-mode
   :hook (markdown-mode . pandoc-mode))
 
+(use-package lean4-mode
+  :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
+  :files ("*.el" "data")))
+
 (use-package tex 
   :ensure (auctex :pre-build (("./autogen.sh")
 			      ("./configure"
@@ -665,8 +669,7 @@
 			      ("make"))
 		  :build (:not elpaca--compile-info) ;; Make will take care of this step
 		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
-		  ;:version (lambda (_) (require 'tex-site) AUCTeX-version)
-          )
+		  :version (lambda (_) (require 'tex-site) AUCTeX-version))
   :init
   (setq TeX-parse-self t ; parse on load
 	reftex-plug-into-AUCTeX t
@@ -676,7 +679,7 @@
 	TeX-source-correlate-method 'synctex
 	TeX-source-correlate-start-server t
 	TeX-electric-sub-and-superscript t
-	TeX-engine 'default ;; use lualatex by default
+	TeX-engine 'default ;; use the default TeX engine
 	TeX-save-query nil
 	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
 
@@ -778,7 +781,7 @@
 
 (use-package evil-org
   :after org
-  :hook (org-mode . (lambda () evil-org-mode))
+  :hook (org-mode . evil-org-mode)
   :config
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
@@ -814,12 +817,12 @@
   :demand t
   :general
   (patrl/leader-keys
-    "nr" '(:ignore t :wk "roam")
-    "nri" '(org-roam-node-insert t :wk "insert node")
-    "nrt" '(org-roam-buffer-toggle t :wk "roam buffer toggle")
-    "nrc" '(org-roam-capture t :wk "roam capture")
+    "nr" '(:ignore :wk "roam")
+    "nri" '(org-roam-node-insert :wk "insert node")
+    "nrt" '(org-roam-buffer-toggle :wk "roam buffer toggle")
+    "nrc" '(org-roam-capture :wk "roam capture")
     "nrf" '(org-roam-node-find :wk "find node")
-    "nrd" '(:ignore t :wk "dailies")
+    "nrd" '(:ignore :wk "dailies")
     "nrdt" '(org-roam-dailies-goto-today :wk "today")
     "nrdy" '(org-roam-dailies-goto-yesterday :wk "yesterday")
     "nrdT" '(org-roam-dailies-goto-tomorrow :wk "tomorrow")
@@ -1005,7 +1008,6 @@
   :custom
   (corfu-cycle t) ;; allows cycling through candidates
   (corfu-auto nil) ;; disables auto-completion
-  :bind
   :general
   (:keymaps 'corfu-map
             "SPC" 'corfu-insert-separator)) ;; for compatibility with orderless
@@ -1066,6 +1068,11 @@
   :general
   (general-nmap "] !" 'flymake-goto-next-error)
   (general-nmap "[ !" 'flymake-goto-prev-error))
+
+(use-package recursion-indicator
+  :demand t
+  :config
+  (recursion-indicator-mode))
 
 (use-package re-builder
   :ensure nil
@@ -1172,7 +1179,7 @@
     "sum" (lambda () (interactive)
 	      (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
     "grandu" (lambda () (interactive)
-	      (yas-expand-snippet "\\bigcup\limits_{$1} $0"))
+	      (yas-expand-snippet "\\bigcup\\limits_{$1} $0"))
     "Span" (lambda () (interactive)
 	       (yas-expand-snippet "\\Span($1)$0"))
     "lam" (lambda () (interactive)
@@ -1213,13 +1220,15 @@
 (use-package simple-httpd
   :commands httpd-serve-directory)
 
+(use-package 0x0)
+
 (use-package transient)
 
 (use-package magit
   :after transient
   :general
   (patrl/leader-keys
-    "g" '(:ignore t :wk "git")
+    "g" '(:ignore :wk "git")
     "gg" '(magit-status :wk "status")))
 
 (use-package eshell
@@ -1288,7 +1297,7 @@
   :general
   (patrl/leader-keys
     "oE" '(elfeed :wk "elfeed"))
-  ;; :config
+  :config
   (setq elfeed-show-entry-switch #'patrl/elfeed-display-buffer))
 
 (use-package elfeed-org
@@ -1338,16 +1347,10 @@
   :disabled
   :general
   (patrl/leader-keys
-    "nmm" '(consult-notmuch t :wk "consult notmuch")
-    "nmt" '(consult-notmuch-tree t :wk "consult notmuch tree")
-    "nma" '(consult-notmuch-address t :wk "consult notmuch address"))
+    "nmm" '(consult-notmuch :wk "consult notmuch")
+    "nmt" '(consult-notmuch-tree :wk "consult notmuch tree")
+    "nma" '(consult-notmuch-address :wk "consult notmuch address"))
   :after notmuch)
-
-(use-package 0x0)
-
-(use-package lean4-mode
-  :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
-  :files ("*.el" "data")))
 
 (use-package overleaf
   :ensure (:type git :host github :repo
@@ -1369,12 +1372,12 @@
 (use-package denote
   :general
   (patrl/leader-keys
-    "nd" '(:ignore t :wk "denote")
-    "ndd" '(denote t :wk "denote")
-    "ndr" '(denote-rename-file t :wk "rename file")
-    "ndl" '(denote-link t :wk "link")
-    "ndb" '(denote-backlinks t :wk "backlinks")
-    "ndf" '(denote-sort-dired t :wk "sort dired"))
+    "nd" '(:ignore :wk "denote")
+    "ndd" '(denote :wk "denote")
+    "ndr" '(denote-rename-file :wk "rename file")
+    "ndl" '(denote-link :wk "link")
+    "ndb" '(denote-backlinks :wk "backlinks")
+    "ndf" '(denote-sort-dired :wk "sort dired"))
   :hook
   (text-mode . denote-fontify-links-mode-maybe)
   (dired-mode . denote-dired-mode)
@@ -1394,7 +1397,7 @@
 (use-package consult-notes
   :general
   (patrl/leader-keys
-    "nn" '(consult-notes t :wk "consult notes"))
+    "nn" '(consult-notes :wk "consult notes"))
   :commands (consult-notes
 	     consult-notes-search-in-all-notes)
   :config
@@ -1417,10 +1420,10 @@
   (burly-tabs-mode +1)
   :general
   (patrl/leader-keys
-    "Bf" '(burly-bookmark-frames t :wk "bookmark frames")
-    "Bw" '(burly-bookmark-windows t :wk "bookmark windows")
-    "Bo" '(burly-open-bookmark t :wk "open bookmark")
-    "Bl" '(burly-open-last-bookmark t :wk "open last bookmark")))
+    "Bf" '(burly-bookmark-frames :wk "bookmark frames")
+    "Bw" '(burly-bookmark-windows :wk "bookmark windows")
+    "Bo" '(burly-open-bookmark :wk "open bookmark")
+    "Bl" '(burly-open-last-bookmark :wk "open last bookmark")))
 
 (use-package ebib
   :config
