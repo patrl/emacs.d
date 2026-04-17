@@ -50,10 +50,13 @@
 (defvar patrl/global-bib-file "~/texmf/bibtex/bib/master.bib"
   "Bibliography.")
 
+(add-to-list 'exec-path "~/.npm-global/bin/")
+
 (use-package emacs
   :demand t
   :ensure nil
   :init
+  (setq tab-always-indent 'complete)
 
   (setq enable-recursive-minibuffers t)
 
@@ -226,9 +229,6 @@
 
   (patrl/leader-keys
   "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
-
-  (patrl/leader-keys
-    "c" '(:ignore :wk "code"))
 
   ;; help
   ;; namespace mostly used by 'helpful'
@@ -431,11 +431,6 @@
   :init (which-key-mode)
   :config
   (which-key-setup-minibuffer))
-
-(use-package mood-line
-  :disabled
-  :demand t
-  :config (mood-line-mode))
 
 (use-package minions
   :demand t
@@ -682,14 +677,13 @@
 	TeX-engine 'default ;; use the default TeX engine
 	TeX-save-query nil
 	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
-
-  (add-hook 'TeX-mode-hook #'reftex-mode)
-  (add-hook 'TeX-mode-hook #'olivetti-mode)
-  (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
-  (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
-  (add-hook 'TeX-after-compilation-finished-functions
-	    #'TeX-revert-document-buffer)
-  (add-hook 'TeX-mode-hook #'outline-minor-mode)
+  :hook
+  (TeX-mode . reftex-mode)
+  (TeX-mode . olivetti-mode)
+  (TeX-mode . turn-on-auto-fill)
+  (TeX-mode . prettify-symbols-mode)
+  (TeX-mode . outline-minor-mode)
+  (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
   :general 
   (patrl/local-leader-keys
     :keymaps 'LaTeX-mode-map
@@ -750,7 +744,7 @@
     (citar-indicator-create
      :symbol (all-the-icons-faicon
               "circle-o"
-              :face 'all-the-icon-green)
+              :face 'all-the-icons-green)
      :function #'citar-is-cited
      :padding "  "
      :tag "is:cited"))
@@ -765,13 +759,12 @@
 	      citar-indicator-links-icons
 	      citar-indicator-notes-icons
 	      citar-indicator-cited-icons))
-  :general
-  (patrl/leader-keys
-    "nb" '(citar-open :wk "citar"))
-  :init
   ;; (setq citar-notes-paths (list patrl/notes-path))
   (setq citar-library-paths (list patrl/library-path))
-  (setq citar-bibliography (list patrl/global-bib-file)))
+  (setq citar-bibliography (list patrl/global-bib-file))
+  :general
+  (patrl/leader-keys
+    "nb" '(citar-open :wk "citar")))
 
 (use-package citar-embark
   :after citar embark
@@ -955,7 +948,7 @@
   (setq consult-project-root-function
         (lambda ()
           (when-let (project (project-current))
-            (car (project-roots project))))))
+	    (project-root project)))))
 
 (use-package affe
   :demand t
@@ -1016,12 +1009,7 @@
   :states '(insert)
   "C-k" ;; this was interfering with corfu completion
   :states '(normal)
-  "C-;") 
-
-(use-package emacs
-  :ensure nil
-  :init
-  (setq tab-always-indent 'complete)) ;; enable tab completion
+  "C-;")
 
 (use-package cape
   :demand t
@@ -1079,16 +1067,6 @@
   :general (patrl/leader-keys
 	     "se" '(regexp-builder :wk "regex builder"))
   :config (setq reb-re-syntax 'rx))
-
-;; (use-package pdf-tools
-;;   :demand t
-;;   :ensure nil
-;;   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
-;;   :mode ("\\.pdf\\'" . pdf-view-mode)
-;;   :config
-;;   (require 'pdf-outline)
-;;   (require 'pdf-occur)
-;;   (pdf-tools-install :no-query))
 
 (use-package pdf-tools
   :demand t
@@ -1237,30 +1215,6 @@
   (patrl/leader-keys
     "oe" '(eshell :wk "eshell")))
 
-(use-package lsp-mode
-  :custom
-  (lsp-completion-provider :none) ;; we use corfu!
-  :init
-  (defun patrl/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) ;; Configure orderless
-  :hook
-  (lsp-mode . lsp-enable-which-key-integration)
-  (lsp-completion-mode . patrl/lsp-mode-setup-completion) ;; setup orderless completion style.
-  :commands
-  lsp)
-
-(use-package lsp-ui
-  :after lsp-mode
-  :commands lsp-ui-mode)
-
-(use-package lsp-haskell
-  :after lsp-mode
-  :config
-  (setq lsp-haskell-server-path "haskell-language-server") ;; for some reason this doesn't get found automatically
-  ;; (setq lsp-haskell-formatting-provider "brittany")
-  )
-
 (use-package eglot
   :ensure nil
   :init (setq completion-category-overrides '((eglot (styles orderless))))
@@ -1351,15 +1305,6 @@
     "nmt" '(consult-notmuch-tree :wk "consult notmuch tree")
     "nma" '(consult-notmuch-address :wk "consult notmuch address"))
   :after notmuch)
-
-(use-package overleaf
-  :ensure (:type git :host github :repo
-                   "vale981/overleaf.el")
-  :custom
-  (overleaf-use-nerdfont t "Use nerfont icons for the modeline.")
-  :init
-  (setq overleaf-cookies
-        (overleaf-read-cookies-from-firefox :firefox-folder "~/.mozilla/firefox/")))
 
 (use-package atomic-chrome
   :init
