@@ -24,3 +24,4 @@ network-security.data
 tramp
 backups/
 image-dired/
+/.agent-shell/
