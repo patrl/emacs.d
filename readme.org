@@ -140,6 +140,7 @@ Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
     :demand t
     :ensure nil
     :init
+    (setq tab-always-indent 'complete)
 
     (setq enable-recursive-minibuffers t)
 
@@ -376,9 +377,6 @@ Show visual hints for evil motions.
 
       (patrl/leader-keys
       "w" '(:keymap evil-window-map :wk "window")) ;; window bindings
-
-      (patrl/leader-keys
-        "c" '(:ignore :wk "code"))
 
       ;; help
       ;; namespace mostly used by 'helpful'
@@ -1021,14 +1019,13 @@ Auto-activating snippets:
   	TeX-engine 'default ;; use the default TeX engine
   	TeX-save-query nil
   	TeX-electric-math (cons "\\(" "\\)")) ;; '$' inserts an in-line equation '\(...\)'
-
-    (add-hook 'TeX-mode-hook #'reftex-mode)
-    (add-hook 'TeX-mode-hook #'olivetti-mode)
-    (add-hook 'TeX-mode-hook #'turn-on-auto-fill)
-    (add-hook 'TeX-mode-hook #'prettify-symbols-mode)
-    (add-hook 'TeX-after-compilation-finished-functions
-  	    #'TeX-revert-document-buffer)
-    (add-hook 'TeX-mode-hook #'outline-minor-mode)
+    :hook
+    (TeX-mode . reftex-mode)
+    (TeX-mode . olivetti-mode)
+    (TeX-mode . turn-on-auto-fill)
+    (TeX-mode . prettify-symbols-mode)
+    (TeX-mode . outline-minor-mode)
+    (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
     :general 
     (patrl/local-leader-keys
       :keymaps 'LaTeX-mode-map
@@ -1102,7 +1099,7 @@ Set up icon support using the following instructions:
       (citar-indicator-create
        :symbol (all-the-icons-faicon
                 "circle-o"
-                :face 'all-the-icon-green)
+                :face 'all-the-icons-green)
        :function #'citar-is-cited
        :padding "  "
        :tag "is:cited"))
@@ -1117,13 +1114,12 @@ Set up icon support using the following instructions:
   	      citar-indicator-links-icons
   	      citar-indicator-notes-icons
   	      citar-indicator-cited-icons))
-    :general
-    (patrl/leader-keys
-      "nb" '(citar-open :wk "citar"))
-    :init
     ;; (setq citar-notes-paths (list patrl/notes-path))
     (setq citar-library-paths (list patrl/library-path))
-    (setq citar-bibliography (list patrl/global-bib-file)))
+    (setq citar-bibliography (list patrl/global-bib-file))
+    :general
+    (patrl/leader-keys
+      "nb" '(citar-open :wk "citar")))
 #+end_src
 
 #+begin_src emacs-lisp :tangle init.el
@@ -1394,7 +1390,7 @@ The completion framework I adopt exploits packages primarily developed by [[http
     (setq consult-project-root-function
           (lambda ()
             (when-let (project (project-current))
-              (car (project-roots project))))))
+  	    (project-root project)))))
 #+end_src
 
 ** Affe
@@ -1473,12 +1469,7 @@ A minimal ui for ~completion-in-region~.
     :states '(insert)
     "C-k" ;; this was interfering with corfu completion
     :states '(normal)
-    "C-;") 
-
-  (use-package emacs
-    :ensure nil
-    :init
-    (setq tab-always-indent 'complete)) ;; enable tab completion
+    "C-;")
 #+end_src
 
 *** Cape
@@ -1576,22 +1567,11 @@ Use ~rx~ notation (S-expressions) as the default for constructing regular expres
 Because this uses natively-compiled code, I install this alongside emacs via nix.
 
 #+begin_src emacs-lisp :tangle init.el
-  ;; (use-package pdf-tools
-  ;;   :demand t
-  ;;   :ensure nil
-  ;;   :hook (TeX-after-compilation-finished . TeX-revert-document-buffer)
-  ;;   :mode ("\\.pdf\\'" . pdf-view-mode)
-  ;;   :config
-  ;;   (require 'pdf-outline)
-  ;;   (require 'pdf-occur)
-  ;;   (pdf-tools-install :no-query))
-
   (use-package pdf-tools
     :demand t
     :mode "\\.pdf\\'"
     :init
     (pdf-loader-install))
-
 #+end_src
 
 ** Jinx
@@ -1793,37 +1773,6 @@ Templates can be found in [[file:templates]].
 
 ** Language servers
 
-*** LSP mode
-
-Note I still need to set keybindings
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package lsp-mode
-    :custom
-    (lsp-completion-provider :none) ;; we use corfu!
-    :init
-    (defun patrl/lsp-mode-setup-completion ()
-      (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-            '(orderless))) ;; Configure orderless
-    :hook
-    (lsp-mode . lsp-enable-which-key-integration)
-    (lsp-completion-mode . patrl/lsp-mode-setup-completion) ;; setup orderless completion style.
-    :commands
-    lsp)
-
-  (use-package lsp-ui
-    :after lsp-mode
-    :commands lsp-ui-mode)
-
-  (use-package lsp-haskell
-    :after lsp-mode
-    :config
-    (setq lsp-haskell-server-path "haskell-language-server") ;; for some reason this doesn't get found automatically
-    ;; (setq lsp-haskell-formatting-provider "brittany")
-    )
-#+end_src
-
-
 *** Eglot
 
 - Integrating corfu with eglot: [[https://github.com/minad/corfu/wiki][Home · minad/corfu Wiki · GitHub]]
@@ -1957,19 +1906,6 @@ Search emails interactively using ~consult~.
 
 
 * Staging grounds
-
-** Overleaf
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package overleaf
-    :ensure (:type git :host github :repo
-                     "vale981/overleaf.el")
-    :custom
-    (overleaf-use-nerdfont t "Use nerfont icons for the modeline.")
-    :init
-    (setq overleaf-cookies
-          (overleaf-read-cookies-from-firefox :firefox-folder "~/.mozilla/firefox/")))
-#+end_src
 
 ** Atomic chrome
 
