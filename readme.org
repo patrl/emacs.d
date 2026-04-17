@@ -127,6 +127,8 @@ Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
 
   (defvar patrl/global-bib-file "~/texmf/bibtex/bib/master.bib"
     "Bibliography.")
+
+  (add-to-list 'exec-path "~/.npm-global/bin/")
 #+end_src
 
 ** Defaults
@@ -614,19 +616,6 @@ Display key bindings.
 #+end_src
 
 * Appearance
-
-** Mode line
-
-- [[https://gitlab.com/jessieh/mood-line][Jessie Hildebrandt / mood-line · GitLab]]
-
-Minimal mode line.
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package mood-line
-    :disabled
-    :demand t
-    :config (mood-line-mode))
-#+end_src
 
 ** Minions
 
