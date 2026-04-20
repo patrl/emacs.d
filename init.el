@@ -849,26 +849,48 @@
                               "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 
 (use-package citeproc
-  :after org)
+    :after org)
 
-(with-eval-after-load 'ox-latex
-   (add-to-list 'org-latex-classes
-                '("scrartcl"
-                  "\\documentclass[letterpaper]{scrartcl}"
-                  ("\\section{%s}" . "\\section*{%s}")
-                  ("\\subsection{%s}" . "\\subsection*{%s}")
-                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+  (with-eval-after-load 'ox-latex
+     (add-to-list 'org-latex-classes
+                  '("scrartcl"
+                    "\\documentclass[letterpaper]{scrartcl}"
+                    ("\\section{%s}" . "\\section*{%s}")
+                    ("\\subsection{%s}" . "\\subsection*{%s}")
+                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                    ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                    ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
-(with-eval-after-load 'ox-latex
-  (add-to-list 'org-latex-classes
-             '("memoir"
-               "\\documentclass{memoir}"
-               ("\\chapter{%s}" . "\\chapter*{%s}")
-               ("\\section{%s}" . "\\section*{%s}")
-               ("\\subsection{%s}" . "\\subsection*{%s}")
-               ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+  (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes
+               '("memoir"
+                 "\\documentclass{memoir}"
+                 ("\\chapter{%s}" . "\\chapter*{%s}")
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+
+  (defun patrl/org-export-view-pdf (output-file)
+    "After org export to PDF, open or refresh OUTPUT-FILE.
+If a buffer is already visiting the PDF, revert it (so pdf-tools
+updates immediately rather than waiting for auto-revert) and pop
+to it; otherwise open it via `find-file-noselect' and pop to it.
+This mirrors how `TeX-pdf-tools-sync-view' works in AUCTeX."
+    (when output-file
+      (let ((buf (or (find-buffer-visiting output-file)
+                     (find-file-noselect output-file))))
+        (with-current-buffer buf
+          (revert-buffer t t))
+        (pop-to-buffer buf)))
+    output-file)
+
+  (with-eval-after-load 'ox-latex
+    (advice-add 'org-latex-export-to-pdf :filter-return
+                #'patrl/org-export-view-pdf))
+
+  (with-eval-after-load 'ox-beamer
+    (advice-add 'org-beamer-export-to-pdf :filter-return
+                #'patrl/org-export-view-pdf))
 
 (use-package htmlize)
 
@@ -1312,7 +1334,10 @@
 	'(("overleaf\\.com" . LaTeX-mode)))
   (setq atomic-chrome-buffer-open-style 'frame))
 
-(use-package agent-shell)
+(use-package agent-shell
+  :general
+  (patrl/leader-keys
+    "ca" '(agent-shell :wk "agent shell")))
 
 (use-package denote
   :general
