@@ -4,12 +4,12 @@
 (defvar elpaca-installer-version 0.12)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
                               :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+                              :build (:not elpaca-activate)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
        (default-directory repo))
@@ -36,7 +36,7 @@
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
     (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
+    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
@@ -380,7 +380,7 @@
   ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
   )
 
-(use-package avy
+  (use-package avy
     :demand t
     :init
 (defun patrl/avy-action-insert-newline (pt)
@@ -459,6 +459,7 @@
   (setq olivetti-body-width 80)
   (setq olivetti-style 'fancy)
   (setq olivetti-minimum-body-width 50))
+
 
 (defun patrl/setup-font-wolfe ()
     (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
@@ -559,7 +560,7 @@
   ;; assign built-in project.el bindings a new prefix
   (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 
-(use-package dired
+  (use-package dired
     :ensure nil
     :general
     (patrl/leader-keys
@@ -581,6 +582,12 @@
 
 (use-package lua-mode
   :mode "\\.lua\\'")
+
+(use-package tidal
+  :after haskell-mode
+  :mode "\\.tidal\\'"
+  :config
+  (setq tidal-boot-script-path "/home/patrl/Projects/tidal/BootTidal.hs"))
 
 ;; FIXME - compatibility with corfu
 (use-package sly)
@@ -697,6 +704,7 @@
     "p" '(preview-at-point :wk "preview at point")
     "f" '(TeX-font :wk "font")
     "c" '(TeX-command-run-all :wk "compile")))
+
 
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode)
@@ -848,7 +856,7 @@
            :target (file+head "%<%Y-%m-%d>.org"
                               "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 
-(use-package citeproc
+  (use-package citeproc
     :after org)
 
   (with-eval-after-load 'ox-latex
