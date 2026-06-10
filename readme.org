@@ -104,6 +104,7 @@ Disable GUI elements before we have a chance to peek.
       (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
   (add-hook 'after-init-hook #'elpaca-process-queues)
   (elpaca `(,@elpaca-order))
+  (elpaca-wait)
 #+end_src
 
 Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
@@ -112,6 +113,7 @@ Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
   (elpaca elpaca-use-package
     (elpaca-use-package-mode))
   (setq use-package-always-ensure t)
+  (elpaca-wait)
 #+end_src
 
 * Emacs
@@ -853,6 +855,14 @@ Use built-in ~dired~.
       :mode "\\.tidal\\'"
       :config
       (setq tidal-boot-script-path "/home/patrl/Projects/tidal/BootTidal.hs"))
+
+** Fennel
+
+- [[https://git.sr.ht/~technomancy/fennel-mode][fennel-mode]] — a Lisp that compiles to Lua.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package fennel-mode
+    :mode "\\.fnl\\'")
 #+end_src
 
 ** Lisp
@@ -1015,8 +1025,8 @@ Auto-activating snippets:
   			       "--with-packagedatadir=./")
   			      ("make"))
   		  :build (:not elpaca--compile-info) ;; Make will take care of this step
-  		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
-  		  :version (lambda (_) (require 'tex-site) AUCTeX-version))
+  		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style"))
+  		  ;; :version (lambda (_) (require 'tex-site) AUCTeX-version))
     :init
     (setq TeX-parse-self t ; parse on load
   	reftex-plug-into-AUCTeX t
@@ -1938,6 +1948,23 @@ Search emails interactively using ~consult~.
 
 
 * Staging grounds
+
+** Tidal
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package tidal
+    :mode "\\.tidal\\'")
+
+  ;; (use-package tidal-completion
+  ;;   :after tidal
+  ;;   :ensure (:type git :host codeberg :repo "pulu/tidal-completion.el")
+  ;;   :config
+  ;;   (tidal-completion-init)
+  ;;   (defun patrl/tidal-completion-add-hook ()
+  ;;     (add-hook 'completion-at-point-functions
+  ;; 	      #'tidal-completion-at-point nil t))
+  ;;   :hook (tidal-mode . patrl/tidal-completion-add-hook))
+#+end_src
 
 ** Atomic chrome
 
