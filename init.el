@@ -39,10 +39,12 @@
     (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
+(elpaca-wait)
 
 (elpaca elpaca-use-package
   (elpaca-use-package-mode))
 (setq use-package-always-ensure t)
+(elpaca-wait)
 
 (defvar patrl/library-path "~/Documents/library/"
   "Directory .pdf collection lives.")
@@ -589,6 +591,9 @@
   :config
   (setq tidal-boot-script-path "/home/patrl/Projects/tidal/BootTidal.hs"))
 
+(use-package fennel-mode
+  :mode "\\.fnl\\'")
+
 ;; FIXME - compatibility with corfu
 (use-package sly)
 
@@ -670,8 +675,8 @@
 			       "--with-packagedatadir=./")
 			      ("make"))
 		  :build (:not elpaca--compile-info) ;; Make will take care of this step
-		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style")
-		  :version (lambda (_) (require 'tex-site) AUCTeX-version))
+		  :files ("*.el" "doc/*.info*" "etc" "images" "latex" "style"))
+		  ;; :version (lambda (_) (require 'tex-site) AUCTeX-version))
   :init
   (setq TeX-parse-self t ; parse on load
 	reftex-plug-into-AUCTeX t
@@ -1335,6 +1340,19 @@ This mirrors how `TeX-pdf-tools-sync-view' works in AUCTeX."
     "nmt" '(consult-notmuch-tree :wk "consult notmuch tree")
     "nma" '(consult-notmuch-address :wk "consult notmuch address"))
   :after notmuch)
+
+(use-package tidal
+  :mode "\\.tidal\\'")
+
+;; (use-package tidal-completion
+;;   :after tidal
+;;   :ensure (:type git :host codeberg :repo "pulu/tidal-completion.el")
+;;   :config
+;;   (tidal-completion-init)
+;;   (defun patrl/tidal-completion-add-hook ()
+;;     (add-hook 'completion-at-point-functions
+;; 	      #'tidal-completion-at-point nil t))
+;;   :hook (tidal-mode . patrl/tidal-completion-add-hook))
 
 (use-package atomic-chrome
   :init

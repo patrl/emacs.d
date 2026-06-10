@@ -855,6 +855,7 @@ Use built-in ~dired~.
       :mode "\\.tidal\\'"
       :config
       (setq tidal-boot-script-path "/home/patrl/Projects/tidal/BootTidal.hs"))
+#+end_src
 
 ** Fennel
 
