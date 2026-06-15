@@ -847,16 +847,6 @@ Use built-in ~dired~.
     :mode "\\.lua\\'")
 #+end_src
 
-** Tidal
-
-#+begin_src emacs-lisp :tangle init.el
-    (use-package tidal
-      :after haskell-mode
-      :mode "\\.tidal\\'"
-      :config
-      (setq tidal-boot-script-path "/home/patrl/Projects/tidal/BootTidal.hs"))
-#+end_src
-
 ** Fennel
 
 - [[https://git.sr.ht/~technomancy/fennel-mode][fennel-mode]] — a Lisp that compiles to Lua.
@@ -864,6 +854,14 @@ Use built-in ~dired~.
 #+begin_src emacs-lisp :tangle init.el
   (use-package fennel-mode
     :mode "\\.fnl\\'")
+#+end_src
+
+- love2d with fennel
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package love2d-fennel
+    :ensure (:host codeberg :repo "alexjgriffith/love2d-fennel.el")
+    :after fennel-mode)
 #+end_src
 
 ** Lisp
@@ -1949,23 +1947,6 @@ Search emails interactively using ~consult~.
 
 
 * Staging grounds
-
-** Tidal
-
-#+begin_src emacs-lisp :tangle init.el
-  (use-package tidal
-    :mode "\\.tidal\\'")
-
-  ;; (use-package tidal-completion
-  ;;   :after tidal
-  ;;   :ensure (:type git :host codeberg :repo "pulu/tidal-completion.el")
-  ;;   :config
-  ;;   (tidal-completion-init)
-  ;;   (defun patrl/tidal-completion-add-hook ()
-  ;;     (add-hook 'completion-at-point-functions
-  ;; 	      #'tidal-completion-at-point nil t))
-  ;;   :hook (tidal-mode . patrl/tidal-completion-add-hook))
-#+end_src
 
 ** Atomic chrome
 

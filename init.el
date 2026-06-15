@@ -585,14 +585,12 @@
 (use-package lua-mode
   :mode "\\.lua\\'")
 
-(use-package tidal
-  :after haskell-mode
-  :mode "\\.tidal\\'"
-  :config
-  (setq tidal-boot-script-path "/home/patrl/Projects/tidal/BootTidal.hs"))
-
 (use-package fennel-mode
   :mode "\\.fnl\\'")
+
+(use-package love2d-fennel
+  :ensure (:host codeberg :repo "alexjgriffith/love2d-fennel.el")
+  :after fennel-mode)
 
 ;; FIXME - compatibility with corfu
 (use-package sly)
@@ -1340,19 +1338,6 @@ This mirrors how `TeX-pdf-tools-sync-view' works in AUCTeX."
     "nmt" '(consult-notmuch-tree :wk "consult notmuch tree")
     "nma" '(consult-notmuch-address :wk "consult notmuch address"))
   :after notmuch)
-
-(use-package tidal
-  :mode "\\.tidal\\'")
-
-;; (use-package tidal-completion
-;;   :after tidal
-;;   :ensure (:type git :host codeberg :repo "pulu/tidal-completion.el")
-;;   :config
-;;   (tidal-completion-init)
-;;   (defun patrl/tidal-completion-add-hook ()
-;;     (add-hook 'completion-at-point-functions
-;; 	      #'tidal-completion-at-point nil t))
-;;   :hook (tidal-mode . patrl/tidal-completion-add-hook))
 
 (use-package atomic-chrome
   :init
