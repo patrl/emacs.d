@@ -396,7 +396,7 @@ Show visual hints for evil motions.
       (patrl/leader-keys
         "b" '(:ignore :wk "buffer")
         "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
-        "bk" '(kill-this-buffer :wk "kill this buffer")
+        "bk" '(kill-current-buffer :wk "kill this buffer")
         "br" '(revert-buffer :wk "reload buffer"))
 
       ;; bookmark
@@ -482,7 +482,7 @@ Resources:
       (setq org-todo-keywords
     	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
     	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-    	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+    	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(h)")
     	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
 
@@ -608,6 +608,7 @@ Display key bindings.
 
 #+begin_src emacs-lisp
   (use-package which-key
+    :ensure nil ;; built into Emacs 30+
     :after evil
     :demand t
     :init (which-key-mode)
@@ -628,25 +629,37 @@ Display key bindings.
 
 ** Icons
 
-- [[https://github.com/domtronn/all-the-icons.el][GitHub - domtronn/all-the-icons.el: A utility package to collect various Icon...]]
-- [[https://github.com/jtbm37/all-the-icons-dired][GitHub - jtbm37/all-the-icons-dired: Adds dired support to all-the-icons]]
+- [[https://github.com/rainstormstudio/nerd-icons.el][GitHub - rainstormstudio/nerd-icons.el: A utility package to collect Nerd Font icons]]
+- [[https://github.com/rainstormstudio/nerd-icons-dired][GitHub - rainstormstudio/nerd-icons-dired: Adds dired support to nerd-icons]]
+
+*Requires a Nerd Font to be installed*, otherwise icons render as tofu
+(placeholder boxes). ~nerd-icons~ defaults to the ~Symbols Nerd Font Mono~
+family, which is /not/ installed on this system; instead we point
+~nerd-icons-font-family~ at ~Iosevka Nerd Font~, which is already installed
+(via nix) and matches the Iosevka fonts used elsewhere in this config. If the
+font is ever missing, run ~M-x nerd-icons-install-fonts~ or add a Nerd Font
+(e.g. ~nerd-fonts.symbols-only~) to the system packages.
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package all-the-icons
-    :demand t)
+  (use-package nerd-icons
+    :demand t
+    :custom
+    ;; the default `Symbols Nerd Font Mono' isn't installed; reuse the Iosevka
+    ;; Nerd Font we already have so glyphs actually render.
+    (nerd-icons-font-family "Iosevka Nerd Font"))
 
 
   ;; prettify dired with icons
-  (use-package all-the-icons-dired
+  (use-package nerd-icons-dired
     :demand t
     :hook
-    (dired-mode . all-the-icons-dired-mode))
+    (dired-mode . nerd-icons-dired-mode))
 
-  (use-package all-the-icons-completion
-    :after (marginalia all-the-icons)
+  (use-package nerd-icons-completion
+    :after (marginalia nerd-icons)
     :demand t
-    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-    :init (all-the-icons-completion-mode))
+    :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
+    :init (nerd-icons-completion-mode))
 #+end_src
 
 **  Olivetti
@@ -1082,13 +1095,13 @@ Set up icon support using the following instructions:
 #+begin_src emacs-lisp :tangle init.el
   (use-package citar
     :demand t
-    :after all-the-icons
+    :after nerd-icons
     :init
     (defvar citar-indicator-files-icons
       (citar-indicator-create
-       :symbol (all-the-icons-faicon
-  	      "file-o"
-  	      :face 'all-the-icons-green
+       :symbol (nerd-icons-faicon
+  	      "nf-fa-file_o"
+  	      :face 'nerd-icons-green
   	      :v-adjust -0.1)
        :function #'citar-has-files
        :padding "  " ; need this because the default padding is too low for these icons
@@ -1096,9 +1109,9 @@ Set up icon support using the following instructions:
 
     (defvar citar-indicator-links-icons
       (citar-indicator-create
-       :symbol (all-the-icons-octicon
-                "link"
-                :face 'all-the-icons-orange
+       :symbol (nerd-icons-octicon
+                "nf-oct-link"
+                :face 'nerd-icons-orange
                 :v-adjust 0.01)
        :function #'citar-has-links
        :padding "  "
@@ -1106,9 +1119,9 @@ Set up icon support using the following instructions:
 
     (defvar citar-indicator-notes-icons
       (citar-indicator-create
-       :symbol (all-the-icons-material
-                "speaker_notes"
-                :face 'all-the-icons-blue
+       :symbol (nerd-icons-codicon
+                "nf-cod-note"
+                :face 'nerd-icons-blue
                 :v-adjust -0.3)
        :function #'citar-has-notes
        :padding "  "
@@ -1116,9 +1129,9 @@ Set up icon support using the following instructions:
 
     (defvar citar-indicator-cited-icons
       (citar-indicator-create
-       :symbol (all-the-icons-faicon
-                "circle-o"
-                :face 'all-the-icons-green)
+       :symbol (nerd-icons-faicon
+                "nf-fa-circle_o"
+                :face 'nerd-icons-green)
        :function #'citar-is-cited
        :padding "  "
        :tag "is:cited"))
@@ -1568,14 +1581,13 @@ Convert the ~company-reftex-labels~ backend to a capf using ~cape~ and activate 
       :keymaps 'flymake-mode-map
       "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
       "cc" '(flymake-mode :wk "toggle flymake")) ;; depends on consult
+    (general-nmap "] !" 'flymake-goto-next-error)
+    (general-nmap "[ !" 'flymake-goto-prev-error)
     :hook
     (TeX-mode . flymake-mode) ;; this is now working
     (emacs-lisp-mode . flymake-mode)
     :custom
-    (flymake-no-changes-timeout nil)
-    :general
-    (general-nmap "] !" 'flymake-goto-next-error)
-    (general-nmap "[ !" 'flymake-goto-prev-error))
+    (flymake-no-changes-timeout nil))
 #+end_src
 
 * Tools
