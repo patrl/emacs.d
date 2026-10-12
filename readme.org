@@ -1005,6 +1005,44 @@ Note that the following uses [[*Cape]] to convert dante's company backend to to 
     :files ("*.el" "data")))
 #+end_src
 
+** Agda
+
+- [[https://agda.readthedocs.io/en/latest/tools/emacs-mode.html][Emacs mode — Agda documentation]]
+
+Agda's emacs mode ships with Agda itself (installed via nix, along with the standard library), and has to match the version of the ~agda~ executable exactly, so it isn't managed by elpaca. ~agda --emacs-mode locate~ returns the path to ~agda2.el~, which adds the rest of the mode to the ~load-path~ and registers it for ~.agda~ and ~.lagda~ files. Literate Agda in other formats (e.g. ~.lagda.md~, as used by PLFA) has to be registered by hand.
+
+The local leader bindings mirror the default ~C-c C-<key>~ bindings, which still work. ~M-,~ (~agda2-go-back~) is shadowed by the local leader, so ~gd~ jumps to a definition and ~C-o~ jumps back instead.
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package agda2-mode
+    :ensure nil
+    :if (executable-find "agda")
+    :mode ("\\.lagda\\.[a-z]+\\'" . agda2-mode) ;; .lagda.md, .lagda.tex, etc.
+    :init
+    (load-file (car (process-lines "agda" "--emacs-mode" "locate")))
+    :general
+    (:states 'normal
+     :keymaps 'agda2-mode-map
+     "gd" 'agda2-goto-definition-keyboard)
+    (patrl/local-leader-keys
+      :keymaps 'agda2-mode-map
+      "l" '(agda2-load :wk "load")
+      "," '(agda2-goal-and-context :wk "goal and context")
+      "." '(agda2-goal-and-context-and-inferred :wk "goal, context, inferred")
+      "SPC" '(agda2-give :wk "give")
+      "r" '(agda2-refine :wk "refine")
+      "c" '(agda2-make-case :wk "case split")
+      "a" '(agda2-mimer-maybe-all :wk "auto")
+      "d" '(agda2-infer-type-maybe-toplevel :wk "infer type")
+      "n" '(agda2-compute-normalised-maybe-toplevel :wk "normalise")
+      "f" '(agda2-next-goal :wk "next goal")
+      "b" '(agda2-previous-goal :wk "previous goal")
+      "?" '(agda2-show-goals :wk "show goals"))
+    :config
+    ;; record a jump, so that `C-o' returns from `gd'
+    (evil-set-command-property #'agda2-goto-definition-keyboard :jump t))
+#+end_src
+
 * Latex
 
 Useful resources:

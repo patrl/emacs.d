@@ -248,7 +248,7 @@
   (patrl/leader-keys
     "b" '(:ignore :wk "buffer")
     "bb" '(switch-to-buffer :wk "switch buffer") ;; gets overridden by consult
-    "bk" '(kill-this-buffer :wk "kill this buffer")
+    "bk" '(kill-current-buffer :wk "kill this buffer")
     "br" '(revert-buffer :wk "reload buffer"))
 
   ;; bookmark
@@ -325,7 +325,7 @@
   (setq org-todo-keywords
 	    ;; it's extremely useful to distinguish between short-term goals and long-term projects
 	    '((sequence "TODO(t)" "SOMEDAY(s)" "|" "DONE(d)")
-	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(d)")
+	      (sequence "TO-READ(r)" "READING(R)" "|" "HAVE-READ(h)")
 	      (sequence "PROJ(p)" "|" "COMPLETED(c)")))
 
 
@@ -428,6 +428,7 @@
   (setq link-hint-avy-style 'pre))
 
 (use-package which-key
+  :ensure nil ;; built into Emacs 30+
   :after evil
   :demand t
   :init (which-key-mode)
@@ -439,21 +440,25 @@
   :config
   (minions-mode 1))
 
-(use-package all-the-icons
-  :demand t)
+(use-package nerd-icons
+  :demand t
+  :custom
+  ;; the default `Symbols Nerd Font Mono' isn't installed; reuse the Iosevka
+  ;; Nerd Font we already have so glyphs actually render.
+  (nerd-icons-font-family "Iosevka Nerd Font"))
 
 
 ;; prettify dired with icons
-(use-package all-the-icons-dired
+(use-package nerd-icons-dired
   :demand t
   :hook
-  (dired-mode . all-the-icons-dired-mode))
+  (dired-mode . nerd-icons-dired-mode))
 
-(use-package all-the-icons-completion
-  :after (marginalia all-the-icons)
+(use-package nerd-icons-completion
+  :after (marginalia nerd-icons)
   :demand t
-  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-  :init (all-the-icons-completion-mode))
+  :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
+  :init (nerd-icons-completion-mode))
 
 (use-package olivetti
   :demand t
@@ -665,6 +670,34 @@
   :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
   :files ("*.el" "data")))
 
+(use-package agda2-mode
+  :ensure nil
+  :if (executable-find "agda")
+  :mode ("\\.lagda\\.[a-z]+\\'" . agda2-mode) ;; .lagda.md, .lagda.tex, etc.
+  :init
+  (load-file (car (process-lines "agda" "--emacs-mode" "locate")))
+  :general
+  (:states 'normal
+   :keymaps 'agda2-mode-map
+   "gd" 'agda2-goto-definition-keyboard)
+  (patrl/local-leader-keys
+    :keymaps 'agda2-mode-map
+    "l" '(agda2-load :wk "load")
+    "," '(agda2-goal-and-context :wk "goal and context")
+    "." '(agda2-goal-and-context-and-inferred :wk "goal, context, inferred")
+    "SPC" '(agda2-give :wk "give")
+    "r" '(agda2-refine :wk "refine")
+    "c" '(agda2-make-case :wk "case split")
+    "a" '(agda2-mimer-maybe-all :wk "auto")
+    "d" '(agda2-infer-type-maybe-toplevel :wk "infer type")
+    "n" '(agda2-compute-normalised-maybe-toplevel :wk "normalise")
+    "f" '(agda2-next-goal :wk "next goal")
+    "b" '(agda2-previous-goal :wk "previous goal")
+    "?" '(agda2-show-goals :wk "show goals"))
+  :config
+  ;; record a jump, so that `C-o' returns from `gd'
+  (evil-set-command-property #'agda2-goto-definition-keyboard :jump t))
+
 (use-package tex 
   :ensure (auctex :pre-build (("./autogen.sh")
 			      ("./configure"
@@ -719,13 +752,13 @@
 
 (use-package citar
   :demand t
-  :after all-the-icons
+  :after nerd-icons
   :init
   (defvar citar-indicator-files-icons
     (citar-indicator-create
-     :symbol (all-the-icons-faicon
-	      "file-o"
-	      :face 'all-the-icons-green
+     :symbol (nerd-icons-faicon
+	      "nf-fa-file_o"
+	      :face 'nerd-icons-green
 	      :v-adjust -0.1)
      :function #'citar-has-files
      :padding "  " ; need this because the default padding is too low for these icons
@@ -733,9 +766,9 @@
 
   (defvar citar-indicator-links-icons
     (citar-indicator-create
-     :symbol (all-the-icons-octicon
-              "link"
-              :face 'all-the-icons-orange
+     :symbol (nerd-icons-octicon
+              "nf-oct-link"
+              :face 'nerd-icons-orange
               :v-adjust 0.01)
      :function #'citar-has-links
      :padding "  "
@@ -743,9 +776,9 @@
 
   (defvar citar-indicator-notes-icons
     (citar-indicator-create
-     :symbol (all-the-icons-material
-              "speaker_notes"
-              :face 'all-the-icons-blue
+     :symbol (nerd-icons-codicon
+              "nf-cod-note"
+              :face 'nerd-icons-blue
               :v-adjust -0.3)
      :function #'citar-has-notes
      :padding "  "
@@ -753,9 +786,9 @@
 
   (defvar citar-indicator-cited-icons
     (citar-indicator-create
-     :symbol (all-the-icons-faicon
-              "circle-o"
-              :face 'all-the-icons-green)
+     :symbol (nerd-icons-faicon
+              "nf-fa-circle_o"
+              :face 'nerd-icons-green)
      :function #'citar-is-cited
      :padding "  "
      :tag "is:cited"))
@@ -1081,14 +1114,13 @@ This mirrors how `TeX-pdf-tools-sync-view' works in AUCTeX."
     :keymaps 'flymake-mode-map
     "cf" '(consult-flymake :wk "consult flymake") ;; depends on consult
     "cc" '(flymake-mode :wk "toggle flymake")) ;; depends on consult
+  (general-nmap "] !" 'flymake-goto-next-error)
+  (general-nmap "[ !" 'flymake-goto-prev-error)
   :hook
   (TeX-mode . flymake-mode) ;; this is now working
   (emacs-lisp-mode . flymake-mode)
   :custom
-  (flymake-no-changes-timeout nil)
-  :general
-  (general-nmap "] !" 'flymake-goto-next-error)
-  (general-nmap "[ !" 'flymake-goto-prev-error))
+  (flymake-no-changes-timeout nil))
 
 (use-package recursion-indicator
   :demand t
