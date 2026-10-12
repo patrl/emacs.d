@@ -2,6 +2,10 @@
 ;; NOTE: init.el is now generated from readme.org.  Please edit that file instead
 
 (defvar elpaca-installer-version 0.12)
+;; On Nix builds `emacs-build-time' is nil and pretest versions (e.g. 31.0.90)
+;; aren't in elpaca's release table, so elpaca can't determine the core date.
+;; That breaks built-in dependency version checks (compat et al.). Set it by hand.
+(defvar elpaca-core-date '(20250901))
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
@@ -382,7 +386,7 @@
   ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
   )
 
-  (use-package avy
+(use-package avy
     :demand t
     :init
 (defun patrl/avy-action-insert-newline (pt)
@@ -466,7 +470,6 @@
   (setq olivetti-body-width 80)
   (setq olivetti-style 'fancy)
   (setq olivetti-minimum-body-width 50))
-
 
 (defun patrl/setup-font-wolfe ()
     (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
@@ -567,7 +570,7 @@
   ;; assign built-in project.el bindings a new prefix
   (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 
-  (use-package dired
+(use-package dired
     :ensure nil
     :general
     (patrl/leader-keys
@@ -741,7 +744,6 @@
     "f" '(TeX-font :wk "font")
     "c" '(TeX-command-run-all :wk "compile")))
 
-
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode)
   :general
@@ -892,7 +894,7 @@
            :target (file+head "%<%Y-%m-%d>.org"
                               "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 
-  (use-package citeproc
+(use-package citeproc
     :after org)
 
   (with-eval-after-load 'ox-latex

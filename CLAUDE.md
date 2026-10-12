@@ -30,7 +30,7 @@ To manually tangle: `M-x org-babel-tangle` inside `readme.org`.
 
 ## Environment
 
-- NixOS (hostnames: "wolfe", "vivacia"), Emacs 30.2, daemon mode
+- NixOS (hostnames: "wolfe", "vivacia"), Emacs 31.0.90, daemon mode
 - Package manager: elpaca
 - Packages installed via Nix (not elpaca): `pdf-tools`, `jinx`
 - Emacs server socket: `/run/user/<UID>/emacs/server`

@@ -67,6 +67,10 @@ Disable GUI elements before we have a chance to peek.
 
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.12)
+  ;; On Nix builds `emacs-build-time' is nil and pretest versions (e.g. 31.0.90)
+  ;; aren't in elpaca's release table, so elpaca can't determine the core date.
+  ;; That breaks built-in dependency version checks (compat et al.). Set it by hand.
+  (defvar elpaca-core-date '(20250901))
   (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
   (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
   (defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
