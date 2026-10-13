@@ -885,9 +885,20 @@ Use built-in ~dired~.
 
 *** Sly
 
+Elpaca symlinks sly's =lib/= and =contrib/= into its build directory, and its byte-compile step doesn't follow symlinked directories. Those files would otherwise load uncompiled, emitting deprecation warnings (e.g. from =sly-completion.el=) on every load, so add a build step that compiles them.
+
 #+begin_src emacs-lisp :tangle init.el
+  (defun patrl/elpaca-compile-linked-subdirs (e)
+    "Byte compile E's symlinked subdirectories, which `elpaca-build-compile' skips."
+    (let* ((default-directory (elpaca<-build-dir e))
+           (load-path (cons default-directory load-path)))
+      (normal-top-level-add-subdirs-to-load-path)
+      (byte-recompile-directory default-directory 0 'force 'follow-symlinks))
+    (elpaca--continue-build e))
+
   ;; FIXME - compatibility with corfu
-  (use-package sly)
+  (use-package sly
+    :ensure (:build (:after elpaca-build-compile patrl/elpaca-compile-linked-subdirs)))
 #+end_src
 
 *** lispy

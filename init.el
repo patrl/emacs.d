@@ -600,8 +600,17 @@
   :ensure (:host codeberg :repo "alexjgriffith/love2d-fennel.el")
   :after fennel-mode)
 
+(defun patrl/elpaca-compile-linked-subdirs (e)
+  "Byte compile E's symlinked subdirectories, which `elpaca-build-compile' skips."
+  (let* ((default-directory (elpaca<-build-dir e))
+         (load-path (cons default-directory load-path)))
+    (normal-top-level-add-subdirs-to-load-path)
+    (byte-recompile-directory default-directory 0 'force 'follow-symlinks))
+  (elpaca--continue-build e))
+
 ;; FIXME - compatibility with corfu
-(use-package sly)
+(use-package sly
+  :ensure (:build (:after elpaca-build-compile patrl/elpaca-compile-linked-subdirs)))
 
 (use-package lispy
   :general
