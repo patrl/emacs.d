@@ -755,7 +755,14 @@
 (use-package citar
   :demand t
   :after nerd-icons
-  :init
+  :hook
+  ;; set up citation completion for latex, org-mode, and markdown
+  (LaTeX-mode . citar-capf-setup)
+  (org-mode . citar-capf-setup)
+  (markdown-mode . citar-capf-setup)
+  :config
+  ;; `citar-indicator-create' isn't autoloaded, so these must be
+  ;; defined after citar loads (i.e. in :config, not :init)
   (defvar citar-indicator-files-icons
     (citar-indicator-create
      :symbol (nerd-icons-faicon
@@ -794,12 +801,7 @@
      :function #'citar-is-cited
      :padding "  "
      :tag "is:cited"))
-  :hook
-  ;; set up citation completion for latex, org-mode, and markdown
-  (LaTeX-mode . citar-capf-setup)
-  (org-mode . citar-capf-setup)
-  (markdown-mode . citar-capf-setup)
-  :config
+
   (setq citar-indicators
 	(list citar-indicator-files-icons
 	      citar-indicator-links-icons
