@@ -38,7 +38,6 @@ To manually tangle: `M-x org-babel-tangle` inside `readme.org`.
 ## Known runtime errors
 
 These are pre-existing and not regressions:
-- `agent-shell--start: Executable "claude-agent-acp" not found` — fires on every new frame; binary not installed
 - `Error during redisplay: pdf-misc-size-indication signaled "Invalid image specification: nil"` — PDF Tools mode-line issue; likely version mismatch between nix pdf-tools and elpaca
 - `Warning (elpaca): Init installer version does not match` — `elpaca-installer-version` in `readme.org`'s bootstrap block needs updating
 

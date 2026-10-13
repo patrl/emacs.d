@@ -123,7 +123,7 @@
   :demand t
   :ensure nil
   :init
-  (setq browse-url-firefox-program "firefox-beta"))
+  (setq browse-url-firefox-program "firefox"))
 
 (use-package electric
   :demand t
@@ -1379,10 +1379,18 @@ This mirrors how `TeX-pdf-tools-sync-view' works in AUCTeX."
 	'(("overleaf\\.com" . LaTeX-mode)))
   (setq atomic-chrome-buffer-open-style 'frame))
 
-(use-package agent-shell
+(use-package gptel
   :general
   (patrl/leader-keys
-    "ca" '(agent-shell :wk "agent shell")))
+    "ca" '(gptel :wk "gptel chat")
+    "cs" '(gptel-send :wk "gptel send")
+    "cm" '(gptel-menu :wk "gptel menu")
+    "cr" '(gptel-rewrite :wk "gptel rewrite"))
+  :config
+  (setq gptel-default-mode 'org-mode
+        gptel-model 'claude-sonnet-5.5
+        gptel-backend (gptel-make-gh-copilot "Copilot"
+                        :host "api.individual.githubcopilot.com")))
 
 (use-package denote
   :general

@@ -206,14 +206,14 @@ Enable ~use-package~ support for ~elpaca~, and ~:ensure~ packages by default.
 
 ** Browse url
 
-I'm currently using ~firefox-beta~, so I need to make sure that the built-in ~browse-url~ package knows about this. 
+Make sure the built-in ~browse-url~ package launches ~firefox~.
 
 #+begin_src emacs-lisp
   (use-package browse-url
     :demand t
     :ensure nil
     :init
-    (setq browse-url-firefox-program "firefox-beta"))
+    (setq browse-url-firefox-program "firefox"))
 #+end_src
 
 **  Electric
@@ -2012,13 +2012,23 @@ Search emails interactively using ~consult~.
     (setq atomic-chrome-buffer-open-style 'frame))
 #+end_src
 
-** Agent-shell
+** gptel
+
+LLM client using Claude via GitHub Copilot (Pro plan, hence the =individual= host). gptel prompts for GitHub login automatically when needed; =M-x gptel-gh-login= forces it.
 
 #+begin_src emacs-lisp :tangle init.el
-  (use-package agent-shell
+  (use-package gptel
     :general
     (patrl/leader-keys
-      "ca" '(agent-shell :wk "agent shell")))
+      "ca" '(gptel :wk "gptel chat")
+      "cs" '(gptel-send :wk "gptel send")
+      "cm" '(gptel-menu :wk "gptel menu")
+      "cr" '(gptel-rewrite :wk "gptel rewrite"))
+    :config
+    (setq gptel-default-mode 'org-mode
+          gptel-model 'claude-sonnet-5.5
+          gptel-backend (gptel-make-gh-copilot "Copilot"
+                          :host "api.individual.githubcopilot.com")))
 #+end_src
 
 
