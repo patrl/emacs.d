@@ -2015,6 +2015,23 @@ Search emails interactively using ~consult~.
 
 * Staging grounds
 
+** Tidal
+
+#+begin_src emacs-lisp :tangle init.el
+  (use-package tidal
+    :mode "\\.tidal\\'")
+
+  ;; (use-package tidal-completion
+  ;;   :after tidal
+  ;;   :ensure (:type git :host codeberg :repo "pulu/tidal-completion.el")
+  ;;   :config
+  ;;   (tidal-completion-init)
+  ;;   (defun patrl/tidal-completion-add-hook ()
+  ;;     (add-hook 'completion-at-point-functions
+  ;; 	      #'tidal-completion-at-point nil t))
+  ;;   :hook (tidal-mode . patrl/tidal-completion-add-hook))
+#+end_src
+
 ** Atomic chrome
 
 #+begin_src emacs-lisp :tangle init.el
