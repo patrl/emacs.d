@@ -1014,10 +1014,28 @@ Note that the following uses [[*Cape]] to convert dante's company backend to to 
 
 ** Lean 4
 
+- [[https://codeberg.org/mekeor/nael][mekeor/nael - Codeberg.org]]
+
+Nael is a refactored fork of ~lean4-mode~ which uses eglot rather than lsp-mode, so completion goes through corfu and diagnostics through flymake like everything else. The tactic state at point is shown via ElDoc, with the first goal in the echo area and the full state in the ElDoc buffer (~, g~), which is displayed in a side window and follows point. Unicode input uses abbrevs (e.g. ~\to SPC~ → ~→~); ~, k~ shows the abbrev for the character at point.
+
 #+begin_src emacs-lisp :tangle init.el
-  (use-package lean4-mode
-    :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
-    :files ("*.el" "data")))
+  (use-package nael
+    :hook ((nael-mode . abbrev-mode)
+           (nael-mode . eglot-ensure))
+    :custom
+    (nael-prepare-lsp nil) ;; otherwise nael requires `nael-lsp' whenever lsp-mode is loaded
+    :general
+    (patrl/local-leader-keys
+      :keymaps 'nael-mode-map
+      "g" '(eldoc-doc-buffer :wk "goal / docs")
+      "c" '(project-compile :wk "compile (lake build)")
+      "k" '(nael-abbrev-help :wk "abbrev for char")
+      "r" '(eglot-reconnect :wk "restart server"))
+    :init
+    (add-to-list 'display-buffer-alist
+                 '("\\*eldoc"
+                   (display-buffer-in-side-window)
+                   (side . right) (window-width . 0.4))))
 #+end_src
 
 ** Agda

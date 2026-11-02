@@ -386,7 +386,7 @@
   ;; (setq org-default-notes-file (concat org-directory "/notes.org"))
   )
 
-(use-package avy
+  (use-package avy
     :demand t
     :init
 (defun patrl/avy-action-insert-newline (pt)
@@ -470,6 +470,7 @@
   (setq olivetti-body-width 80)
   (setq olivetti-style 'fancy)
   (setq olivetti-minimum-body-width 50))
+
 
 (defun patrl/setup-font-wolfe ()
     (set-face-attribute 'default nil :font (font-spec :family "Iosevka Comfy Motion" :size 10.0 :weight 'regular))
@@ -570,7 +571,7 @@
   ;; assign built-in project.el bindings a new prefix
   (patrl/leader-keys "p" '(:keymap project-prefix-map :wk "project")))
 
-(use-package dired
+  (use-package dired
     :ensure nil
     :general
     (patrl/leader-keys
@@ -678,9 +679,23 @@
   :after markdown-mode
   :hook (markdown-mode . pandoc-mode))
 
-(use-package lean4-mode
-  :ensure (:type git :host github :repo "leanprover-community/lean4-mode"
-  :files ("*.el" "data")))
+(use-package nael
+  :hook ((nael-mode . abbrev-mode)
+         (nael-mode . eglot-ensure))
+  :custom
+  (nael-prepare-lsp nil) ;; otherwise nael requires `nael-lsp' whenever lsp-mode is loaded
+  :general
+  (patrl/local-leader-keys
+    :keymaps 'nael-mode-map
+    "g" '(eldoc-doc-buffer :wk "goal / docs")
+    "c" '(project-compile :wk "compile (lake build)")
+    "k" '(nael-abbrev-help :wk "abbrev for char")
+    "r" '(eglot-reconnect :wk "restart server"))
+  :init
+  (add-to-list 'display-buffer-alist
+               '("\\*eldoc"
+                 (display-buffer-in-side-window)
+                 (side . right) (window-width . 0.4))))
 
 (use-package agda2-mode
   :ensure nil
@@ -752,6 +767,7 @@
     "p" '(preview-at-point :wk "preview at point")
     "f" '(TeX-font :wk "font")
     "c" '(TeX-command-run-all :wk "compile")))
+
 
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode)
@@ -905,7 +921,7 @@
            :target (file+head "%<%Y-%m-%d>.org"
                               "#+title: %<%Y-%m-%d>\n#+filetags: daily\n")))))
 
-(use-package citeproc
+  (use-package citeproc
     :after org)
 
   (with-eval-after-load 'ox-latex
