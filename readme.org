@@ -1371,27 +1371,160 @@ Enable org-modern mode globally.
                  ("\\subsection{%s}" . "\\subsection*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 
+  ;; Forward "sync" from org to PDF: after exporting, jump to point's page.
+  ;; SyncTeX can't see through org->tex, so instead we drop a label at point
+  ;; (in the export copy only, never the org buffer) and read its page number
+  ;; back from the .aux file.  The export copy has the same buffer positions
+  ;; as the original when `org-export-before-processing-functions' runs, so
+  ;; point's position can be used directly (subtree/region exports included).
+  ;;  - beamer: a \label in the frame at point (frame pages = physical pages).
+  ;;  - latex:  a \zlabel (zref-abspage, so roman/reset page numbers don't
+  ;;    matter) at the start of the paragraph at point, or else just before
+  ;;    the block/list/table containing point.
+
+  (defvar patrl/org-pdf-sync-target nil
+    "During export: (KIND . POS), where to put the sync label.
+KIND is `beamer' or `latex'; POS is a position in the org buffer.")
+
+  (defvar patrl/org-pdf-sync-page nil
+    "Physical PDF page of point after the last export, or nil.")
+
+  (defun patrl/org-pdf-sync--frame-pos ()
+    "Position of the beamer frame heading at point, or nil.
+If point is on a section heading (above frame level), use its first frame."
+    (save-excursion
+      (save-restriction
+        (widen)
+        (unless (org-before-first-heading-p)
+          (let ((h (plist-get (org-export-get-environment
+                               (org-export-get-backend 'beamer))
+                              :headline-levels)))
+            (org-back-to-heading t)
+            (while (and (> (org-current-level) h) (org-up-heading-safe)))
+            (while (and (< (org-current-level) h) (outline-next-heading)))
+            (when (and (org-at-heading-p) (= (org-current-level) h))
+              (point)))))))
+
+  (defun patrl/org-pdf-sync--insert-latex-label ()
+    "Insert a \\zlabel at a safe spot at or just before point."
+    (let* ((label "\\zlabel{org-sync-point}")
+           ;; TeX records a label between paragraphs before the next one
+           ;; starts, so a page break can separate them: start the paragraph
+           ;; (inline case) or forbid a break after the label (own line).
+           (inline (concat "@@latex:\\leavevmode" label "@@"))
+           (own-line (concat "@@latex:" label "\\nopagebreak@@\n"))
+           (el (org-element-at-point))
+           (top el))
+      (while (and (org-element-parent top)
+                  (not (org-element-type-p (org-element-parent top)
+                                           '(section org-data))))
+        (setq top (org-element-parent top)))
+      (cond
+       ;; on a heading, or in its planning/property drawer: start of body
+       ((or (org-element-type-p el 'headline)
+            (org-element-type-p top '(planning property-drawer)))
+        (org-end-of-meta-data t)
+        (insert own-line))
+       ;; an ordinary paragraph (possibly in a list item or quote): inline
+       ((and (org-element-type-p el 'paragraph)
+             (org-element-type-p (org-element-parent el)
+                                 '(section item quote-block)))
+        (goto-char (org-element-contents-begin el))
+        (insert inline))
+       ;; anything else: on its own line before the enclosing top-level element
+       (t
+        (goto-char (org-element-begin top))
+        (insert own-line)))))
+
+  (defun patrl/org-pdf-sync--insert-label (backend)
+    "In the export copy, put a label where `patrl/org-pdf-sync-target' says."
+    (pcase patrl/org-pdf-sync-target
+      (`(,kind . ,pos)
+       (when (org-export-derived-backend-p
+              backend (if (eq kind 'beamer) 'beamer 'latex))
+         (goto-char (max (point-min) (min pos (point-max))))
+         (if (eq kind 'beamer)
+             (progn (when (org-at-heading-p) (org-end-of-meta-data t))
+                    (insert "\\label{org-sync-point}\n"))
+           (patrl/org-pdf-sync--insert-latex-label))))))
+
+  (defun patrl/org-pdf-sync--page (pdf)
+    "Physical page of the org-sync-point label, from PDF's .aux file, or nil."
+    (let ((aux (concat (file-name-sans-extension pdf) ".aux")))
+      (when (file-readable-p aux)
+        (with-temp-buffer
+          (insert-file-contents aux)
+          (when (or (re-search-forward
+                     "\\\\zref@newlabel{org-sync-point}{.*?\\\\abspage{\\([0-9]+\\)}"
+                     nil t)
+                    (re-search-forward
+                     "\\\\newlabel{org-sync-point}{{[^}]*}{\\([0-9]+\\)}" nil t))
+            (string-to-number (match-string 1)))))))
+
+  (defun patrl/org-pdf-sync--export (kind fn args)
+    "Run export FN with ARGS, recording point first and its page after.
+The .aux file (normally deleted by org) is kept just long enough to read."
+    (setq patrl/org-pdf-sync-page nil)
+    (let* ((patrl/org-pdf-sync-target
+            (when-let* ((pos (if (eq kind 'beamer)
+                                 (ignore-errors (patrl/org-pdf-sync--frame-pos))
+                               (point))))
+              (cons kind pos)))
+           (org-latex-packages-alist
+            (if (eq kind 'latex)
+                (append org-latex-packages-alist '(("user,abspage" "zref" nil)))
+              org-latex-packages-alist))
+           (org-latex-logfiles-extensions
+            (remove "aux" org-latex-logfiles-extensions))
+           (pdf (apply fn args)))
+      (when (and pdf patrl/org-pdf-sync-target)
+        (let ((aux (concat (file-name-sans-extension pdf) ".aux")))
+          (setq patrl/org-pdf-sync-page (patrl/org-pdf-sync--page pdf))
+          (when (and org-latex-remove-logfiles (file-exists-p aux))
+            (delete-file aux))))
+      pdf))
+
+  (defun patrl/org-pdf-sync--around-beamer (fn &rest args)
+    (patrl/org-pdf-sync--export 'beamer fn args))
+
+  (defun patrl/org-pdf-sync--around-latex (fn &rest args)
+    (patrl/org-pdf-sync--export 'latex fn args))
+
+  (with-eval-after-load 'ox
+    (add-hook 'org-export-before-processing-functions
+              #'patrl/org-pdf-sync--insert-label))
+
   (defun patrl/org-export-view-pdf (output-file)
     "After org export to PDF, open or refresh OUTPUT-FILE.
 If a buffer is already visiting the PDF, revert it (so pdf-tools
 updates immediately rather than waiting for auto-revert) and pop
 to it; otherwise open it via `find-file-noselect' and pop to it.
+Then go to the page of point, if `patrl/org-pdf-sync--export' found it.
 This mirrors how `TeX-pdf-tools-sync-view' works in AUCTeX."
     (when output-file
       (let ((buf (or (find-buffer-visiting output-file)
-                     (find-file-noselect output-file))))
+                     (find-file-noselect output-file)))
+            (page patrl/org-pdf-sync-page))
+        (setq patrl/org-pdf-sync-page nil)
         (with-current-buffer buf
           (revert-buffer t t))
-        (pop-to-buffer buf)))
+        (pop-to-buffer buf)
+        (when (and page (derived-mode-p 'pdf-view-mode))
+          (pdf-view-goto-page page))))
     output-file)
 
+  ;; depth 100 = innermost, so the page is known before the viewer runs
   (with-eval-after-load 'ox-latex
     (advice-add 'org-latex-export-to-pdf :filter-return
-                #'patrl/org-export-view-pdf))
+                #'patrl/org-export-view-pdf)
+    (advice-add 'org-latex-export-to-pdf :around
+                #'patrl/org-pdf-sync--around-latex '((depth . 100))))
 
   (with-eval-after-load 'ox-beamer
     (advice-add 'org-beamer-export-to-pdf :filter-return
-                #'patrl/org-export-view-pdf))
+                #'patrl/org-export-view-pdf)
+    (advice-add 'org-beamer-export-to-pdf :around
+                #'patrl/org-pdf-sync--around-beamer '((depth . 100))))
 #+end_src
 
 ** Highlighting

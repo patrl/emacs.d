@@ -1,0 +1,20 @@
+#+title: TODO
+
+* Org→PDF sync review (readme.org)
+** TODO Beamer frame level detection is wrong in common cases
+=patrl/org-pdf-sync--frame-pos= assumes frames sit at =:headline-levels=.
+- Ignores =:BEAMER_env: frame= headings at other levels (no sync or wrong spot).
+- Uses absolute =org-current-level=; H: is relative in subtree exports.
+Fix: walk up to nearest =BEAMER_env: frame= ancestor; else fall back to relative level.
+** TODO .aux file left behind on failure or nil target
+"aux" is removed from =org-latex-logfiles-extensions= for every export, but manual deletion only happens when pdf and target are non-nil.
+Fix: only rebind when a target exists; clean up in =unwind-protect=.
+** TODO Async export errors
+=file-name-sans-extension= on a non-string return value signals. Guard with =(stringp pdf)=; same for =patrl/org-export-view-pdf=.
+** TODO Hook ordering on =org-export-before-processing-functions=
+Appended hook may run after others that shift positions (check org-transclusion). Add with depth, e.g. =-90=.
+** TODO zref is a hard dependency of every LaTeX export
+Missing =zref.sty= breaks all PDF exports; option clash if a doc loads zref differently.
+Check =kpsewhich zref.sty=; consider adding the package only when sync is enabled.
+** TODO Verify subtree/region exports keep buffer positions
+Test that the label lands correctly for subtree (=s=) and region exports.
